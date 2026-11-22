@@ -1,0 +1,4 @@
+# RAC-ReID CPU detector dependency.
+# Install CPU PyTorch/torchvision first from:
+# https://download.pytorch.org/whl/cpu
+ultralytics-opencv-headless==8.4.216

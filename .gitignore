@@ -38,3 +38,5 @@ results/*
 # Logs
 *.log
 logs/
+.runtime/
+data/gallery/

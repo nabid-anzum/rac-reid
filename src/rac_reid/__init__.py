@@ -4,6 +4,14 @@ from .image_signals import (
     ImageSignalExtractor,
     ImageSignals,
 )
+from .person_detector import (
+    NoPersonDetectedError,
+    PersonDetection,
+    PersonDetectionResult,
+    PersonQueryPreprocessor,
+    PreparedPersonQuery,
+    YOLOPersonDetector,
+)
 from .pipeline import (
     AdaptiveReIDPipeline,
     DetectorEvidence,
@@ -40,9 +48,14 @@ __all__ = [
     "IdentityAwareTokenPruner",
     "ImageSignalExtractor",
     "ImageSignals",
+    "NoPersonDetectedError",
+    "PersonDetection",
+    "PersonDetectionResult",
+    "PersonQueryPreprocessor",
     "PipelineResult",
     "PipelineStage",
     "PreparedImage",
+    "PreparedPersonQuery",
     "QuerySignals",
     "ResourceController",
     "ResourcePlan",
@@ -50,6 +63,7 @@ __all__ = [
     "RoutingDecision",
     "TokenSelection",
     "VisualToken",
+    "YOLOPersonDetector",
 ]
 
-__version__ = "0.4.0"
+__version__ = "0.6.0"

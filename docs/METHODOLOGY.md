@@ -256,3 +256,78 @@ recalculated.
 
 Automated tests verify that the final incremental descriptor matches the
 equivalent one-shot descriptor at the same token budget.
+
+## Milestone 6: Lightweight Person Detection and Adaptive Context Crop
+
+The prototype now includes an actual person-detection stage.
+
+A nano YOLO detector is executed on CPU and restricted to the person class.
+
+For every detected person, RAC-ReID records its bounding box and detection
+confidence.
+
+The current primary-person selection score combines confidence with relative
+bounding-box area, favoring detections that are both reliable and visually
+prominent.
+
+### Detector evidence
+
+Detector confidence is used directly.
+
+Foreground occupancy is the selected person's bounding-box area divided by
+the full image area.
+
+Occlusion is represented by a low-cost proxy combining:
+
+- overlap between the selected person and other detected people
+- whether the selected bounding box touches image boundaries
+
+Crowding is represented by a proxy combining:
+
+- number of additional detected people
+- overlap with the selected person
+
+These two values are research heuristics, not ground-truth occlusion or
+crowding labels.
+
+### Adaptive crop
+
+RAC-ReID initially generates a tight person crop.
+
+Cheap image-quality measurements and detector evidence are then passed to
+the Resource Budget Controller.
+
+The selected difficulty plan determines the context margin:
+
+- easy: 5 percent
+- medium: 10 percent
+- hard: 15 percent
+
+A second crop retains the person plus the selected amount of surrounding
+context.
+
+This implements the adaptive-context-crop stage of the proposed methodology.
+
+## Milestone 7: Interactive Retrieval Demo
+
+The current system includes a local web interface that can build a gallery
+from uploaded person images and search it using a full-scene query image.
+
+Gallery images and uploaded query images are automatically passed through
+the person detector and crop stage.
+
+The web interface exposes the resource-adaptive process, including:
+
+- detected person count
+- detector confidence
+- initial difficulty
+- adaptive crop margin
+- per-stage token budget
+- newly processed tokens
+- cumulative unique tokens
+- retrieval score
+- confidence margin
+- final routing action
+
+The current server is intentionally bound to localhost until reverse-proxy
+and HTTPS deployment are completed.

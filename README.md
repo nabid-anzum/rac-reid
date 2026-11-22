@@ -221,3 +221,53 @@ instead of 213 repeated token operations.
 
 The final incremental descriptor is tested against a one-shot descriptor at
 the same 80 percent budget.
+
+## Implemented Milestone 6: Real Person Detection and Adaptive Crop
+
+RAC-ReID now accepts full-scene images rather than requiring a manually
+cropped person image.
+
+A CPU-only Ultralytics YOLO nano detector finds person-class bounding boxes.
+The detector is restricted to the person class and uses a maximum of two
+PyTorch CPU threads to reduce interference with other VPS workloads.
+
+The primary person is selected using detector confidence together with
+relative bounding-box size.
+
+Detector-derived query evidence now includes:
+
+- detector confidence
+- person bounding-box occupancy
+- overlap-based occlusion proxy
+- crowd-count and overlap-based crowding proxy
+
+The occlusion and crowding values are explicitly treated as inexpensive
+proxies rather than ground-truth annotations.
+
+RAC-ReID first measures a tight person crop, calculates the initial resource
+budget, then expands the final person crop using the budget-specific adaptive
+context margin.
+
+The current detector model is:
+
+    yolo26n.pt
+
+The model runs on CPU only.
+
+## Implemented Milestone 7: Local Research Web Application
+
+A functional upload/search interface is available through:
+
+    scripts/run_web.sh
+
+The application supports:
+
+1. adding labeled gallery identities
+2. automatic person detection and crop generation
+3. uploading a full-scene query image
+4. adaptive token processing
+5. gallery ranking
+6. display of token budgets, confidence, margins, and routing decisions
+
+The application currently binds only to localhost. Public DNS and HTTPS will
+be configured only after the existing VPS reverse-proxy routing is inspected.
