@@ -464,3 +464,48 @@ visual-patch proxy stage. It is not reported as transformer-token pruning.
 
 Search workers are serialized within the web process to avoid concurrent use
 of shared CPU YOLO/Torch model state.
+
+
+## Milestone 12: Full Market-1501 Adaptive Retrieval Ablation
+
+The current fixed resource-adaptive retrieval policy was evaluated on the
+complete standard Market-1501 test split.
+
+The full-compute learned reference remains:
+
+- mAP: 37.368%
+- Rank-1: 66.330%
+
+The adaptive result is:
+
+- mAP: 2.015% (-35.353 percentage points)
+- Rank-1: 14.252% (-52.078 percentage points)
+- Rank-5: 16.776% (-63.510 percentage points)
+- Rank-10: 17.221% (-68.527 percentage points)
+- mINP: 0.182% (-5.897 percentage points)
+
+Measured resource behavior:
+
+- OSNet invocation rate: 100.0%
+- Query-side learned-forward reduction: 0.0%
+- Early-exit rate: 0.0%
+- Average proxy patch saving: 19.5%
+- Average adaptive stages: 3.000
+
+Market-1501 already supplies cropped pedestrians. Therefore detector execution
+is excluded and detector-derived controller evidence is neutralized for this
+retrieval-layer comparison.
+
+OSNet gallery embeddings are treated as offline gallery precomputation, which
+matches the deployed system's gallery workflow. Only adaptively invoked query
+embeddings count as query-side learned forward passes.
+
+For learned escalation, the current production design reranks the proxy
+candidate set with normalized OSNet cosine similarity and keeps the remaining
+gallery in proxy order.
+
+This experiment uses the existing policy without tuning thresholds on the
+Market-1501 test queries.
+
+The visual-patch savings are proxy-compute measurements and must not be
+reported as transformer-token or neural-FLOP savings.

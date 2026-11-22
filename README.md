@@ -458,3 +458,53 @@ animation.
 
 Expensive searches are serialized with a process-local lock because the
 deployed YOLO/Torch models are shared inside the CPU web process.
+
+
+## Implemented Milestone 12: Market-1501 Adaptive Ablation
+
+The fixed RAC-ReID adaptive retrieval policy was evaluated on all 3,368
+Market-1501 standard queries against the 19,732-image gallery.
+
+Because Market-1501 supplies pedestrian crops, YOLO/person detection is
+excluded from this retrieval-layer experiment so the scope matches the
+full-compute OSNet retrieval baseline. Detector-derived difficulty values
+are neutralized rather than fabricated.
+
+No adaptive thresholds were tuned on the Market-1501 test queries.
+
+### Accuracy
+
+| Metric | Full OSNet | Adaptive RAC-ReID | Delta |
+| --- | ---: | ---: | ---: |
+| mAP | 37.368% | 2.015% | -35.353 pp |
+| Rank-1 | 66.330% | 14.252% | -52.078 pp |
+| Rank-5 | 80.285% | 16.776% | -63.510 pp |
+| Rank-10 | 85.748% | 17.221% | -68.527 pp |
+| mINP | 6.079% | 0.182% | -5.897 pp |
+
+### Efficiency
+
+- OSNet query invocation rate: 100.0%
+- Query-side OSNet forward-pass reduction: 0.0%
+- Early-exit rate: 0.0%
+- Average proxy patches processed: 103.00
+- Average proxy patch saving: 19.5%
+- Average adaptive stages: 3.000
+- Average proxy query processing: 0.0225 seconds
+- Average OSNet query inference when invoked: 0.0429 seconds
+
+Final routing distribution:
+
+    {"invoke_vllm": 3368}
+
+Initial-difficulty distribution:
+
+    {"easy": 3368}
+
+This experiment evaluates the currently implemented fixed policy as-is.
+The result must be interpreted from the measured accuracy delta and compute
+reduction; no efficiency advantage is claimed merely because fewer learned
+forward passes were used.
+
+The current visual-patch budgets remain handcrafted proxy budgets rather
+than learned transformer token pruning.
