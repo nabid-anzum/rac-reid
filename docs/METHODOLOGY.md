@@ -219,3 +219,40 @@ person ReID model.
 Its role is to make the proposed resource-adaptive orchestration fully
 executable and measurable before integrating a learned ReID backbone such
 as OSNet.
+
+## Milestone 5: True Incremental Progressive Computation
+
+Progressive token restoration now reuses computation, not only token IDs.
+
+A naive staged implementation would calculate:
+
+    39 + 71 + 103 = 213 token operations
+
+when processing easy, medium, and hard stages.
+
+RAC-ReID instead maintains an incremental descriptor state.
+
+Stage 1:
+
+    39 new tokens
+    cumulative = 39
+
+Stage 2:
+
+    32 new tokens
+    cumulative = 71
+
+Stage 3:
+
+    32 new tokens
+    cumulative = 103
+
+Therefore the complete progressive route evaluates 103 unique tokens rather
+than 213 repeated token operations.
+
+The state maintains feature sums, squared sums, vertical-region sums, and
+counts so that previously processed token contributions do not need to be
+recalculated.
+
+Automated tests verify that the final incremental descriptor matches the
+equivalent one-shot descriptor at the same token budget.

@@ -11,6 +11,7 @@ from .token_pruning import (
     IdentityAwareTokenPruner,
     PreparedImage,
     TokenSelection,
+    VisualToken,
 )
 
 
@@ -20,6 +21,7 @@ class EncodedImage:
     total_tokens: int
     retained_tokens: int
     actual_retention: float
+    new_tokens_processed: int
 
 
 @dataclass(frozen=True)
@@ -36,8 +38,208 @@ class GalleryRecord:
     descriptor: np.ndarray
 
 
+class ProgressiveDescriptorState:
+    """Incrementally aggregate newly restored visual tokens."""
+
+    FEATURE_SIZE = 8
+
+    def __init__(
+        self,
+        prepared: PreparedImage,
+    ) -> None:
+        self.prepared = prepared
+
+        self._processed: set[
+            tuple[int, int]
+        ] = set()
+
+        self._count = 0
+
+        self._sum = np.zeros(
+            self.FEATURE_SIZE,
+            dtype=np.float64,
+        )
+
+        self._sum_sq = np.zeros(
+            self.FEATURE_SIZE,
+            dtype=np.float64,
+        )
+
+        self._band_count = [
+            0,
+            0,
+            0,
+        ]
+
+        self._band_sum = [
+            np.zeros(
+                self.FEATURE_SIZE,
+                dtype=np.float64,
+            )
+            for _ in range(3)
+        ]
+
+    @property
+    def processed_tokens(self) -> int:
+        return self._count
+
+    def update(
+        self,
+        selection: TokenSelection,
+    ) -> EncodedImage:
+        selected_keys = {
+            (
+                token.row,
+                token.column,
+            )
+            for token in selection.tokens
+        }
+
+        if not self._processed.issubset(
+            selected_keys
+        ):
+            raise ValueError(
+                "Progressive selections may only add tokens."
+            )
+
+        new_tokens = [
+            token
+            for token in selection.tokens
+            if (
+                token.row,
+                token.column,
+            )
+            not in self._processed
+        ]
+
+        for token in new_tokens:
+            self._add_token(
+                token
+            )
+
+        return EncodedImage(
+            descriptor=self._descriptor(),
+            total_tokens=selection.total_tokens,
+            retained_tokens=selection.retained_tokens,
+            actual_retention=selection.actual_retention,
+            new_tokens_processed=len(new_tokens),
+        )
+
+    def _add_token(
+        self,
+        token: VisualToken,
+    ) -> None:
+        key = (
+            token.row,
+            token.column,
+        )
+
+        if key in self._processed:
+            return
+
+        feature = np.asarray(
+            token.feature,
+            dtype=np.float64,
+        )
+
+        self._processed.add(
+            key
+        )
+
+        self._count += 1
+
+        self._sum += feature
+        self._sum_sq += feature * feature
+
+        band = self._band(
+            token.y_center
+        )
+
+        self._band_count[
+            band
+        ] += 1
+
+        self._band_sum[
+            band
+        ] += feature
+
+    def _descriptor(
+        self,
+    ) -> np.ndarray:
+        if self._count < 1:
+            raise RuntimeError(
+                "No tokens have been processed."
+            )
+
+        global_mean = (
+            self._sum
+            / self._count
+        )
+
+        variance = (
+            self._sum_sq
+            / self._count
+            - global_mean * global_mean
+        )
+
+        global_std = np.sqrt(
+            np.maximum(
+                variance,
+                0.0,
+            )
+        )
+
+        band_features: list[
+            np.ndarray
+        ] = []
+
+        for index in range(3):
+            count = self._band_count[
+                index
+            ]
+
+            if count:
+                mean = (
+                    self._band_sum[
+                        index
+                    ]
+                    / count
+                )
+            else:
+                mean = np.zeros(
+                    self.FEATURE_SIZE,
+                    dtype=np.float64,
+                )
+
+            band_features.append(
+                mean
+            )
+
+        return np.concatenate(
+            [
+                global_mean,
+                global_std,
+                *band_features,
+            ]
+        ).astype(
+            np.float32
+        )
+
+    @staticmethod
+    def _band(
+        y_center: float,
+    ) -> int:
+        if y_center < 1.0 / 3.0:
+            return 0
+
+        if y_center < 2.0 / 3.0:
+            return 1
+
+        return 2
+
+
 class BudgetedVisualEncoder:
-    """Create fixed-size descriptors from variable token budgets."""
+    """Create adaptive descriptors while reusing prior token computation."""
 
     def __init__(
         self,
@@ -59,6 +261,14 @@ class BudgetedVisualEncoder:
             image_path
         )
 
+    def start_progressive(
+        self,
+        prepared: PreparedImage,
+    ) -> ProgressiveDescriptorState:
+        return ProgressiveDescriptorState(
+            prepared
+        )
+
     def encode(
         self,
         image_path: str | Path,
@@ -78,110 +288,36 @@ class BudgetedVisualEncoder:
         prepared: PreparedImage,
         retention: float,
     ) -> EncodedImage:
-        selection = self.pruner.select(
-            prepared,
+        state = (
+            self.start_progressive(
+                prepared
+            )
+        )
+
+        return self.encode_progressive(
+            state,
             retention,
         )
 
-        descriptor = self._descriptor(
+    def encode_progressive(
+        self,
+        state: ProgressiveDescriptorState,
+        retention: float,
+    ) -> EncodedImage:
+        selection = (
+            self.pruner.select(
+                state.prepared,
+                retention,
+            )
+        )
+
+        return state.update(
             selection
         )
 
-        return EncodedImage(
-            descriptor=descriptor,
-            total_tokens=(
-                selection.total_tokens
-            ),
-            retained_tokens=(
-                selection.retained_tokens
-            ),
-            actual_retention=(
-                selection.actual_retention
-            ),
-        )
-
-    @staticmethod
-    def _descriptor(
-        selection: TokenSelection,
-    ) -> np.ndarray:
-        features = np.asarray(
-            [
-                token.feature
-                for token
-                in selection.tokens
-            ],
-            dtype=np.float32,
-        )
-
-        global_mean = np.mean(
-            features,
-            axis=0,
-        )
-
-        global_std = np.std(
-            features,
-            axis=0,
-        )
-
-        band_features: list[
-            np.ndarray
-        ] = []
-
-        for band in range(3):
-            selected = [
-                token.feature
-                for token
-                in selection.tokens
-                if BudgetedVisualEncoder._band(
-                    token.y_center
-                ) == band
-            ]
-
-            if selected:
-                band_mean = np.mean(
-                    np.asarray(
-                        selected,
-                        dtype=np.float32,
-                    ),
-                    axis=0,
-                )
-            else:
-                band_mean = np.zeros(
-                    features.shape[1],
-                    dtype=np.float32,
-                )
-
-            band_features.append(
-                band_mean
-            )
-
-        descriptor = np.concatenate(
-            [
-                global_mean,
-                global_std,
-                *band_features,
-            ]
-        ).astype(
-            np.float32
-        )
-
-        return descriptor
-
-    @staticmethod
-    def _band(
-        y_center: float,
-    ) -> int:
-        if y_center < 1.0 / 3.0:
-            return 0
-
-        if y_center < 2.0 / 3.0:
-            return 1
-
-        return 2
-
 
 class GalleryIndex:
-    """Precomputed gallery descriptor index."""
+    """Precomputed full-budget gallery descriptor index."""
 
     def __init__(
         self,

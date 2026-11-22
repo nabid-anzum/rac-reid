@@ -190,3 +190,34 @@ Run the full pipeline demonstration with:
 The current descriptor is a lightweight engineering baseline used to test
 the adaptive routing and token-budget methodology. A learned ReID backbone
 will be introduced in a later milestone.
+
+## Implemented Milestone 5: True Incremental Token Restoration
+
+Progressive refinement now processes only newly restored visual tokens.
+
+For the default 128-token query:
+
+| Stage | Retained | Newly processed | Cumulative unique |
+|---|---:|---:|---:|
+| Easy | 39 | 39 | 39 |
+| Medium | 71 | 32 | 71 |
+| Hard | 103 | 32 | 103 |
+
+The earlier prototype logically reused the token set but recomputed all
+retained descriptor contributions at each stage.
+
+That produced:
+
+    39 + 71 + 103 = 213 repeated token operations
+
+The incremental descriptor state now maintains running sums, squared sums,
+regional sums, and counts.
+
+The complete easy-to-hard route therefore processes:
+
+    39 + 32 + 32 = 103 unique tokens
+
+instead of 213 repeated token operations.
+
+The final incremental descriptor is tested against a one-shot descriptor at
+the same 80 percent budget.

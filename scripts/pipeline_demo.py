@@ -169,6 +169,8 @@ def main() -> None:
                 f"retention={stage.token_retention:.0%} "
                 f"tokens={stage.retained_tokens}/"
                 f"{stage.total_tokens} "
+                f"new={stage.new_tokens_processed} "
+                f"cumulative={stage.cumulative_tokens_processed} "
                 f"top_k={stage.top_k} "
                 f"top1={stage.top1_score:.3f} "
                 f"margin={stage.margin:.3f} "
@@ -182,8 +184,13 @@ def main() -> None:
         )
 
         print(
-            "Total query tokens processed:",
+            "Unique query tokens processed:",
             result.total_query_tokens_processed,
+        )
+
+        print(
+            "Token saving vs full query:",
+            f"{result.token_saving_ratio:.1%}",
         )
 
         print()

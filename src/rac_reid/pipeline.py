@@ -20,8 +20,6 @@ from .retrieval import (
 
 @dataclass(frozen=True)
 class DetectorEvidence:
-    """Evidence that should originate from a person detector."""
-
     confidence: float
     foreground_ratio: float
     occlusion: float
@@ -55,6 +53,8 @@ class PipelineStage:
     token_retention: float
     total_tokens: int
     retained_tokens: int
+    new_tokens_processed: int
+    cumulative_tokens_processed: int
     top_k: int
     top1_score: float
     margin: float
@@ -81,13 +81,40 @@ class PipelineResult:
         self,
     ) -> int:
         return sum(
-            stage.retained_tokens
+            stage.new_tokens_processed
             for stage in self.stages
+        )
+
+    @property
+    def full_token_count(
+        self,
+    ) -> int:
+        if not self.stages:
+            return 0
+
+        return self.stages[
+            0
+        ].total_tokens
+
+    @property
+    def token_saving_ratio(
+        self,
+    ) -> float:
+        if self.full_token_count == 0:
+            return 0.0
+
+        return max(
+            0.0,
+            1.0
+            - (
+                self.total_query_tokens_processed
+                / self.full_token_count
+            ),
         )
 
 
 class AdaptiveReIDPipeline:
-    """Resource-adaptive query processing and retrieval."""
+    """Resource-adaptive ReID with incremental token restoration."""
 
     def __init__(
         self,
@@ -147,6 +174,12 @@ class AdaptiveReIDPipeline:
             )
         )
 
+        progressive = (
+            self.encoder.start_progressive(
+                prepared
+            )
+        )
+
         stages: list[
             PipelineStage
         ] = []
@@ -155,15 +188,21 @@ class AdaptiveReIDPipeline:
             RetrievalCandidate
         ] = []
 
+        cumulative_tokens = 0
+
         for stage_number in range(
             1,
             5,
         ):
             encoded = (
-                self.encoder.encode_prepared(
-                    prepared,
+                self.encoder.encode_progressive(
+                    progressive,
                     plan.token_retention,
                 )
+            )
+
+            cumulative_tokens += (
+                encoded.new_tokens_processed
             )
 
             candidates = (
@@ -206,6 +245,12 @@ class AdaptiveReIDPipeline:
                     retained_tokens=(
                         encoded.retained_tokens
                     ),
+                    new_tokens_processed=(
+                        encoded.new_tokens_processed
+                    ),
+                    cumulative_tokens_processed=(
+                        cumulative_tokens
+                    ),
                     top_k=(
                         plan.top_k
                     ),
@@ -223,16 +268,10 @@ class AdaptiveReIDPipeline:
 
             final_candidates = candidates
 
-            if (
-                decision.action
-                == "refine"
-            ):
-                if (
-                    decision.next_plan
-                    is None
-                ):
+            if decision.action == "refine":
+                if decision.next_plan is None:
                     raise RuntimeError(
-                        "Refinement requested without a next plan."
+                        "Refinement requested without next plan."
                     )
 
                 plan = (

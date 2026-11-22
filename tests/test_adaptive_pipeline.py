@@ -383,5 +383,97 @@ class AdaptivePipelineTests(
             )
 
 
+
+class ProgressiveComputeTests(
+    unittest.TestCase
+):
+    def test_progressive_restoration_processes_each_token_once(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(
+            dir=ROOT
+        ) as directory:
+            path = (
+                Path(directory)
+                / "progressive.png"
+            )
+
+            create_person_image(
+                path,
+                (175, 55, 80),
+            )
+
+            encoder = (
+                BudgetedVisualEncoder()
+            )
+
+            prepared = (
+                encoder.prepare(
+                    path
+                )
+            )
+
+            state = (
+                encoder.start_progressive(
+                    prepared
+                )
+            )
+
+            easy = (
+                encoder.encode_progressive(
+                    state,
+                    0.30,
+                )
+            )
+
+            medium = (
+                encoder.encode_progressive(
+                    state,
+                    0.55,
+                )
+            )
+
+            hard = (
+                encoder.encode_progressive(
+                    state,
+                    0.80,
+                )
+            )
+
+            self.assertEqual(
+                easy.new_tokens_processed,
+                39,
+            )
+
+            self.assertEqual(
+                medium.new_tokens_processed,
+                32,
+            )
+
+            self.assertEqual(
+                hard.new_tokens_processed,
+                32,
+            )
+
+            self.assertEqual(
+                state.processed_tokens,
+                103,
+            )
+
+            one_shot = (
+                encoder.encode_prepared(
+                    prepared,
+                    0.80,
+                )
+            )
+
+            np.testing.assert_allclose(
+                hard.descriptor,
+                one_shot.descriptor,
+                rtol=1e-5,
+                atol=1e-6,
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
