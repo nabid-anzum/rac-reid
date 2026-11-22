@@ -633,3 +633,23 @@ they failed the predetermined held-out validation gates.
 
 The full learned gallery is searched directly; proxy Top-K pruning is not used
 to restrict the learned candidate population.
+
+
+## Public multi-resolution search path
+
+Efficient:
+
+`photo -> detect/crop -> 160x80 -> trained OSNet -> 512-D -> full gallery`
+
+Full quality:
+
+`photo -> detect/crop -> 256x128 -> trained OSNet -> 512-D -> full gallery`
+
+Gallery:
+
+`photo -> detect/crop -> 256x128 -> trained OSNet -> stored 512-D embedding`
+
+Each query is embedded once. The full learned gallery is searched directly.
+
+The historical proxy Top-K restriction and failed learned routers are not part
+of the public production search path.

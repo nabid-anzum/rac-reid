@@ -1299,12 +1299,12 @@ class AppState:
         mode: str = "efficient",
         progress_callback=None,
     ):
-        """
-        Direct trained-OSNet gallery search.
+        mode = (
+            str(mode)
+            .strip()
+            .lower()
+        )
 
-        This is the backend path that the next
-        frontend milestone will expose.
-        """
         resolution = (
             self.learned_encoder
             .resolution_for_mode(
@@ -1347,21 +1347,23 @@ class AppState:
 
         if progress_callback is not None:
             progress_callback(
-                "multires_query",
+                "query_embedding",
                 (
-                    "Efficient query embedding"
+                    "Generating efficient query embedding"
                     if mode == "efficient"
                     else
-                    "Full-quality query embedding"
+                    "Generating full-quality query embedding"
                 ),
                 (
-                    f"Running the trained OSNet "
-                    f"checkpoint at "
+                    f"Running the jointly trained "
+                    f"epoch-8 OSNet on the detected "
+                    f"person crop at "
                     f"{resolution[0]}x"
-                    f"{resolution[1]} for the "
-                    f"query crop."
+                    f"{resolution[1]}. "
+                    f"The model generates one "
+                    f"normalized 512-D embedding."
                 ),
-                58,
+                62,
             )
 
         learned_started = (
@@ -1383,29 +1385,28 @@ class AppState:
 
         if progress_callback is not None:
             progress_callback(
-                "multires_gallery_match",
+                "gallery_embedding_search",
                 "Searching learned gallery",
                 (
-                    f"Compared one 512-D "
-                    f"{resolution[0]}x"
-                    f"{resolution[1]} query "
-                    f"embedding against all "
-                    f"stored 256x128 gallery "
-                    f"embeddings. "
+                    f"Comparing the single 512-D "
+                    f"query embedding against every "
+                    f"stored 256x128 gallery embedding. "
                     f"Top cosine="
                     f"{learned_result.top1:.4f}; "
                     f"margin="
                     f"{learned_result.margin:.4f}."
                 ),
-                94,
+                92,
             )
 
             progress_callback(
-                "final_ranking",
-                "Finalizing learned ranking",
+                "ranking_complete",
+                "Identity ranking complete",
                 (
-                    "Returning the complete "
-                    "OSNet gallery ranking."
+                    f"Ranked "
+                    f"{len(learned_result.candidates)} "
+                    f"gallery candidate(s) using "
+                    f"cosine similarity."
                 ),
                 98,
             )
@@ -1422,8 +1423,19 @@ class AppState:
             "learned_seconds":
                 learned_seconds,
 
+            "query_inference_seconds":
+                learned_result
+                .inference_seconds,
+
+            "model_load_seconds":
+                learned_result
+                .model_load_seconds,
+
             "total_seconds":
                 total_seconds,
+
+            "mode":
+                mode,
 
             "query_height":
                 resolution[0],
@@ -1437,12 +1449,38 @@ class AppState:
             "gallery_width":
                 128,
 
+            "embedding_dim":
+                learned_result
+                .embedding_dim,
+        }
+
+        result = {
+            "pipeline_kind":
+                "trained_multires",
+
             "mode":
                 mode,
+
+            "query_resolution":
+                [
+                    resolution[0],
+                    resolution[1],
+                ],
+
+            "gallery_resolution":
+                [
+                    256,
+                    128,
+                ],
+
+            "embedding_dim":
+                learned_result
+                .embedding_dim,
         }
 
         return (
             prepared,
+            result,
             learned_result,
             timings,
         )
@@ -1450,7 +1488,18 @@ class AppState:
     def start_search(
         self,
         uploaded: Path,
+        mode: str = "efficient",
     ) -> str:
+        mode = (
+            str(mode)
+            .strip()
+            .lower()
+        )
+
+        self.learned_encoder.resolution_for_mode(
+            mode
+        )
+
         job_id = (
             self.jobs.create()
         )
@@ -1463,6 +1512,7 @@ class AppState:
                 args=(
                     job_id,
                     uploaded,
+                    mode,
                 ),
                 name=(
                     "rac-search-"
@@ -1480,6 +1530,7 @@ class AppState:
         self,
         job_id: str,
         uploaded: Path,
+        mode: str = "efficient",
     ) -> None:
         def report(
             code: str,
@@ -1505,11 +1556,12 @@ class AppState:
         if not acquired:
             report(
                 "queue_wait",
-                "Waiting for search worker",
+                "Waiting for CPU search worker",
                 (
-                    "Another RAC-ReID query is running. "
-                    "This job is queued to protect shared "
-                    "CPU model state."
+                    "Another RAC-ReID search is "
+                    "running. This query is queued "
+                    "to avoid concurrent YOLO and "
+                    "OSNet CPU inference."
                 ),
                 4,
             )
@@ -1517,19 +1569,30 @@ class AppState:
             self._search_lock.acquire()
 
         try:
+            resolution = (
+                self.learned_encoder
+                .resolution_for_mode(
+                    mode
+                )
+            )
+
             report(
                 "job_started",
                 "Search worker started",
                 (
-                    "Beginning the RAC-ReID backend "
-                    "execution pipeline."
+                    f"Starting trained "
+                    f"multi-resolution search in "
+                    f"{mode} mode using a "
+                    f"{resolution[0]}x"
+                    f"{resolution[1]} query."
                 ),
                 6,
             )
 
             result = (
-                self.search(
+                self.search_multires(
                     uploaded,
+                    mode=mode,
                     progress_callback=(
                         report
                     ),
@@ -1544,9 +1607,7 @@ class AppState:
         except Exception as exc:
             self.jobs.fail(
                 job_id,
-                str(
-                    exc
-                ),
+                str(exc),
             )
 
         finally:
@@ -1700,6 +1761,19 @@ class ReIDHandler(
                     self._form()
                 )
 
+                mode = (
+                    form.getfirst(
+                        "mode",
+                        "efficient",
+                    )
+                    .strip()
+                    .lower()
+                )
+
+                self.state.learned_encoder.resolution_for_mode(
+                    mode
+                )
+
                 upload = (
                     self._save_image(
                         form
@@ -1709,7 +1783,8 @@ class ReIDHandler(
                 job_id = (
                     self.state
                     .start_search(
-                        upload
+                        upload,
+                        mode=mode,
                     )
                 )
 
@@ -3430,7 +3505,7 @@ class ReIDHandler(
       if (button) {{
         button.disabled = false;
         button.textContent =
-          "Run RAC-ReID search";
+          "Search gallery";
       }}
     }}
 
@@ -3673,7 +3748,7 @@ class ReIDHandler(
 
           <p>
             Upload a person image and watch RAC-ReID locate,
-            analyze, prune, search, refine, rerank and decide
+            crop, embed, search, compare and rank identities
             in real time.
           </p>
         </div>
@@ -3686,14 +3761,14 @@ class ReIDHandler(
 
             <div style="margin-top:12px">
               <span class="stack-badge">YOLO26n</span>
-              <span class="stack-badge">Adaptive proxy</span>
+              <span class="stack-badge">Multi-resolution OSNet</span>
               <span class="stack-badge">OSNet x1.0</span>
               <span class="stack-badge">CPU-only</span>
             </div>
           </div>
 
           <p class="small">
-            Semantic VLLM is not connected yet.
+            Jointly trained epoch-8 OSNet is active.
             The current 30/55/80% resource values are
             visual-patch proxy budgets.
           </p>
@@ -3731,31 +3806,31 @@ class ReIDHandler(
           <div class="pipeline-step">
             <span>03</span>
             <strong>Analyze</strong>
-            <small>Quality + difficulty signals</small>
+            <small>Detected person crop</small>
           </div>
 
           <div class="pipeline-step">
             <span>04</span>
             <strong>Prune</strong>
-            <small>Identity-aware patch selection</small>
+            <small>160x80 / 256x128 -> 512-D</small>
           </div>
 
           <div class="pipeline-step">
             <span>05</span>
             <strong>Search</strong>
-            <small>Gallery candidate retrieval</small>
+            <small>Full learned gallery search</small>
           </div>
 
           <div class="pipeline-step">
             <span>06</span>
             <strong>Refine</strong>
-            <small>Restore patches if uncertain</small>
+            <small>Compare stored gallery vectors</small>
           </div>
 
           <div class="pipeline-step">
             <span>07</span>
             <strong>Rerank</strong>
-            <small>Conditional OSNet</small>
+            <small>Cosine identity ranking</small>
           </div>
 
         </div>
@@ -3837,9 +3912,46 @@ class ReIDHandler(
                 id="search-button"
                 type="submit"
               >
-                Run RAC-ReID search
+                Search gallery
               </button>
-            </form>
+
+
+              <fieldset style="margin:14px 0;padding:13px;border:1px solid rgba(148,163,184,.15);border-radius:11px;">
+                <legend style="padding:0 6px;color:#93a4bd;font-size:.78rem;">
+                  Search compute mode
+                </legend>
+
+                <label style="display:block;margin-bottom:6px;">
+                  <input
+                    type="radio"
+                    name="mode"
+                    value="efficient"
+                    checked
+                  >
+                  <strong>Efficient - 160x80</strong>
+                </label>
+
+                <p class="small">
+                  Recommended default. The detected person crop
+                  is embedded once at 160x80 and compared against
+                  the stored 256x128 gallery embeddings.
+                </p>
+
+                <label style="display:block;margin-top:12px;margin-bottom:6px;">
+                  <input
+                    type="radio"
+                    name="mode"
+                    value="full"
+                  >
+                  <strong>Full quality - 256x128</strong>
+                </label>
+
+                <p class="small">
+                  Runs the same jointly trained OSNet at 256x128
+                  for direct full-quality comparison.
+                </p>
+              </fieldset>
+</form>
 
             <div
               id="live-console"
@@ -4003,7 +4115,7 @@ class ReIDHandler(
     </body>
     </html>"""
 
-    def _result_html(
+    def _legacy_result_html(
         self,
         prepared,
         result,
@@ -4539,6 +4651,286 @@ class ReIDHandler(
 
     </div>
     """
+
+    def _result_html(
+        self,
+        prepared,
+        result,
+        learned_result,
+        timings,
+        progress_events=None,
+    ) -> str:
+        if not (
+            isinstance(
+                result,
+                dict,
+            )
+            and result.get(
+                "pipeline_kind"
+            )
+            == "trained_multires"
+        ):
+            return (
+                self._legacy_result_html(
+                    prepared,
+                    result,
+                    learned_result,
+                    timings,
+                    progress_events,
+                )
+            )
+
+        mode = str(
+            result.get(
+                "mode",
+                "efficient",
+            )
+        )
+
+        query_resolution = (
+            result.get(
+                "query_resolution",
+                [
+                    160,
+                    80,
+                ],
+            )
+        )
+
+        gallery_resolution = (
+            result.get(
+                "gallery_resolution",
+                [
+                    256,
+                    128,
+                ],
+            )
+        )
+
+        mode_name = (
+            "Efficient"
+            if mode == "efficient"
+            else "Full quality"
+        )
+
+        rows = ""
+
+        for (
+            rank,
+            candidate,
+        ) in enumerate(
+            learned_result.candidates,
+            start=1,
+        ):
+            rows += (
+                "<tr>"
+                f"<td>{rank}</td>"
+                "<td>"
+                + html.escape(
+                    candidate.label
+                )
+                + "</td>"
+                "<td>"
+                + format(
+                    candidate
+                    .cosine_similarity,
+                    ".4f",
+                )
+                + "</td>"
+                "</tr>"
+            )
+
+        events_html = ""
+
+        for event in (
+            progress_events
+            or []
+        ):
+            if isinstance(
+                event,
+                dict,
+            ):
+                title = str(
+                    event.get(
+                        "title",
+                        event.get(
+                            "code",
+                            "",
+                        ),
+                    )
+                )
+
+                detail = str(
+                    event.get(
+                        "detail",
+                        "",
+                    )
+                )
+
+                elapsed = float(
+                    event.get(
+                        "elapsed_seconds",
+                        0.0,
+                    )
+                )
+
+            else:
+                title = str(
+                    event
+                )
+
+                detail = ""
+                elapsed = 0.0
+
+            events_html += (
+                "<tr>"
+                "<td>"
+                + html.escape(
+                    title
+                )
+                + "</td>"
+                "<td>"
+                + html.escape(
+                    detail
+                )
+                + "</td>"
+                "<td>"
+                + format(
+                    elapsed,
+                    ".3f",
+                )
+                + " s</td>"
+                "</tr>"
+            )
+
+        return (
+            '<section class="card result-card">'
+            '<div class="eyebrow">'
+            'Trained person-ReID result'
+            '</div>'
+
+            '<h2>Identity ranking</h2>'
+
+            '<div class="metric-grid">'
+
+            '<div><span>Search mode</span><strong>'
+            + html.escape(
+                mode_name
+            )
+            + '</strong></div>'
+
+            '<div><span>Query resolution</span><strong>'
+            + str(
+                int(
+                    query_resolution[0]
+                )
+            )
+            + 'x'
+            + str(
+                int(
+                    query_resolution[1]
+                )
+            )
+            + '</strong></div>'
+
+            '<div><span>Gallery resolution</span><strong>'
+            + str(
+                int(
+                    gallery_resolution[0]
+                )
+            )
+            + 'x'
+            + str(
+                int(
+                    gallery_resolution[1]
+                )
+            )
+            + '</strong></div>'
+
+            '<div><span>Embedding</span><strong>'
+            + str(
+                learned_result.embedding_dim
+            )
+            + '-D</strong></div>'
+
+            '</div>'
+
+            '<h3>Top matches</h3>'
+
+            '<div class="table-scroll">'
+            '<table>'
+            '<tr>'
+            '<th>Rank</th>'
+            '<th>Identity</th>'
+            '<th>Cosine similarity</th>'
+            '</tr>'
+            + rows
+            + '</table>'
+            '</div>'
+
+            '<div class="metric-grid" '
+            'style="margin-top:14px">'
+
+            '<div><span>Top-1 cosine</span><strong>'
+            + format(
+                learned_result.top1,
+                ".4f",
+            )
+            + '</strong></div>'
+
+            '<div><span>Top-1 / Top-2 margin</span><strong>'
+            + format(
+                learned_result.margin,
+                ".4f",
+            )
+            + '</strong></div>'
+
+            '<div><span>OSNet query inference</span><strong>'
+            + format(
+                learned_result
+                .inference_seconds,
+                ".4f",
+            )
+            + ' s</strong></div>'
+
+            '<div><span>Total backend search</span><strong>'
+            + format(
+                float(
+                    timings.get(
+                        "total_seconds",
+                        0.0,
+                    )
+                ),
+                ".4f",
+            )
+            + ' s</strong></div>'
+
+            '</div>'
+
+            '<p class="small">'
+            'The query is embedded once. '
+            'Its normalized 512-D vector is '
+            'compared against the stored '
+            '256x128 gallery embeddings. '
+            'Cosine similarity is a ranking '
+            'score, not a calibrated probability.'
+            '</p>'
+
+            '<h3>Real backend execution</h3>'
+
+            '<div class="table-scroll">'
+            '<table>'
+            '<tr>'
+            '<th>Operation</th>'
+            '<th>Backend detail</th>'
+            '<th>Elapsed</th>'
+            '</tr>'
+            + events_html
+            + '</table>'
+            '</div>'
+
+            '</section>'
+        )
 
     def _html(
         self,

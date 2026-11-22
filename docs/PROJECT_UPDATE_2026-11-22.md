@@ -299,3 +299,37 @@ will switch the public search workflow to the direct trained-OSNet path and
 expose efficient/full search modes to the user.
 
 The standard Market-1501 test split remains untouched.
+
+
+## Step 29H-C - Real multi-resolution public search
+
+The primary asynchronous public search now uses the jointly trained epoch-8
+multi-resolution OSNet directly.
+
+Efficient mode:
+
+1. upload a query photograph
+2. YOLO detects and crops the person
+3. resize the person crop to 160x80
+4. run the jointly trained OSNet once
+5. generate one normalized 512-D query embedding
+6. compare it against all stored 256x128 gallery embeddings
+7. rank identities by cosine similarity
+
+Full-quality mode runs the same model at 256x128.
+
+Gallery enrollment stores normalized 512-D embeddings generated at 256x128.
+
+The query embedding is generated once per search and compared against the
+complete learned gallery.
+
+The historical proxy cascade is no longer the primary public search path.
+The failed confidence/refinement routers are not deployed.
+
+Repeated production-wrapper timing on this VPS measured:
+
+- 160x80 median query embedding: 0.029225 seconds
+- 256x128 median query embedding: 0.040603 seconds
+- measured low-resolution saving: 28.022%
+
+The standard Market-1501 query/gallery test remains untouched.
