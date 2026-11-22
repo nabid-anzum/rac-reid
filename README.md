@@ -508,3 +508,36 @@ forward passes were used.
 
 The current visual-patch budgets remain handcrafted proxy budgets rather
 than learned transformer token pruning.
+
+
+## Implemented Milestone 13: Lightweight Learned ReID Baseline
+
+The official MSMT17-combineall OSNet x0.25 checkpoint was added as the
+candidate coarse learned stage for the redesigned RAC-ReID cascade.
+
+The checkpoint is stored project-locally at runtime and is not committed as
+a binary Git artifact.
+
+Observed complete Market-1501 cross-domain results:
+
+- mAP: 31.008%
+- Rank-1: 59.768%
+- Rank-5: 76.900%
+- Rank-10: 83.106%
+- mINP: 4.266%
+- queries: 3,368
+- gallery images: 19,732
+- CPU evaluation wall time: 169.481 seconds
+
+Model reference complexity:
+
+- architecture: OSNet x0.25
+- parameters: approximately 0.2 million
+- reference compute: approximately 0.08 GFLOPs
+
+This establishes a real learned coarse ReID stage before production routing
+is changed.
+
+The failed handcrafted proxy-first candidate shortlist remains historical
+experimental evidence and will not be used as the identity candidate gate in
+the redesigned production cascade.

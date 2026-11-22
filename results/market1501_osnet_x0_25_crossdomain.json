@@ -1,0 +1,50 @@
+{
+  "benchmark": "Market-1501 lightweight cross-domain learned baseline",
+  "dataset": {
+    "gallery_images": 19732,
+    "name": "Market-1501-v15.09.15",
+    "query_images": 3368,
+    "scored_queries": 3368
+  },
+  "delta_vs_official_reference_pp": {
+    "map": 0.007668182369773291,
+    "rank1": -0.1315914489311112
+  },
+  "metrics_percent": {
+    "map": 31.007668182369773,
+    "minp": 4.266313759711168,
+    "rank1": 59.76840855106889,
+    "rank10": 83.10570071258907,
+    "rank5": 76.90023752969121
+  },
+  "model": {
+    "architecture": "osnet_x0_25",
+    "device": "cpu",
+    "gflops_reference": 0.08,
+    "parameters_reference_millions": 0.2,
+    "training_source": "MSMT17 combineall",
+    "weights_file": "osnet_x0_25_msmt17_combineall_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip_jitter.pth",
+    "weights_sha256": "cf55163d78fc44c62c82f85ab62d39f10438679b5abe8c698ae08cfa84aa6e18"
+  },
+  "official_reference_percent": {
+    "map": 31.0,
+    "rank1": 59.9
+  },
+  "protocol": {
+    "distance": "euclidean",
+    "standard_market1501": true
+  },
+  "runtime": {
+    "evaluation_wall_seconds": 169.48143960395828,
+    "machine": "x86_64",
+    "model_load_seconds": 0.162968372926116,
+    "python": "3.12.3",
+    "torch": "2.15.0+cpu",
+    "torch_threads": 4
+  },
+  "scientific_notes": [
+    "This is the lightweight learned coarse-stage baseline.",
+    "It is not yet the final coarse-to-fine RAC-ReID cascade.",
+    "The checkpoint is MSMT17 combineall evaluated cross-domain on Market-1501."
+  ]
+}

@@ -509,3 +509,34 @@ Market-1501 test queries.
 
 The visual-patch savings are proxy-compute measurements and must not be
 reported as transformer-token or neural-FLOP savings.
+
+
+## Milestone 13: Lightweight Learned Coarse Stage
+
+The official OSNet x0.25 MSMT17-combineall checkpoint was validated locally
+and evaluated on the same complete Market-1501 protocol used by the existing
+OSNet x1.0 reference.
+
+Observed results:
+
+- mAP: 31.008%
+- Rank-1: 59.768%
+- Rank-5: 76.900%
+- Rank-10: 83.106%
+- mINP: 4.266%
+
+The intended redesigned cascade is:
+
+1. OSNet x0.25 performs the inexpensive learned full-gallery retrieval.
+2. A confidence controller decides whether the x0.25 result is sufficient.
+3. Confident queries exit immediately.
+4. Ambiguous queries invoke OSNet x1.0.
+5. The heavy model searches the full learned gallery rather than a
+   handcrafted proxy shortlist.
+
+This avoids the failure mode measured in the previous proxy-first ablation,
+where the handcrafted candidate restriction reduced accuracy while still
+invoking the heavy learned model for every test query.
+
+Thresholds for learned early exit must be calibrated on training data rather
+than tuned on Market-1501 test queries.
