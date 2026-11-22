@@ -1,0 +1,41 @@
+{
+  "difficulty_weights": {
+    "low_detector_confidence": 0.20,
+    "low_foreground_ratio": 0.15,
+    "blur": 0.15,
+    "visual_entropy": 0.15,
+    "occlusion": 0.25,
+    "crowding": 0.10
+  },
+  "difficulty_thresholds": {
+    "easy_max": 0.35,
+    "medium_max": 0.65
+  },
+  "budgets": {
+    "easy": {
+      "crop_margin": 0.05,
+      "token_retention": 0.30,
+      "top_k": 5,
+      "encoder_depth": 1,
+      "vllm_eligible": false
+    },
+    "medium": {
+      "crop_margin": 0.10,
+      "token_retention": 0.55,
+      "top_k": 10,
+      "encoder_depth": 2,
+      "vllm_eligible": false
+    },
+    "hard": {
+      "crop_margin": 0.15,
+      "token_retention": 0.80,
+      "top_k": 20,
+      "encoder_depth": 3,
+      "vllm_eligible": true
+    }
+  },
+  "early_exit": {
+    "min_top1": 0.80,
+    "min_margin": 0.12
+  }
+}

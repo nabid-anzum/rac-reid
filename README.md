@@ -65,3 +65,46 @@ Metrics:
 
 Initial project scaffold.
 No benchmark results have been produced yet.
+
+## Implemented Milestone 1: Resource Budget Controller
+
+The first implementation milestone introduces a configurable controller
+that allocates computation according to query difficulty.
+
+The controller currently:
+
+- accepts six normalized query-quality signals
+- calculates a weighted difficulty score
+- classifies queries as easy, medium, or hard
+- assigns crop, token, candidate, and encoder-depth budgets
+- exits early when retrieval confidence is sufficient
+- progressively upgrades ambiguous queries
+- marks unresolved hard queries as eligible for VLLM reasoning
+
+Current default budgets:
+
+| Difficulty | Tokens retained | Top-K | Encoder depth | VLLM |
+|---|---:|---:|---:|---|
+| Easy | 30% | 5 | 1 | No |
+| Medium | 55% | 10 | 2 | No |
+| Hard | 80% | 20 | 3 | Eligible |
+
+Run the controller demonstration with:
+
+    PYTHONPATH=src .venv/bin/python scripts/controller_demo.py
+
+Run the tests with:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+
+This milestone implements the resource-allocation logic only. Real image
+signals, person detection, ReID embeddings, token extraction, and VLLM
+inference will be connected in later milestones.
+
+## Planned Public Application
+
+The application is planned for:
+
+    https://reid.nabidanzum.com
+
+No public service has been deployed yet.
