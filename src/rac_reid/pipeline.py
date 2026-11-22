@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -59,6 +61,8 @@ class PipelineStage:
     top1_score: float
     margin: float
     action: str
+    reason: str = ""
+    elapsed_seconds: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -194,6 +198,10 @@ class AdaptiveReIDPipeline:
             1,
             5,
         ):
+            stage_started = (
+                time.perf_counter()
+            )
+
             encoded = (
                 self.encoder.encode_progressive(
                     progressive,
@@ -226,6 +234,11 @@ class AdaptiveReIDPipeline:
                     ],
                     plan,
                 )
+            )
+
+            stage_elapsed = (
+                time.perf_counter()
+                - stage_started
             )
 
             stages.append(
@@ -263,10 +276,18 @@ class AdaptiveReIDPipeline:
                     action=(
                         decision.action
                     ),
+                    reason=(
+                        decision.reason
+                    ),
+                    elapsed_seconds=(
+                        stage_elapsed
+                    ),
                 )
             )
 
-            final_candidates = candidates
+            final_candidates = (
+                candidates
+            )
 
             if decision.action == "refine":
                 if decision.next_plan is None:

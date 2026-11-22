@@ -414,3 +414,30 @@ resource-adaptive RAC-ReID cascade using accuracy, learned-model invocation
 rate, patch budget, and latency.
 
 No adaptive-compute improvement is claimed from this baseline alone.
+
+## Milestone 10: Observable Adaptive Decision Trace
+
+The online RAC-ReID query path is now instrumented so that the resource
+controller can be inspected during a live demonstration.
+
+Each adaptive stage records its actual controller decision reason and measured
+elapsed time in addition to the existing difficulty class, visual-patch proxy
+budget, number of newly restored patches, cumulative patch count, Top-K,
+Top-1 score, and Top-1/Top-2 margin.
+
+The interface also reports the six query-difficulty inputs and component-level
+timing for person preprocessing, gallery-index access, the adaptive proxy
+pipeline, optional OSNet reranking, and total request processing.
+
+The visual-patch budget remains an engineering proxy implemented by the
+handcrafted patch encoder. It must not be represented as transformer-token
+pruning or learned-backbone FLOP reduction.
+
+The internal historical route name `invoke_vllm` currently represents an
+escalation request; the deployed web application satisfies that request using
+OSNet learned person-ReID reranking. No semantic VLLM is connected at this
+milestone.
+
+This observability milestone does not establish an efficiency or accuracy
+advantage by itself. The next Market-1501 experiment must compare the adaptive
+method against the verified full-compute OSNet baseline.

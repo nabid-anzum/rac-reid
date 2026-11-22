@@ -369,3 +369,46 @@ This experiment establishes the full-compute learned OSNet baseline.
 
 It does not yet demonstrate an RAC-ReID compute/accuracy advantage.
 That requires the adaptive ablation experiment.
+
+## Implemented Milestone 10: Teacher-Facing Adaptive Trace
+
+The public research demo now exposes the actual backend resource-adaptive
+execution path for each query.
+
+The interface reports:
+
+- YOLO/person preprocessing time
+- detector confidence
+- foreground ratio
+- blur
+- visual entropy
+- occlusion proxy
+- crowding proxy
+- normalized difficulty score
+- initial easy/medium/hard classification
+- adaptive crop margin
+- each progressive visual-patch proxy stage
+- requested patch retention
+- new and cumulative patches processed
+- Top-K
+- Top-1 score
+- Top-1/Top-2 margin
+- real per-stage processing time
+- the resource-controller decision reason
+- early exit or progressive refinement
+- proxy patch saving versus full proxy processing
+- conditional OSNet invocation
+- OSNet query inference and cold-load timing
+- complete backend query timing
+- proxy and learned rankings
+
+The current 30/55/80 percent resource budgets are handcrafted visual-patch
+proxy budgets. They are not transformer or VLM token counts.
+
+The controller action historically named `invoke_vllm` currently causes the
+web application to escalate the ambiguous candidate set to OSNet learned
+person-ReID reranking. A semantic VLLM is not connected yet.
+
+The verified full-compute Market-1501 baseline is displayed on the public
+research interface. The adaptive Market-1501 comparison remains pending the
+next experiment.
