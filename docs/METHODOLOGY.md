@@ -79,3 +79,51 @@ Otherwise, computation is increased progressively:
 
 These values are initial research parameters. They will later be calibrated
 through experiments on Market-1501 rather than treated as final constants.
+
+## Milestone 2: Image-Derived Query Evidence
+
+The second implementation milestone introduces a CPU-friendly image signal
+extractor.
+
+Before expensive ReID inference, a query image can now be reduced to a
+small set of measurable visual properties:
+
+1. Brightness
+2. Contrast
+3. Grayscale entropy
+4. Blur estimate
+5. Edge density
+6. Approximate foreground occupancy
+7. Image geometry
+
+For efficiency, the analysis copy is resized so its longest dimension is
+at most 512 pixels. The original image dimensions are preserved separately.
+
+Blur is represented as a normalized inverse function of Laplacian variance.
+A larger value therefore indicates a blurrier or less locally detailed
+image, while a smaller value indicates stronger high-frequency detail.
+
+Visual entropy is calculated from the normalized 256-bin grayscale
+histogram.
+
+Edge density uses neighboring grayscale intensity differences and measures
+the fraction that exceed a configurable threshold.
+
+Foreground occupancy is currently a lightweight heuristic. The median
+color of the image border is treated as an approximate background color,
+and pixels sufficiently different from that color are counted as probable
+foreground.
+
+This foreground estimate must not be interpreted as person segmentation.
+
+The following signals still require detector-level evidence and are not
+fabricated from raw pixel statistics:
+
+- person detector confidence
+- true person bounding-box occupancy
+- person occlusion
+- number of nearby people or crowding
+
+The next integration stage will combine image-derived evidence with
+detector-derived evidence before the Resource Budget Controller chooses
+the query compute budget.

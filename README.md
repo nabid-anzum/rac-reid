@@ -108,3 +108,39 @@ The application is planned for:
     https://reid.nabidanzum.com
 
 No public service has been deployed yet.
+
+## Implemented Milestone 2: Real Image-Derived Signals
+
+RAC-ReID now extracts inexpensive measurements directly from real image
+pixels using NumPy and Pillow.
+
+Current image-derived signals include:
+
+- original image width and height
+- aspect ratio
+- normalized brightness
+- normalized contrast
+- grayscale visual entropy
+- Laplacian-based blur estimate
+- edge density
+- approximate foreground occupancy
+
+The image is downscaled to a maximum working dimension before signal
+calculation, keeping this preprocessing stage lightweight and CPU-friendly.
+
+The foreground occupancy value is intentionally treated as an estimate.
+It compares pixels against a border-derived background color and is not a
+replacement for person segmentation.
+
+Detector confidence, true person occlusion, and crowding are not inferred
+from these pixel statistics. They remain separate detector-level signals
+for a later milestone.
+
+Project-local runtime dependencies are pinned in requirements.txt:
+
+    numpy==2.5.5
+    pillow==13.0.0
+
+Run the image-signal demonstration with:
+
+    PYTHONPATH=src .venv/bin/python scripts/image_signal_demo.py
