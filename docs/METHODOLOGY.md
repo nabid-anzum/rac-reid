@@ -441,3 +441,26 @@ milestone.
 This observability milestone does not establish an efficiency or accuracy
 advantage by itself. The next Market-1501 experiment must compare the adaptive
 method against the verified full-compute OSNet baseline.
+
+## Milestone 11: Live Execution Observability
+
+The online research prototype now exposes a backend-generated execution trace
+while a query is running.
+
+Progress events are emitted at the boundaries of real processing operations,
+including detector execution, person localization, crop preparation, signal
+extraction, difficulty estimation, budget assignment, proxy tokenization,
+identity-aware pruning, gallery retrieval, confidence routing, progressive
+restoration, optional learned OSNet reranking, and final ranking.
+
+The browser polls job state and displays the actual server event sequence,
+current operation, elapsed time, and completion state.
+
+The displayed progress percentage is an execution-stage indicator rather than
+a measurement of neural-network completion percentage.
+
+The patch-pruning terminology continues to refer only to the handcrafted
+visual-patch proxy stage. It is not reported as transformer-token pruning.
+
+Search workers are serialized within the web process to avoid concurrent use
+of shared CPU YOLO/Torch model state.

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import threading
+
 import time
 
 import argparse
@@ -75,6 +77,457 @@ ALLOWED_SUFFIXES = {
     ".png",
     ".webp",
 }
+
+
+class SearchJobStore:
+    """Thread-safe in-memory progress state for live search jobs."""
+
+    def __init__(
+        self,
+        ttl_seconds: float = 3600.0,
+        max_jobs: int = 100,
+    ) -> None:
+        self.ttl_seconds = float(
+            ttl_seconds
+        )
+
+        self.max_jobs = int(
+            max_jobs
+        )
+
+        self._lock = (
+            threading.Lock()
+        )
+
+        self._jobs = {}
+
+    def _cleanup_locked(
+        self,
+    ) -> None:
+        now = time.time()
+
+        expired = [
+            job_id
+            for (
+                job_id,
+                job,
+            )
+            in self._jobs.items()
+            if (
+                now
+                - job["created_epoch"]
+                > self.ttl_seconds
+            )
+        ]
+
+        for job_id in expired:
+            self._jobs.pop(
+                job_id,
+                None,
+            )
+
+        if (
+            len(self._jobs)
+            <= self.max_jobs
+        ):
+            return
+
+        ordered = sorted(
+            self._jobs.items(),
+            key=lambda item:
+                item[1][
+                    "created_epoch"
+                ],
+        )
+
+        remove_count = (
+            len(self._jobs)
+            - self.max_jobs
+        )
+
+        for (
+            job_id,
+            _,
+        ) in ordered[
+            :remove_count
+        ]:
+            self._jobs.pop(
+                job_id,
+                None,
+            )
+
+    @staticmethod
+    def _event(
+        job,
+        code: str,
+        title: str,
+        detail: str,
+        progress: int,
+    ):
+        elapsed = (
+            time.perf_counter()
+            - job[
+                "started_monotonic"
+            ]
+        )
+
+        return {
+            "sequence":
+                len(
+                    job[
+                        "events"
+                    ]
+                )
+                + 1,
+            "code":
+                str(code),
+            "title":
+                str(title),
+            "detail":
+                str(detail),
+            "progress":
+                int(
+                    max(
+                        0,
+                        min(
+                            100,
+                            progress,
+                        ),
+                    )
+                ),
+            "elapsed_seconds":
+                float(
+                    elapsed
+                ),
+        }
+
+    def create(
+        self,
+    ) -> str:
+        with self._lock:
+            self._cleanup_locked()
+
+            job_id = (
+                uuid.uuid4()
+                .hex
+            )
+
+            job = {
+                "id":
+                    job_id,
+                "status":
+                    "running",
+                "progress":
+                    2,
+                "created_epoch":
+                    time.time(),
+                "started_monotonic":
+                    time.perf_counter(),
+                "events":
+                    [],
+                "current":
+                    None,
+                "error":
+                    None,
+                "result":
+                    None,
+            }
+
+            event = (
+                self._event(
+                    job,
+                    "upload_received",
+                    "Upload received",
+                    (
+                        "The server accepted the image and "
+                        "created a RAC-ReID search job."
+                    ),
+                    2,
+                )
+            )
+
+            job[
+                "events"
+            ].append(
+                event
+            )
+
+            job[
+                "current"
+            ] = event
+
+            self._jobs[
+                job_id
+            ] = job
+
+            return job_id
+
+    def update(
+        self,
+        job_id: str,
+        code: str,
+        title: str,
+        detail: str,
+        progress: int,
+    ) -> None:
+        with self._lock:
+            job = (
+                self._jobs.get(
+                    job_id
+                )
+            )
+
+            if job is None:
+                return
+
+            if (
+                job[
+                    "status"
+                ]
+                != "running"
+            ):
+                return
+
+            progress = max(
+                int(
+                    job[
+                        "progress"
+                    ]
+                ),
+                int(
+                    progress
+                ),
+            )
+
+            event = (
+                self._event(
+                    job,
+                    code,
+                    title,
+                    detail,
+                    progress,
+                )
+            )
+
+            job[
+                "progress"
+            ] = progress
+
+            job[
+                "current"
+            ] = event
+
+            job[
+                "events"
+            ].append(
+                event
+            )
+
+            if (
+                len(
+                    job[
+                        "events"
+                    ]
+                )
+                > 250
+            ):
+                job[
+                    "events"
+                ] = (
+                    job[
+                        "events"
+                    ][
+                        -250:
+                    ]
+                )
+
+    def finish(
+        self,
+        job_id: str,
+        result,
+    ) -> None:
+        with self._lock:
+            job = (
+                self._jobs.get(
+                    job_id
+                )
+            )
+
+            if job is None:
+                return
+
+            event = (
+                self._event(
+                    job,
+                    "complete",
+                    "Search complete",
+                    (
+                        "RAC-ReID finished the query and "
+                        "generated the final ranking."
+                    ),
+                    100,
+                )
+            )
+
+            job[
+                "events"
+            ].append(
+                event
+            )
+
+            job[
+                "current"
+            ] = event
+
+            job[
+                "progress"
+            ] = 100
+
+            job[
+                "status"
+            ] = "done"
+
+            job[
+                "result"
+            ] = result
+
+    def fail(
+        self,
+        job_id: str,
+        error: str,
+    ) -> None:
+        with self._lock:
+            job = (
+                self._jobs.get(
+                    job_id
+                )
+            )
+
+            if job is None:
+                return
+
+            event = (
+                self._event(
+                    job,
+                    "failed",
+                    "Search failed",
+                    str(
+                        error
+                    ),
+                    int(
+                        job[
+                            "progress"
+                        ]
+                    ),
+                )
+            )
+
+            job[
+                "events"
+            ].append(
+                event
+            )
+
+            job[
+                "current"
+            ] = event
+
+            job[
+                "status"
+            ] = "error"
+
+            job[
+                "error"
+            ] = str(
+                error
+            )
+
+    def snapshot(
+        self,
+        job_id: str,
+    ):
+        with self._lock:
+            self._cleanup_locked()
+
+            job = (
+                self._jobs.get(
+                    job_id
+                )
+            )
+
+            if job is None:
+                return None
+
+            elapsed = (
+                time.perf_counter()
+                - job[
+                    "started_monotonic"
+                ]
+            )
+
+            return {
+                "id":
+                    job[
+                        "id"
+                    ],
+                "status":
+                    job[
+                        "status"
+                    ],
+                "progress":
+                    job[
+                        "progress"
+                    ],
+                "elapsed_seconds":
+                    float(
+                        elapsed
+                    ),
+                "current":
+                    (
+                        dict(
+                            job[
+                                "current"
+                            ]
+                        )
+                        if job[
+                            "current"
+                        ]
+                        is not None
+                        else None
+                    ),
+                "events":
+                    [
+                        dict(
+                            event
+                        )
+                        for event
+                        in job[
+                            "events"
+                        ]
+                    ],
+                "error":
+                    job[
+                        "error"
+                    ],
+            }
+
+    def result(
+        self,
+        job_id: str,
+    ):
+        with self._lock:
+            job = (
+                self._jobs.get(
+                    job_id
+                )
+            )
+
+            if job is None:
+                return None
+
+            return job[
+                "result"
+            ]
 
 
 class GalleryStore:
@@ -496,9 +949,22 @@ class AppState:
             )
         )
 
+        self.jobs = (
+            SearchJobStore()
+        )
+
+        # YOLO / Torch state is shared by the web process.
+        # Serialize expensive searches rather than running
+        # multiple inference pipelines against the same
+        # model state concurrently.
+        self._search_lock = (
+            threading.Lock()
+        )
+
     def search(
         self,
         uploaded: Path,
+        progress_callback=None,
     ):
         total_started = (
             time.perf_counter()
@@ -522,6 +988,9 @@ class AppState:
             self.preprocessor.prepare(
                 uploaded,
                 workspace,
+                progress_callback=(
+                    progress_callback
+                ),
             )
         )
 
@@ -529,6 +998,17 @@ class AppState:
             time.perf_counter()
             - preprocess_started
         )
+
+        if progress_callback is not None:
+            progress_callback(
+                "gallery_index",
+                "Loading gallery search index",
+                (
+                    "Loading the cached proxy gallery index "
+                    "or building it once if required."
+                ),
+                44,
+            )
 
         index_started = (
             time.perf_counter()
@@ -544,6 +1024,17 @@ class AppState:
             time.perf_counter()
             - index_started
         )
+
+        if progress_callback is not None:
+            progress_callback(
+                "gallery_index_ready",
+                "Gallery index ready",
+                (
+                    f"Proxy gallery contains "
+                    f"{len(index.records)} identity record(s)."
+                ),
+                45,
+            )
 
         pipeline = (
             AdaptiveReIDPipeline(
@@ -568,6 +1059,9 @@ class AppState:
             pipeline.run(
                 prepared.crop_path,
                 prepared.evidence,
+                progress_callback=(
+                    progress_callback
+                ),
             )
         )
 
@@ -583,6 +1077,18 @@ class AppState:
             result.final_action
             == "invoke_vllm"
         ):
+            if progress_callback is not None:
+                progress_callback(
+                    "osnet_embedding",
+                    "Running learned OSNet embedding",
+                    (
+                        "The proxy cascade remained ambiguous. "
+                        "Computing one learned 512-D query "
+                        "embedding."
+                    ),
+                    89,
+                )
+
             learned_started = (
                 time.perf_counter()
             )
@@ -598,6 +1104,43 @@ class AppState:
             learned_seconds = (
                 time.perf_counter()
                 - learned_started
+            )
+
+            if progress_callback is not None:
+                progress_callback(
+                    "learned_matching",
+                    "Comparing learned identity embeddings",
+                    (
+                        f"OSNet reranking complete; "
+                        f"top cosine="
+                        f"{learned_result.top1:.4f}, "
+                        f"margin="
+                        f"{learned_result.margin:.4f}."
+                    ),
+                    95,
+                )
+
+        else:
+            if progress_callback is not None:
+                progress_callback(
+                    "osnet_skipped",
+                    "OSNet skipped",
+                    (
+                        "The adaptive proxy cascade returned "
+                        "without requiring learned reranking."
+                    ),
+                    94,
+                )
+
+        if progress_callback is not None:
+            progress_callback(
+                "final_ranking",
+                "Finalizing result",
+                (
+                    "Selecting the final ranked identity "
+                    "list and collecting timing metrics."
+                ),
+                98,
             )
 
         total_seconds = (
@@ -625,6 +1168,112 @@ class AppState:
             timings,
         )
 
+    def start_search(
+        self,
+        uploaded: Path,
+    ) -> str:
+        job_id = (
+            self.jobs.create()
+        )
+
+        worker = (
+            threading.Thread(
+                target=(
+                    self._run_search_job
+                ),
+                args=(
+                    job_id,
+                    uploaded,
+                ),
+                name=(
+                    "rac-search-"
+                    + job_id[:8]
+                ),
+                daemon=True,
+            )
+        )
+
+        worker.start()
+
+        return job_id
+
+    def _run_search_job(
+        self,
+        job_id: str,
+        uploaded: Path,
+    ) -> None:
+        def report(
+            code: str,
+            title: str,
+            detail: str,
+            progress: int,
+        ) -> None:
+            self.jobs.update(
+                job_id,
+                code,
+                title,
+                detail,
+                progress,
+            )
+
+        acquired = (
+            self._search_lock
+            .acquire(
+                blocking=False
+            )
+        )
+
+        if not acquired:
+            report(
+                "queue_wait",
+                "Waiting for search worker",
+                (
+                    "Another RAC-ReID query is running. "
+                    "This job is queued to protect shared "
+                    "CPU model state."
+                ),
+                4,
+            )
+
+            self._search_lock.acquire()
+
+        try:
+            report(
+                "job_started",
+                "Search worker started",
+                (
+                    "Beginning the RAC-ReID backend "
+                    "execution pipeline."
+                ),
+                6,
+            )
+
+            result = (
+                self.search(
+                    uploaded,
+                    progress_callback=(
+                        report
+                    ),
+                )
+            )
+
+            self.jobs.finish(
+                job_id,
+                result,
+            )
+
+        except Exception as exc:
+            self.jobs.fail(
+                job_id,
+                str(
+                    exc
+                ),
+            )
+
+        finally:
+            self._search_lock.release()
+
+
 
 class ReIDHandler(
     BaseHTTPRequestHandler
@@ -638,6 +1287,85 @@ class ReIDHandler(
     def do_GET(
         self,
     ) -> None:
+        if self.path.startswith(
+            "/api/search/"
+        ):
+            job_id = (
+                self.path[
+                    len(
+                        "/api/search/"
+                    ):
+                ]
+                .split(
+                    "?",
+                    1,
+                )[0]
+                .strip()
+            )
+
+            snapshot = (
+                self.state
+                .jobs
+                .snapshot(
+                    job_id
+                )
+            )
+
+            if snapshot is None:
+                self._json(
+                    404,
+                    {
+                        "error":
+                            "Search job not found."
+                    },
+                )
+                return
+
+            if (
+                snapshot[
+                    "status"
+                ]
+                == "done"
+            ):
+                stored = (
+                    self.state
+                    .jobs
+                    .result(
+                        job_id
+                    )
+                )
+
+                if stored is not None:
+                    (
+                        prepared,
+                        result,
+                        learned_result,
+                        timings,
+                    ) = stored
+
+                    snapshot[
+                        "result_html"
+                    ] = (
+                        self._result_html(
+                            prepared,
+                            result,
+                            learned_result,
+                            timings,
+                            progress_events=(
+                                snapshot[
+                                    "events"
+                                ]
+                            ),
+                        )
+                    )
+
+            self._json(
+                200,
+                snapshot,
+            )
+
+            return
+
         if self.path == "/health":
             payload = {
                 "status": "ok",
@@ -687,6 +1415,70 @@ class ReIDHandler(
     def do_POST(
         self,
     ) -> None:
+        if self.path == "/search/start":
+            try:
+                form = (
+                    self._form()
+                )
+
+                upload = (
+                    self._save_image(
+                        form
+                    )
+                )
+
+                job_id = (
+                    self.state
+                    .start_search(
+                        upload
+                    )
+                )
+
+                self._json(
+                    202,
+                    {
+                        "job_id":
+                            job_id,
+                        "status":
+                            "running",
+                        "poll_url":
+                            (
+                                "/api/search/"
+                                + job_id
+                            ),
+                    },
+                )
+
+            except (
+                ValueError,
+                NoPersonDetectedError,
+            ) as exc:
+                self._json(
+                    400,
+                    {
+                        "error":
+                            str(
+                                exc
+                            )
+                    },
+                )
+
+            except Exception as exc:
+                self._json(
+                    500,
+                    {
+                        "error":
+                            (
+                                "Unable to start search: "
+                                + str(
+                                    exc
+                                )
+                            )
+                    },
+                )
+
+            return
+
         try:
             if self.path == "/gallery":
                 form = (
@@ -1000,16 +1792,27 @@ class ReIDHandler(
         gallery_items = (
             "".join(
                 "<li>"
+                + "<span class=\"gallery-avatar\">"
+                + html.escape(
+                    item["label"][:1].upper()
+                )
+                + "</span>"
+                + "<div><strong>"
                 + html.escape(
                     item["label"]
                 )
-                + " <span class=\"small\">"
-                + "detector confidence "
+                + "</strong>"
+                + "<small>Detector confidence "
                 + f"{item['confidence']:.3f}"
-                + "</span></li>"
+                + "</small></div>"
+                + "</li>"
                 for item in entries
             )
-            or "<li>No gallery identities yet.</li>"
+            or """
+    <li class="empty-gallery">
+      No gallery identities yet.
+    </li>
+    """
         )
 
         message_html = ""
@@ -1056,42 +1859,29 @@ class ReIDHandler(
                 )
 
                 baseline_html = f"""
-    <div class="metric-grid">
+    <div class="benchmark-metrics">
       <div>
         <span>mAP</span>
-        <strong>
-          {float(metrics["map"]):.3f}%
-        </strong>
+        <strong>{float(metrics["map"]):.3f}%</strong>
       </div>
-
       <div>
         <span>Rank-1</span>
-        <strong>
-          {float(metrics["rank1"]):.3f}%
-        </strong>
+        <strong>{float(metrics["rank1"]):.3f}%</strong>
       </div>
-
       <div>
         <span>Rank-5</span>
-        <strong>
-          {float(metrics["rank5"]):.3f}%
-        </strong>
+        <strong>{float(metrics["rank5"]):.3f}%</strong>
       </div>
-
       <div>
         <span>Rank-10</span>
-        <strong>
-          {float(metrics["rank10"]):.3f}%
-        </strong>
+        <strong>{float(metrics["rank10"]):.3f}%</strong>
       </div>
-
       <div>
         <span>Queries</span>
         <strong>3,368</strong>
       </div>
-
       <div>
-        <span>Full evaluation</span>
+        <span>CPU benchmark</span>
         <strong>{wall / 60.0:.1f} min</strong>
       </div>
     </div>
@@ -1099,13 +1889,19 @@ class ReIDHandler(
 
             except Exception:
                 baseline_html = (
-                    "<p>Baseline file could not be rendered.</p>"
+                    "<p>Baseline could not be rendered.</p>"
                 )
 
         adaptive_html = """
-    <div class="pending">
-      <strong>Adaptive benchmark:</strong>
-      pending Step 28C.
+    <div class="pending-benchmark">
+      <span class="pending-dot"></span>
+      <div>
+        <strong>Adaptive benchmark pending</strong>
+        <small>
+          Step 28C will populate the baseline-vs-adaptive
+          accuracy and efficiency comparison.
+        </small>
+      </div>
     </div>
     """
 
@@ -1137,46 +1933,30 @@ class ReIDHandler(
 
                 adaptive_html = f"""
     <div class="adaptive-result">
-      <h3>Adaptive RAC-ReID benchmark</h3>
-
-      <div class="metric-grid">
-        <div>
-          <span>mAP</span>
-          <strong>
-            {float(metrics["map"]):.3f}%
-          </strong>
-        </div>
-
-        <div>
-          <span>Rank-1</span>
-          <strong>
-            {float(metrics["rank1"]):.3f}%
-          </strong>
-        </div>
-
-        <div>
-          <span>OSNet invocation</span>
-          <strong>
-            {float(efficiency["osnet_invocation_rate"]):.1%}
-          </strong>
-        </div>
-
-        <div>
-          <span>Proxy patch saving</span>
-          <strong>
-            {float(efficiency["proxy_patch_saving"]):.1%}
-          </strong>
-        </div>
+      <div>
+        <span>Adaptive mAP</span>
+        <strong>{float(metrics["map"]):.3f}%</strong>
+      </div>
+      <div>
+        <span>Adaptive Rank-1</span>
+        <strong>{float(metrics["rank1"]):.3f}%</strong>
+      </div>
+      <div>
+        <span>OSNet invocation</span>
+        <strong>
+          {float(efficiency["osnet_invocation_rate"]):.1%}
+        </strong>
+      </div>
+      <div>
+        <span>Proxy patch saving</span>
+        <strong>
+          {float(efficiency["proxy_patch_saving"]):.1%}
+        </strong>
       </div>
     </div>
     """
-
             except Exception:
-                adaptive_html = """
-    <div class="pending">
-      Adaptive result exists but could not be rendered.
-    </div>
-    """
+                pass
 
         return f"""<!doctype html>
     <html>
@@ -1186,31 +1966,58 @@ class ReIDHandler(
       name="viewport"
       content="width=device-width,initial-scale=1"
     >
-    <title>RAC-ReID Research Demo</title>
+    <title>RAC-ReID Research Console</title>
 
     <style>
     :root {{
-      --bg: #f5f7fa;
-      --panel: #ffffff;
-      --text: #17202a;
-      --muted: #667085;
-      --line: #e4e7ec;
-      --accent: #2357d8;
-      --accent-soft: #eef3ff;
-      --green: #16825d;
-      --green-soft: #eaf8f2;
-      --amber-soft: #fff7df;
+      --bg: #070b14;
+      --bg2: #0c1220;
+      --panel: rgba(17, 25, 40, .88);
+      --panel2: rgba(23, 33, 51, .88);
+      --text: #f4f7fb;
+      --muted: #93a4bd;
+      --line: rgba(148, 163, 184, .15);
+      --blue: #5794ff;
+      --blue2: #8bb7ff;
+      --green: #43d79e;
+      --amber: #ffc766;
+      --red: #ff6d7a;
+      --purple: #ae8bff;
+      --shadow: 0 24px 80px rgba(0,0,0,.25);
     }}
 
     * {{
       box-sizing: border-box;
     }}
 
+    html {{
+      scroll-behavior: smooth;
+    }}
+
     body {{
       margin: 0;
-      background: var(--bg);
+      min-height: 100vh;
       color: var(--text);
+      background:
+        radial-gradient(
+          circle at 15% -10%,
+          rgba(69, 121, 255, .20),
+          transparent 34%
+        ),
+        radial-gradient(
+          circle at 95% 0%,
+          rgba(142, 92, 246, .12),
+          transparent 32%
+        ),
+        linear-gradient(
+          180deg,
+          #070b14,
+          #0b101c 55%,
+          #070b14
+        );
       font-family:
+        Inter,
+        ui-sans-serif,
         system-ui,
         -apple-system,
         BlinkMacSystemFont,
@@ -1219,32 +2026,134 @@ class ReIDHandler(
       line-height: 1.5;
     }}
 
-    .container {{
-      max-width: 1120px;
+    a {{
+      color: inherit;
+    }}
+
+    .shell {{
+      width: min(1180px, calc(100% - 28px));
       margin: 0 auto;
-      padding: 34px 20px 70px;
+      padding: 22px 0 70px;
+    }}
+
+    .topbar {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 2px 22px;
+    }}
+
+    .brand {{
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }}
+
+    .logo {{
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background:
+        linear-gradient(
+          135deg,
+          #3377ff,
+          #896bff
+        );
+      font-weight: 900;
+      box-shadow:
+        0 8px 30px rgba(69,121,255,.30);
+    }}
+
+    .brand strong {{
+      display: block;
+    }}
+
+    .brand span {{
+      display: block;
+      color: var(--muted);
+      font-size: .76rem;
+    }}
+
+    .node-status {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      border: 1px solid rgba(67, 215, 158, .22);
+      border-radius: 999px;
+      background: rgba(67,215,158,.07);
+      color: #8ff0c7;
+      font-size: .78rem;
+    }}
+
+    .node-dot {{
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow:
+        0 0 14px var(--green);
     }}
 
     .hero {{
-      padding: 20px 0 8px;
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1.4fr)
+        minmax(280px, .6fr);
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }}
+
+    .hero-main,
+    .hero-side,
+    .card {{
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }}
+
+    .hero-main {{
+      padding: 32px;
+    }}
+
+    .hero-side {{
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+      background:
+        linear-gradient(
+          150deg,
+          rgba(87,148,255,.12),
+          rgba(174,139,255,.06)
+        ),
+        var(--panel);
     }}
 
     .eyebrow {{
-      color: var(--accent);
-      font-size: .75rem;
-      font-weight: 800;
-      letter-spacing: .08em;
+      color: #8cb7ff;
       text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .71rem;
+      font-weight: 800;
     }}
 
     h1 {{
-      margin: 7px 0 10px;
-      font-size: clamp(2.2rem, 6vw, 3.8rem);
-      letter-spacing: -.05em;
+      margin: 8px 0 12px;
+      font-size: clamp(2.4rem, 7vw, 4.6rem);
+      line-height: .98;
+      letter-spacing: -.055em;
     }}
 
     h2 {{
-      margin-top: 0;
+      margin: 0 0 10px;
+      letter-spacing: -.025em;
     }}
 
     h3 {{
@@ -1252,56 +2161,155 @@ class ReIDHandler(
     }}
 
     .hero p {{
-      max-width: 760px;
+      max-width: 710px;
+      margin-bottom: 0;
       color: var(--muted);
-      font-size: 1.04rem;
+      font-size: 1.03rem;
+    }}
+
+    .stack-badge {{
+      display: inline-block;
+      margin: 4px 4px 4px 0;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #cdd8e7;
+      font-size: .72rem;
     }}
 
     .card {{
-      margin: 18px 0;
       padding: 24px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      box-shadow:
-        0 1px 2px rgba(16, 24, 40, .04);
+      margin: 18px 0;
     }}
 
-    .two-column {{
-      display: grid;
-      grid-template-columns:
-        repeat(auto-fit, minmax(300px, 1fr));
-      gap: 18px;
+    .card-header {{
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
     }}
 
-    .architecture {{
-      display: grid;
-      grid-template-columns:
-        repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-    }}
-
-    .architecture div {{
-      padding: 15px;
-      background: #fafbfc;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-    }}
-
-    .architecture span {{
-      display: block;
-      color: var(--accent);
-      font-size: .75rem;
-      font-weight: 800;
-    }}
-
-    .architecture strong {{
-      display: block;
-      margin: 4px 0;
-    }}
-
-    .architecture small {{
+    .card-header p {{
+      margin: 5px 0 0;
       color: var(--muted);
+    }}
+
+    .pipeline-map {{
+      display: grid;
+      grid-template-columns:
+        repeat(7, minmax(105px, 1fr));
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }}
+
+    .pipeline-step {{
+      min-width: 105px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255,255,255,.025);
+    }}
+
+    .pipeline-step span {{
+      display: block;
+      color: var(--blue2);
+      font-size: .67rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }}
+
+    .pipeline-step strong {{
+      display: block;
+      margin: 5px 0 3px;
+      font-size: .84rem;
+    }}
+
+    .pipeline-step small {{
+      display: block;
+      color: var(--muted);
+      font-size: .69rem;
+    }}
+
+    .science-note {{
+      margin-top: 14px;
+      padding: 13px 14px;
+      border: 1px solid rgba(87,148,255,.22);
+      border-radius: 12px;
+      background: rgba(87,148,255,.07);
+      color: #c9d9f4;
+      font-size: .86rem;
+    }}
+
+    .benchmark-metrics,
+    .adaptive-result,
+    .metric-grid,
+    .saving-box {{
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fit, minmax(125px, 1fr));
+      gap: 9px;
+    }}
+
+    .benchmark-metrics > div,
+    .adaptive-result > div,
+    .metric-grid > div,
+    .saving-box > div {{
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(255,255,255,.025);
+    }}
+
+    .benchmark-metrics span,
+    .adaptive-result span,
+    .metric-grid span,
+    .saving-box span {{
+      display: block;
+      color: var(--muted);
+      font-size: .72rem;
+    }}
+
+    .benchmark-metrics strong,
+    .adaptive-result strong,
+    .metric-grid strong,
+    .saving-box strong {{
+      display: block;
+      margin-top: 3px;
+      overflow-wrap: anywhere;
+    }}
+
+    .pending-benchmark {{
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 11px;
+      background: rgba(255,199,102,.06);
+      border: 1px solid rgba(255,199,102,.16);
+    }}
+
+    .pending-benchmark small {{
+      display: block;
+      color: var(--muted);
+    }}
+
+    .pending-dot {{
+      flex: 0 0 auto;
+      width: 8px;
+      height: 8px;
+      margin-top: 7px;
+      border-radius: 50%;
+      background: var(--amber);
+    }}
+
+    .workspace {{
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1.25fr)
+        minmax(300px, .75fr);
+      gap: 18px;
     }}
 
     input,
@@ -1310,82 +2318,303 @@ class ReIDHandler(
     }}
 
     input[type="text"],
-    input[type="password"],
-    input[type="file"] {{
+    input[type="password"] {{
       width: 100%;
-      margin: 6px 0 14px;
+      padding: 11px 12px;
+      margin: 6px 0 13px;
+      color: var(--text);
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
     }}
 
-    input[type="text"],
-    input[type="password"] {{
-      padding: 10px 12px;
-      border: 1px solid var(--line);
-      border-radius: 9px;
+    input[type="file"] {{
+      width: 100%;
+      margin: 10px 0 14px;
+      color: var(--muted);
     }}
 
     button {{
       padding: 11px 16px;
       border: 0;
       border-radius: 10px;
-      background: var(--accent);
       color: white;
-      font-weight: 700;
+      background:
+        linear-gradient(
+          135deg,
+          #3e7eff,
+          #7667f7
+        );
+      font-weight: 750;
       cursor: pointer;
+      box-shadow:
+        0 8px 28px rgba(62,126,255,.20);
+    }}
+
+    button:hover {{
+      filter: brightness(1.06);
     }}
 
     button:disabled {{
-      opacity: .6;
+      opacity: .55;
       cursor: wait;
     }}
 
-    .notice,
-    .pending {{
+    .search-preview {{
+      display: none;
+      margin: 12px 0;
+      border-radius: 13px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #05080e;
+    }}
+
+    .search-preview.visible {{
+      display: block;
+    }}
+
+    .search-preview img {{
+      display: block;
+      width: 100%;
+      max-height: 290px;
+      object-fit: contain;
+    }}
+
+    .live-console {{
+      display: none;
+      margin-top: 16px;
+      border: 1px solid rgba(87,148,255,.28);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #080d17;
+    }}
+
+    .live-console.visible {{
+      display: block;
+    }}
+
+    .console-head {{
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 15px;
+      border-bottom: 1px solid var(--line);
+    }}
+
+    .run-state {{
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #9bc0ff;
+      font-size: .78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }}
+
+    .run-spinner {{
+      width: 9px;
+      height: 9px;
+      border: 2px solid rgba(87,148,255,.28);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }}
+
+    .run-state.done {{
+      color: var(--green);
+    }}
+
+    .run-state.done .run-spinner {{
+      border: 0;
+      background: var(--green);
+      animation: none;
+    }}
+
+    .run-state.error {{
+      color: var(--red);
+    }}
+
+    .run-state.error .run-spinner {{
+      border: 0;
+      background: var(--red);
+      animation: none;
+    }}
+
+    .console-elapsed {{
+      color: var(--muted);
+      font-size: .78rem;
+    }}
+
+    .progress-wrap {{
+      padding: 15px;
+    }}
+
+    .progress-meta {{
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+    }}
+
+    .progress-meta strong {{
+      font-size: .9rem;
+    }}
+
+    .progress-meta span {{
+      color: var(--blue2);
+      font-size: .82rem;
+      font-weight: 700;
+    }}
+
+    .progress-track {{
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      overflow: hidden;
+    }}
+
+    .progress-bar {{
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background:
+        linear-gradient(
+          90deg,
+          #3578ff,
+          #7f69ff,
+          #43d79e
+        );
+      transition: width .3s ease;
+    }}
+
+    .current-operation {{
+      margin-top: 13px;
+      padding: 12px;
+      border-radius: 11px;
+      background: rgba(87,148,255,.06);
+    }}
+
+    .current-operation strong {{
+      display: block;
+    }}
+
+    .current-operation small {{
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+    }}
+
+    .event-log {{
+      max-height: 430px;
+      overflow-y: auto;
+      border-top: 1px solid var(--line);
+    }}
+
+    .event {{
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      gap: 9px;
+      align-items: start;
+      padding: 11px 15px;
+      border-bottom: 1px solid rgba(148,163,184,.08);
+    }}
+
+    .event:last-child {{
+      border-bottom: 0;
+    }}
+
+    .event-icon {{
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      margin-top: 1px;
+      border-radius: 50%;
+      background: rgba(67,215,158,.11);
+      color: var(--green);
+      font-size: .67rem;
+    }}
+
+    .event.running .event-icon {{
+      background: rgba(87,148,255,.12);
+      color: var(--blue);
+    }}
+
+    .event.error .event-icon {{
+      background: rgba(255,109,122,.12);
+      color: var(--red);
+    }}
+
+    .event strong {{
+      display: block;
+      font-size: .82rem;
+    }}
+
+    .event small {{
+      display: block;
+      color: var(--muted);
+      margin-top: 2px;
+      font-size: .72rem;
+    }}
+
+    .event-time {{
+      color: var(--muted);
+      font-family: ui-monospace, monospace;
+      font-size: .68rem;
+    }}
+
+    .notice {{
+      margin: 12px 0;
       padding: 12px 14px;
-      background: var(--amber-soft);
-      border-radius: 10px;
+      border: 1px solid rgba(255,199,102,.20);
+      border-radius: 11px;
+      background: rgba(255,199,102,.07);
     }}
 
     .small {{
       color: var(--muted);
-      font-size: .9rem;
+      font-size: .84rem;
     }}
 
-    .science-note {{
-      padding: 14px;
-      margin: 16px 0;
-      background: var(--accent-soft);
-      border: 1px solid #cbd8ff;
-      border-radius: 11px;
+    .gallery-list {{
+      list-style: none;
+      margin: 12px 0 0;
+      padding: 0;
     }}
 
-    .metric-grid,
-    .saving-box {{
+    .gallery-list li {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(148,163,184,.08);
+    }}
+
+    .gallery-list li:last-child {{
+      border-bottom: 0;
+    }}
+
+    .gallery-avatar {{
       display: grid;
-      grid-template-columns:
-        repeat(auto-fit, minmax(130px, 1fr));
-      gap: 9px;
-    }}
-
-    .metric-grid > div,
-    .saving-box > div {{
-      padding: 12px;
-      background: #fafbfc;
-      border: 1px solid var(--line);
+      place-items: center;
+      width: 34px;
+      height: 34px;
       border-radius: 10px;
+      background: rgba(87,148,255,.10);
+      color: var(--blue2);
+      font-weight: 800;
     }}
 
-    .metric-grid span,
-    .saving-box span {{
+    .gallery-list small {{
       display: block;
       color: var(--muted);
-      font-size: .77rem;
     }}
 
-    .metric-grid strong,
-    .saving-box strong {{
-      display: block;
-      margin-top: 3px;
-      overflow-wrap: anywhere;
+    .result-card {{
+      border-color: rgba(67,215,158,.20);
     }}
 
     .result-hero {{
@@ -1399,9 +2628,9 @@ class ReIDHandler(
     .final-match {{
       min-width: 220px;
       padding: 15px;
-      background: var(--green-soft);
-      border: 1px solid #b8e5d4;
       border-radius: 12px;
+      background: rgba(67,215,158,.08);
+      border: 1px solid rgba(67,215,158,.20);
     }}
 
     .final-match span,
@@ -1412,92 +2641,97 @@ class ReIDHandler(
 
     .final-match strong {{
       display: block;
-      font-size: 1.25rem;
       margin: 4px 0;
+      font-size: 1.18rem;
     }}
 
     .signal {{
-      margin: 13px 0;
+      margin: 12px 0;
     }}
 
     .signal-head {{
       display: flex;
       justify-content: space-between;
-      gap: 10px;
     }}
 
     .signal small {{
       display: block;
+      margin-top: 3px;
       color: var(--muted);
-      margin-top: 4px;
     }}
 
     .meter,
     .budget-bar {{
-      height: 9px;
-      margin-top: 6px;
+      height: 8px;
+      margin-top: 5px;
       overflow: hidden;
-      background: #e9edf3;
       border-radius: 999px;
+      background: rgba(255,255,255,.08);
     }}
 
     .meter span,
     .budget-bar span {{
       display: block;
       height: 100%;
-      background: var(--accent);
+      background:
+        linear-gradient(
+          90deg,
+          var(--blue),
+          var(--purple)
+        );
     }}
 
     .thresholds {{
       display: flex;
       justify-content: space-between;
-      gap: 10px;
-      margin-top: 14px;
+      gap: 8px;
+      margin-top: 12px;
       padding-top: 10px;
       border-top: 1px solid var(--line);
       color: var(--muted);
-      font-size: .78rem;
+      font-size: .75rem;
     }}
 
     .stage {{
       margin: 12px 0;
-      padding: 16px;
+      padding: 15px;
       border: 1px solid var(--line);
       border-radius: 13px;
+      background: rgba(255,255,255,.018);
     }}
 
     .stage-title,
     .budget-head {{
       display: flex;
       justify-content: space-between;
+      gap: 10px;
       align-items: center;
-      gap: 12px;
     }}
 
     .stage-number {{
       display: inline-grid;
-      width: 28px;
-      height: 28px;
-      margin-right: 8px;
+      width: 27px;
+      height: 27px;
+      margin-right: 6px;
       place-items: center;
       border-radius: 50%;
-      background: var(--accent);
+      background: var(--blue);
       color: white;
     }}
 
     .pill {{
-      padding: 5px 9px;
-      background: var(--accent-soft);
-      color: var(--accent);
+      padding: 4px 8px;
       border-radius: 999px;
-      font-size: .75rem;
+      color: var(--blue2);
+      background: rgba(87,148,255,.09);
+      font-size: .71rem;
       font-weight: 800;
     }}
 
     .budget-head {{
-      margin-top: 14px;
+      margin-top: 12px;
       color: var(--muted);
-      font-size: .84rem;
+      font-size: .8rem;
     }}
 
     .reason {{
@@ -1506,47 +2740,47 @@ class ReIDHandler(
     }}
 
     .learned {{
-      padding: 17px;
+      padding: 15px;
       border-radius: 12px;
     }}
 
     .learned.skipped {{
-      background: var(--green-soft);
-      border: 1px solid #b8e5d4;
+      border: 1px solid rgba(67,215,158,.20);
+      background: rgba(67,215,158,.06);
     }}
 
     .learned.invoked {{
-      background: var(--accent-soft);
-      border: 1px solid #cbd8ff;
+      border: 1px solid rgba(87,148,255,.20);
+      background: rgba(87,148,255,.06);
     }}
 
     .learned-title {{
       display: flex;
-      align-items: center;
       gap: 8px;
+      align-items: center;
     }}
 
     .status-dot {{
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--green);
     }}
 
     .invoked .status-dot {{
-      background: var(--accent);
+      background: var(--blue);
     }}
 
     .timing-flow {{
       display: flex;
-      flex-wrap: wrap;
       align-items: stretch;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 7px;
     }}
 
     .timing-flow > div:not(.arrow) {{
-      flex: 1 1 145px;
-      padding: 12px;
+      flex: 1 1 135px;
+      padding: 11px;
       border: 1px solid var(--line);
       border-radius: 10px;
     }}
@@ -1554,7 +2788,7 @@ class ReIDHandler(
     .timing-flow span {{
       display: block;
       color: var(--muted);
-      font-size: .77rem;
+      font-size: .71rem;
     }}
 
     .arrow {{
@@ -1566,12 +2800,52 @@ class ReIDHandler(
     .total-time {{
       display: flex;
       justify-content: space-between;
-      gap: 12px;
-      margin-top: 10px;
-      padding: 14px;
-      background: #17202a;
-      color: white;
+      gap: 10px;
+      margin-top: 9px;
+      padding: 13px;
       border-radius: 10px;
+      background: rgba(255,255,255,.05);
+    }}
+
+    .history-timeline {{
+      position: relative;
+      margin: 15px 0;
+    }}
+
+    .history-event {{
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      padding-bottom: 14px;
+    }}
+
+    .history-marker {{
+      display: grid;
+      place-items: center;
+      width: 23px;
+      height: 23px;
+      border-radius: 50%;
+      background: rgba(67,215,158,.11);
+      color: var(--green);
+      font-size: .7rem;
+    }}
+
+    .history-title {{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }}
+
+    .history-title span {{
+      color: var(--muted);
+      font-family: ui-monospace, monospace;
+      font-size: .71rem;
+    }}
+
+    .history-event p {{
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: .78rem;
     }}
 
     .table-scroll {{
@@ -1585,54 +2859,25 @@ class ReIDHandler(
 
     th,
     td {{
-      padding: 9px;
-      text-align: left;
+      padding: 8px;
       border-bottom: 1px solid var(--line);
+      text-align: left;
       white-space: nowrap;
     }}
 
     th {{
       color: var(--muted);
-      font-size: .78rem;
+      font-size: .73rem;
     }}
 
-    .processing {{
-      display: none;
-      margin-top: 14px;
-      padding: 14px;
-      background: var(--accent-soft);
-      border: 1px solid #cbd8ff;
-      border-radius: 11px;
+    #live-result {{
+      margin-top: 18px;
     }}
 
-    .processing.visible {{
-      display: block;
-    }}
-
-    .processing-steps {{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 9px;
-    }}
-
-    .processing-steps span {{
-      padding: 4px 8px;
-      background: white;
-      border: 1px solid var(--line);
-      border-radius: 999px;
+    footer {{
+      padding: 24px 3px;
+      color: var(--muted);
       font-size: .76rem;
-    }}
-
-    .loader {{
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      margin-right: 7px;
-      border: 2px solid #cbd8ff;
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
     }}
 
     @keyframes spin {{
@@ -1641,19 +2886,36 @@ class ReIDHandler(
       }}
     }}
 
-    footer {{
-      margin-top: 25px;
-      color: var(--muted);
-      font-size: .8rem;
-    }}
-
-    @media (max-width: 640px) {{
-      .container {{
-        padding: 20px 12px 50px;
+    @media (max-width: 900px) {{
+      .hero,
+      .workspace {{
+        grid-template-columns: 1fr;
       }}
 
+      .pipeline-map {{
+        grid-template-columns:
+          repeat(7, 125px);
+      }}
+    }}
+
+    @media (max-width: 580px) {{
+      .shell {{
+        width: min(100% - 18px, 1180px);
+      }}
+
+      .hero-main,
+      .hero-side,
       .card {{
-        padding: 18px;
+        padding: 17px;
+        border-radius: 15px;
+      }}
+
+      .topbar {{
+        align-items: flex-start;
+      }}
+
+      .node-status {{
+        font-size: .67rem;
       }}
 
       .arrow {{
@@ -1663,30 +2925,438 @@ class ReIDHandler(
     </style>
 
     <script>
-    function showProcessing(form) {{
-      const panel =
+    let activeJobId = null;
+    let pollTimer = null;
+
+    function escapeHtml(value) {{
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }}
+
+    function previewSearchImage(input) {{
+      const box =
         document.getElementById(
-          "processing-panel"
+          "search-preview"
         );
 
-      if (panel) {{
-        panel.classList.add(
-          "visible"
+      const image =
+        document.getElementById(
+          "search-preview-image"
         );
+
+      if (!box || !image) {{
+        return;
       }}
 
+      if (
+        !input.files
+        || !input.files[0]
+      ) {{
+        box.classList.remove(
+          "visible"
+        );
+        return;
+      }}
+
+      image.src =
+        URL.createObjectURL(
+          input.files[0]
+        );
+
+      box.classList.add(
+        "visible"
+      );
+    }}
+
+    function resetLiveConsole() {{
+      const consoleBox =
+        document.getElementById(
+          "live-console"
+        );
+
+      consoleBox.classList.add(
+        "visible"
+      );
+
+      document.getElementById(
+        "run-state"
+      ).className =
+        "run-state";
+
+      document.getElementById(
+        "run-state-text"
+      ).textContent =
+        "Running";
+
+      document.getElementById(
+        "progress-bar"
+      ).style.width =
+        "2%";
+
+      document.getElementById(
+        "progress-value"
+      ).textContent =
+        "2%";
+
+      document.getElementById(
+        "current-title"
+      ).textContent =
+        "Uploading query";
+
+      document.getElementById(
+        "current-detail"
+      ).textContent =
+        "Starting RAC-ReID search job...";
+
+      document.getElementById(
+        "event-log"
+      ).innerHTML =
+        "";
+
+      document.getElementById(
+        "live-result"
+      ).innerHTML =
+        "";
+    }}
+
+    function renderEvents(data) {{
+      const events =
+        data.events || [];
+
+      const log =
+        document.getElementById(
+          "event-log"
+        );
+
+      log.innerHTML =
+        events.map(
+          (event, index) => {{
+            const isLast =
+              index ===
+              events.length - 1;
+
+            let state =
+              "done";
+
+            let icon =
+              "✓";
+
+            if (
+              data.status === "running"
+              && isLast
+            ) {{
+              state =
+                "running";
+
+              icon =
+                "●";
+            }}
+
+            if (
+              data.status === "error"
+              && isLast
+            ) {{
+              state =
+                "error";
+
+              icon =
+                "!";
+            }}
+
+            return `
+    <div class="event ${{state}}">
+      <div class="event-icon">
+        ${{icon}}
+      </div>
+
+      <div>
+        <strong>
+          ${{escapeHtml(event.title)}}
+        </strong>
+
+        <small>
+          ${{escapeHtml(event.detail)}}
+        </small>
+      </div>
+
+      <div class="event-time">
+        ${{Number(event.elapsed_seconds).toFixed(3)}}s
+      </div>
+    </div>`;
+          }}
+        ).join("");
+
+      log.scrollTop =
+        log.scrollHeight;
+    }}
+
+    function renderProgress(data) {{
+      const progress =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            Number(
+              data.progress || 0
+            )
+          )
+        );
+
+      document.getElementById(
+        "progress-bar"
+      ).style.width =
+        `${{progress}}%`;
+
+      document.getElementById(
+        "progress-value"
+      ).textContent =
+        `${{progress}}%`;
+
+      document.getElementById(
+        "console-elapsed"
+      ).textContent =
+        `${{
+          Number(
+            data.elapsed_seconds || 0
+          ).toFixed(2)
+        }} s`;
+
+      if (data.current) {{
+        document.getElementById(
+          "current-title"
+        ).textContent =
+          data.current.title;
+
+        document.getElementById(
+          "current-detail"
+        ).textContent =
+          data.current.detail;
+      }}
+
+      renderEvents(
+        data
+      );
+    }}
+
+    function finishButton() {{
       const button =
-        form.querySelector(
-          'button[type="submit"]'
+        document.getElementById(
+          "search-button"
         );
 
       if (button) {{
-        button.disabled = true;
+        button.disabled = false;
         button.textContent =
-          "Processing query...";
+          "Run RAC-ReID search";
+      }}
+    }}
+
+    async function pollSearch() {{
+      if (!activeJobId) {{
+        return;
       }}
 
-      return true;
+      try {{
+        const response =
+          await fetch(
+            "/api/search/"
+            + encodeURIComponent(
+              activeJobId
+            ),
+            {{
+              cache: "no-store"
+            }}
+          );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {{
+          throw new Error(
+            data.error
+            || "Unable to read search progress."
+          );
+        }}
+
+        renderProgress(
+          data
+        );
+
+        if (
+          data.status === "done"
+        ) {{
+          const state =
+            document.getElementById(
+              "run-state"
+            );
+
+          state.className =
+            "run-state done";
+
+          document.getElementById(
+            "run-state-text"
+          ).textContent =
+            "Completed";
+
+          if (data.result_html) {{
+            document.getElementById(
+              "live-result"
+            ).innerHTML =
+              data.result_html;
+          }}
+
+          finishButton();
+
+          document.getElementById(
+            "live-result"
+          ).scrollIntoView({{
+            behavior: "smooth",
+            block: "start"
+          }});
+
+          return;
+        }}
+
+        if (
+          data.status === "error"
+        ) {{
+          const state =
+            document.getElementById(
+              "run-state"
+            );
+
+          state.className =
+            "run-state error";
+
+          document.getElementById(
+            "run-state-text"
+          ).textContent =
+            "Failed";
+
+          finishButton();
+
+          return;
+        }}
+
+        pollTimer =
+          setTimeout(
+            pollSearch,
+            350
+          );
+
+      }} catch (error) {{
+        const state =
+          document.getElementById(
+            "run-state"
+          );
+
+        state.className =
+          "run-state error";
+
+        document.getElementById(
+          "run-state-text"
+        ).textContent =
+          "Connection error";
+
+        document.getElementById(
+          "current-title"
+        ).textContent =
+          "Unable to read progress";
+
+        document.getElementById(
+          "current-detail"
+        ).textContent =
+          String(error);
+
+        finishButton();
+      }}
+    }}
+
+    async function startLiveSearch(form) {{
+      if (pollTimer) {{
+        clearTimeout(
+          pollTimer
+        );
+      }}
+
+      resetLiveConsole();
+
+      const button =
+        document.getElementById(
+          "search-button"
+        );
+
+      button.disabled = true;
+      button.textContent =
+        "Search running...";
+
+      try {{
+        const response =
+          await fetch(
+            "/search/start",
+            {{
+              method: "POST",
+              body: new FormData(
+                form
+              )
+            }}
+          );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {{
+          throw new Error(
+            data.error
+            || "Unable to start search."
+          );
+        }}
+
+        activeJobId =
+          data.job_id;
+
+        document.getElementById(
+          "job-id"
+        ).textContent =
+          activeJobId.slice(
+            0,
+            12
+          );
+
+        pollSearch();
+
+      }} catch (error) {{
+        const state =
+          document.getElementById(
+            "run-state"
+          );
+
+        state.className =
+          "run-state error";
+
+        document.getElementById(
+          "run-state-text"
+        ).textContent =
+          "Failed";
+
+        document.getElementById(
+          "current-title"
+        ).textContent =
+          "Search could not start";
+
+        document.getElementById(
+          "current-detail"
+        ).textContent =
+          String(error);
+
+        finishButton();
+      }}
+
+      return false;
     }}
     </script>
 
@@ -1694,223 +3364,359 @@ class ReIDHandler(
 
     <body>
 
-    <div class="container">
+    <div class="shell">
 
-      <section class="hero">
-        <div class="eyebrow">
-          MSc research prototype
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">R</div>
+          <div>
+            <strong>RAC-ReID</strong>
+            <span>Research execution console</span>
+          </div>
         </div>
 
-        <h1>RAC-ReID</h1>
+        <div class="node-status">
+          <span class="node-dot"></span>
+          CPU RESEARCH NODE ONLINE
+        </div>
+      </header>
 
-        <p>
-          Resource-Adaptive Cascaded Person Re-Identification.
-          The system starts with a query-specific compute budget
-          and restores additional resources only when the current
-          retrieval result remains uncertain.
-        </p>
+      <section class="hero">
+
+        <div class="hero-main">
+          <div class="eyebrow">
+            Resource-Adaptive Person Re-Identification
+          </div>
+
+          <h1>
+            See every decision.
+          </h1>
+
+          <p>
+            Upload a person image and watch RAC-ReID locate,
+            analyze, prune, search, refine, rerank and decide
+            in real time.
+          </p>
+        </div>
+
+        <div class="hero-side">
+          <div>
+            <div class="eyebrow">
+              Runtime stack
+            </div>
+
+            <div style="margin-top:12px">
+              <span class="stack-badge">YOLO26n</span>
+              <span class="stack-badge">Adaptive proxy</span>
+              <span class="stack-badge">OSNet x1.0</span>
+              <span class="stack-badge">CPU-only</span>
+            </div>
+          </div>
+
+          <p class="small">
+            Semantic VLLM is not connected yet.
+            The current 30/55/80% resource values are
+            visual-patch proxy budgets.
+          </p>
+        </div>
+
       </section>
 
       {message_html}
 
-      <div class="card">
+      <section class="card">
 
-        <h2>How the backend processes a query</h2>
-
-        <div class="architecture">
-
+        <div class="card-header">
           <div>
+            <div class="eyebrow">
+              Backend architecture
+            </div>
+            <h2>What RAC-ReID actually does</h2>
+          </div>
+        </div>
+
+        <div class="pipeline-map">
+
+          <div class="pipeline-step">
             <span>01</span>
-            <strong>Detect</strong>
-            <small>YOLO finds the person.</small>
+            <strong>Validate</strong>
+            <small>Check uploaded image</small>
           </div>
 
-          <div>
+          <div class="pipeline-step">
             <span>02</span>
-            <strong>Measure</strong>
-            <small>Six signals estimate difficulty.</small>
+            <strong>Locate</strong>
+            <small>YOLO person detection</small>
           </div>
 
-          <div>
+          <div class="pipeline-step">
             <span>03</span>
-            <strong>Allocate</strong>
-            <small>Assign 30%, 55%, or 80% proxy patches.</small>
+            <strong>Analyze</strong>
+            <small>Quality + difficulty signals</small>
           </div>
 
-          <div>
+          <div class="pipeline-step">
             <span>04</span>
-            <strong>Decide</strong>
-            <small>Exit early or restore additional patches.</small>
+            <strong>Prune</strong>
+            <small>Identity-aware patch selection</small>
           </div>
 
-          <div>
+          <div class="pipeline-step">
             <span>05</span>
-            <strong>Escalate</strong>
-            <small>Ambiguous hard cases use OSNet reranking.</small>
+            <strong>Search</strong>
+            <small>Gallery candidate retrieval</small>
+          </div>
+
+          <div class="pipeline-step">
+            <span>06</span>
+            <strong>Refine</strong>
+            <small>Restore patches if uncertain</small>
+          </div>
+
+          <div class="pipeline-step">
+            <span>07</span>
+            <strong>Rerank</strong>
+            <small>Conditional OSNet</small>
           </div>
 
         </div>
 
         <div class="science-note">
-          <strong>Important research distinction:</strong>
-          the current resource budget refers to handcrafted
-          visual-patch proxy processing.
-          It is not transformer/VLM token pruning yet.
+          <strong>Research terminology:</strong>
+          pruning currently refers to handcrafted
+          visual-patch proxy selection.
+          It is deliberately not presented as learned
+          transformer-token pruning.
         </div>
 
-      </div>
+      </section>
 
-      <div class="card">
+      <section class="card">
 
-        <div class="eyebrow">
-          Verified full-compute baseline
+        <div class="card-header">
+          <div>
+            <div class="eyebrow">
+              Verified baseline
+            </div>
+            <h2>Market-1501 full OSNet</h2>
+            <p>
+              3,368 standard queries against 19,732 gallery images.
+            </p>
+          </div>
         </div>
-
-        <h2>Market-1501 OSNet baseline</h2>
-
-        <p class="small">
-          Standard cross-domain evaluation:
-          3,368 queries against 19,732 gallery images.
-        </p>
 
         {baseline_html}
 
         {adaptive_html}
 
-      </div>
+      </section>
 
-      <div class="two-column">
+      <div class="workspace">
 
-        <div class="card">
+        <main>
 
-          <h2>1. Add gallery identity</h2>
+          <section class="card">
 
-          <p class="small">
-            Admin-only operation.
-            OSNet gallery embeddings are computed once when an
-            identity is added and reused during future searches.
-          </p>
-
-          <form
-            method="post"
-            action="/gallery"
-            enctype="multipart/form-data"
-          >
-
-            <label>Identity label</label>
-
-            <input
-              type="text"
-              name="label"
-              required
-              maxlength="80"
-            >
-
-            <label>Admin token</label>
-
-            <input
-              type="password"
-              name="admin_token"
-              autocomplete="off"
-              required
-            >
-
-            <label>Image</label>
-
-            <input
-              type="file"
-              name="image"
-              accept="image/*"
-              required
-            >
-
-            <button type="submit">
-              Add to gallery
-            </button>
-
-          </form>
-
-        </div>
-
-        <div class="card">
-
-          <h2>2. Search person</h2>
-
-          <p class="small">
-            The completed result will expose the real backend
-            difficulty signals, resource stages, routing reasons,
-            timings, patch savings, and OSNet decision.
-          </p>
-
-          <form
-            method="post"
-            action="/search"
-            enctype="multipart/form-data"
-            onsubmit="return showProcessing(this)"
-          >
-
-            <input
-              type="file"
-              name="image"
-              accept="image/*"
-              required
-            >
-
-            <button type="submit">
-              Run RAC-ReID search
-            </button>
-
-          </form>
-
-          <div
-            id="processing-panel"
-            class="processing"
-          >
-            <div>
-              <span class="loader"></span>
-              <strong>Backend processing...</strong>
+            <div class="card-header">
+              <div>
+                <div class="eyebrow">
+                  Live query
+                </div>
+                <h2>Run RAC-ReID</h2>
+                <p>
+                  The dashboard below reflects events emitted by
+                  the backend, not a simulated animation.
+                </p>
+              </div>
             </div>
 
-            <div class="processing-steps">
-              <span>YOLO</span>
-              <span>difficulty</span>
-              <span>proxy patches</span>
-              <span>confidence routing</span>
-              <span>conditional OSNet</span>
+            <form
+              method="post"
+              action="/search"
+              enctype="multipart/form-data"
+              onsubmit="startLiveSearch(this); return false;"
+            >
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onchange="previewSearchImage(this)"
+                required
+              >
+
+              <div
+                id="search-preview"
+                class="search-preview"
+              >
+                <img
+                  id="search-preview-image"
+                  alt="Selected query image preview"
+                >
+              </div>
+
+              <button
+                id="search-button"
+                type="submit"
+              >
+                Run RAC-ReID search
+              </button>
+            </form>
+
+            <div
+              id="live-console"
+              class="live-console"
+              aria-live="polite"
+            >
+
+              <div class="console-head">
+
+                <div
+                  id="run-state"
+                  class="run-state"
+                >
+                  <span class="run-spinner"></span>
+                  <span id="run-state-text">
+                    Running
+                  </span>
+                </div>
+
+                <div class="console-elapsed">
+                  Job
+                  <span id="job-id">—</span>
+                  ·
+                  <span id="console-elapsed">0.00 s</span>
+                </div>
+
+              </div>
+
+              <div class="progress-wrap">
+
+                <div class="progress-meta">
+                  <strong id="current-title">
+                    Starting
+                  </strong>
+
+                  <span id="progress-value">
+                    0%
+                  </span>
+                </div>
+
+                <div class="progress-track">
+                  <div
+                    id="progress-bar"
+                    class="progress-bar"
+                  ></div>
+                </div>
+
+                <div class="current-operation">
+                  <strong>
+                    Current backend operation
+                  </strong>
+                  <small id="current-detail">
+                    Waiting for server...
+                  </small>
+                </div>
+
+              </div>
+
+              <div
+                id="event-log"
+                class="event-log"
+              ></div>
+
             </div>
 
-            <p class="small">
-              This is the expected pipeline indicator.
-              After completion, the result reports the actual
-              path and measured values used by the backend.
-            </p>
+          </section>
+
+          <div id="live-result">
+            {result_html}
           </div>
 
-        </div>
+        </main>
+
+        <aside>
+
+          <section class="card">
+
+            <div class="eyebrow">
+              Search gallery
+            </div>
+
+            <h2>
+              Identities ({len(entries)})
+            </h2>
+
+            <ul class="gallery-list">
+              {gallery_items}
+            </ul>
+
+            <p class="small">
+              A minimum of two identities is required
+              for comparative retrieval.
+            </p>
+
+          </section>
+
+          <section class="card">
+
+            <div class="eyebrow">
+              Admin
+            </div>
+
+            <h2>Add identity</h2>
+
+            <p class="small">
+              OSNet embeddings are precomputed once at gallery
+              insertion time and reused during searches.
+            </p>
+
+            <form
+              method="post"
+              action="/gallery"
+              enctype="multipart/form-data"
+            >
+
+              <label>Identity label</label>
+
+              <input
+                type="text"
+                name="label"
+                maxlength="80"
+                required
+              >
+
+              <label>Admin token</label>
+
+              <input
+                type="password"
+                name="admin_token"
+                autocomplete="off"
+                required
+              >
+
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                required
+              >
+
+              <button type="submit">
+                Add identity
+              </button>
+
+            </form>
+
+          </section>
+
+        </aside>
 
       </div>
-
-      <div class="card">
-
-        <h2>Gallery ({len(entries)})</h2>
-
-        <ul>
-          {gallery_items}
-        </ul>
-
-        <p class="small">
-          At least two gallery identities are required to perform
-          comparative retrieval.
-        </p>
-
-      </div>
-
-      {result_html}
 
       <footer>
-        RAC-ReID research prototype · CPU deployment ·
-        verified Market-1501 baseline ·
-        semantic VLLM stage not yet connected
+        RAC-ReID · MSc research prototype ·
+        live backend instrumentation ·
+        CPU-only research deployment
       </footer>
 
     </div>
@@ -1924,6 +3730,7 @@ class ReIDHandler(
         result,
         learned_result,
         timings,
+        progress_events=None,
     ) -> str:
         difficulty_score = (
             self.state
@@ -1961,12 +3768,12 @@ class ReIDHandler(
             (
                 "Occlusion proxy",
                 signals.occlusion,
-                "Heuristic proxy; this is not ground-truth occlusion.",
+                "Heuristic proxy; not ground-truth occlusion.",
             ),
             (
                 "Crowding proxy",
                 signals.crowding,
-                "Heuristic estimate derived from nearby detections.",
+                "Heuristic estimate from nearby detections.",
             ),
         ]
 
@@ -1977,7 +3784,9 @@ class ReIDHandler(
             value,
             note,
         ) in signal_items:
-            value = float(value)
+            value = float(
+                value
+            )
 
             signal_html += f"""
     <div class="signal">
@@ -1995,7 +3804,10 @@ class ReIDHandler(
         stage_html = ""
 
         for stage in result.stages:
-            if stage.action == "invoke_vllm":
+            if (
+                stage.action
+                == "invoke_vllm"
+            ):
                 display_action = (
                     "escalate_to_osnet"
                 )
@@ -2023,7 +3835,6 @@ class ReIDHandler(
             {html.escape(stage.difficulty.title())} stage
           </strong>
         </div>
-
         <span class="pill">
           {html.escape(display_action)}
         </span>
@@ -2048,34 +3859,28 @@ class ReIDHandler(
           <span>New patches</span>
           <strong>{stage.new_tokens_processed}</strong>
         </div>
-
         <div>
           <span>Cumulative</span>
           <strong>{stage.cumulative_tokens_processed}</strong>
         </div>
-
         <div>
           <span>Top-K</span>
           <strong>{stage.top_k}</strong>
         </div>
-
         <div>
           <span>Top-1</span>
           <strong>{stage.top1_score:.3f}</strong>
         </div>
-
         <div>
           <span>Margin</span>
           <strong>{stage.margin:.3f}</strong>
         </div>
-
         <div>
           <span>Stage time</span>
           <strong>{stage.elapsed_seconds:.4f} s</strong>
         </div>
-
         <div>
-          <span>Unused proxy budget</span>
+          <span>Unused budget</span>
           <strong>{unused_ratio:.1%}</strong>
         </div>
       </div>
@@ -2115,14 +3920,12 @@ class ReIDHandler(
         <span class="status-dot"></span>
         <strong>OSNet skipped</strong>
       </div>
-
       <p>
         The adaptive proxy path returned before learned
-        person-ReID reranking was needed.
+        person-ReID reranking was necessary.
       </p>
-
       <p class="small">
-        No OSNet query embedding was computed for this request.
+        No OSNet query embedding was computed.
       </p>
     </div>
     """
@@ -2133,19 +3936,13 @@ class ReIDHandler(
                     .label
                 )
 
-                final_score = (
-                    result.candidates[0]
-                    .score
-                )
-
                 score_text = (
-                    f"Proxy similarity {final_score:.4f}"
-                )
-            else:
-                final_label = (
-                    "No candidate"
+                    "Proxy similarity "
+                    f"{result.candidates[0].score:.4f}"
                 )
 
+            else:
+                final_label = "No candidate"
                 score_text = "No score"
 
         else:
@@ -2190,53 +3987,37 @@ class ReIDHandler(
       </div>
 
       <p>
-        The hard adaptive proxy stage remained ambiguous,
-        so the candidate set was escalated to the learned
-        OSNet person-ReID model.
+        Proxy retrieval remained ambiguous, so RAC-ReID
+        escalated the selected candidates to learned OSNet
+        person-ReID matching.
       </p>
 
       <div class="metric-grid">
         <div>
           <span>Model</span>
-          <strong>
-            {html.escape(learned_result.model_name)}
-          </strong>
+          <strong>{html.escape(learned_result.model_name)}</strong>
         </div>
-
         <div>
           <span>Embedding</span>
           <strong>{learned_result.embedding_dim}-D</strong>
         </div>
-
         <div>
-          <span>Query inference</span>
-          <strong>
-            {learned_result.inference_seconds:.4f} s
-          </strong>
+          <span>Inference</span>
+          <strong>{learned_result.inference_seconds:.4f} s</strong>
         </div>
-
         <div>
-          <span>Cold model load</span>
-          <strong>
-            {learned_result.model_load_seconds:.4f} s
-          </strong>
+          <span>Cold load</span>
+          <strong>{learned_result.model_load_seconds:.4f} s</strong>
         </div>
-
         <div>
           <span>Top-1 cosine</span>
           <strong>{learned_result.top1:.4f}</strong>
         </div>
-
         <div>
           <span>Margin</span>
           <strong>{learned_result.margin:.4f}</strong>
         </div>
       </div>
-
-      <p class="small">
-        Cosine similarity is a ranking score here,
-        not a calibrated probability.
-      </p>
 
       <div class="table-scroll">
         <table>
@@ -2251,6 +4032,43 @@ class ReIDHandler(
       </div>
     </div>
     """
+
+        timeline_html = ""
+
+        if progress_events:
+            for event in progress_events:
+                timeline_html += f"""
+    <div class="history-event">
+      <div class="history-marker">✓</div>
+      <div>
+        <div class="history-title">
+          {html.escape(str(event.get("title", "")))}
+          <span>
+            {float(event.get("elapsed_seconds", 0.0)):.3f}s
+          </span>
+        </div>
+        <p>
+          {html.escape(str(event.get("detail", "")))}
+        </p>
+      </div>
+    </div>
+    """
+
+        if timeline_html:
+            timeline_section = f"""
+    <h3>Full backend execution timeline</h3>
+
+    <p class="small">
+      This is the actual sequence emitted by the server while
+      this query was running.
+    </p>
+
+    <div class="history-timeline">
+      {timeline_html}
+    </div>
+    """
+        else:
+            timeline_section = ""
 
         preprocess_seconds = float(
             timings[
@@ -2289,7 +4107,10 @@ class ReIDHandler(
                 f"{learned_seconds:.3f} s"
             )
 
-        if result.final_action == "invoke_vllm":
+        if (
+            result.final_action
+            == "invoke_vllm"
+        ):
             final_route = (
                 "escalate_to_osnet"
             )
@@ -2306,45 +4127,39 @@ class ReIDHandler(
           <div class="eyebrow">
             Actual backend execution trace
           </div>
-
           <h2>Search complete</h2>
-
           <p>
-            Every value below comes from the backend execution
-            of this uploaded query.
+            These values were measured during this exact query.
           </p>
         </div>
 
         <div class="final-match">
           <span>Final top match</span>
-          <strong>
-            {html.escape(final_label)}
-          </strong>
+          <strong>{html.escape(final_label)}</strong>
           <small>{html.escape(score_text)}</small>
         </div>
       </div>
 
       <div class="science-note">
         <strong>Scientific boundary:</strong>
-        30% / 55% / 80% are
-        <strong>visual-patch proxy budgets</strong>
-        from the current handcrafted CPU encoder.
-        They are not transformer or VLM token counts.
+        30% / 55% / 80% represent handcrafted
+        <strong>visual-patch proxy budgets</strong>,
+        not transformer/VLM token counts.
       </div>
 
-      <h3>1. Detection and adaptive crop</h3>
+      {timeline_section}
+
+      <h3>Detection and localization</h3>
 
       <div class="metric-grid">
         <div>
           <span>People detected</span>
           <strong>{prepared.person_count}</strong>
         </div>
-
         <div>
           <span>Detector confidence</span>
           <strong>{prepared.primary_confidence:.3f}</strong>
         </div>
-
         <div>
           <span>Bounding box</span>
           <strong>
@@ -2354,37 +4169,21 @@ class ReIDHandler(
             {prepared.bbox[3]}
           </strong>
         </div>
-
         <div>
           <span>Initial difficulty</span>
-          <strong>
-            {html.escape(prepared.initial_difficulty)}
-          </strong>
+          <strong>{html.escape(prepared.initial_difficulty)}</strong>
         </div>
-
         <div>
           <span>Difficulty score</span>
           <strong>{difficulty_score:.3f}</strong>
         </div>
-
         <div>
           <span>Crop margin</span>
           <strong>{prepared.crop_margin:.0%}</strong>
         </div>
-
-        <div>
-          <span>Detection + crop time</span>
-          <strong>{preprocess_seconds:.3f} s</strong>
-        </div>
       </div>
 
-      <h3>2. Difficulty signals</h3>
-
-      <p class="small">
-        These are the six values passed into the resource
-        controller for this query.
-      </p>
-
+      <h3>Difficulty signals</h3>
       <div class="signals">
         {signal_html}
       </div>
@@ -2395,66 +4194,46 @@ class ReIDHandler(
         <span>Hard &gt; 0.65</span>
       </div>
 
-      <h3>3. Progressive resource allocation</h3>
-
-      <p class="small">
-        Previously processed proxy patches are reused.
-        A refinement stage processes only newly restored patches.
-      </p>
+      <h3>Pruning, searching and progressive refinement</h3>
 
       {stage_html}
 
       <div class="saving-box">
         <div>
-          <span>Unique proxy patches processed</span>
-          <strong>
-            {result.total_query_tokens_processed}
-          </strong>
+          <span>Unique proxy patches</span>
+          <strong>{result.total_query_tokens_processed}</strong>
         </div>
-
         <div>
-          <span>Proxy patch saving vs full query</span>
-          <strong>
-            {result.token_saving_ratio:.1%}
-          </strong>
+          <span>Proxy patch saving</span>
+          <strong>{result.token_saving_ratio:.1%}</strong>
         </div>
-
         <div>
           <span>Final route</span>
-          <strong>
-            {html.escape(final_route)}
-          </strong>
+          <strong>{html.escape(final_route)}</strong>
         </div>
       </div>
 
-      <h3>4. Conditional learned ReID</h3>
-
+      <h3>Conditional learned ReID</h3>
       {learned_html}
 
-      <h3>5. Backend timing</h3>
+      <h3>Backend timing</h3>
 
       <div class="timing-flow">
         <div>
-          <span>YOLO + crop</span>
+          <span>YOLO + preprocessing</span>
           <strong>{preprocess_seconds:.3f} s</strong>
         </div>
-
         <div class="arrow">→</div>
-
         <div>
-          <span>Proxy gallery cache/build</span>
+          <span>Gallery index</span>
           <strong>{index_seconds:.3f} s</strong>
         </div>
-
         <div class="arrow">→</div>
-
         <div>
-          <span>Adaptive proxy</span>
+          <span>Adaptive retrieval</span>
           <strong>{adaptive_seconds:.3f} s</strong>
         </div>
-
         <div class="arrow">→</div>
-
         <div>
           <span>OSNet</span>
           <strong>{learned_time}</strong>
@@ -2466,13 +4245,7 @@ class ReIDHandler(
         <strong>{total_seconds:.3f} s</strong>
       </div>
 
-      <p class="small">
-        Gallery OSNet embeddings are precomputed when gallery
-        identities are added. The proxy gallery index is cached
-        after its first construction.
-      </p>
-
-      <h3>6. Proxy ranking before learned reranking</h3>
+      <h3>Proxy candidate ranking</h3>
 
       <div class="table-scroll">
         <table>

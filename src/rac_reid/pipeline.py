@@ -138,7 +138,32 @@ class AdaptiveReIDPipeline:
         self,
         query_image: str | Path,
         detector: DetectorEvidence,
+        progress_callback=None,
     ) -> PipelineResult:
+        def emit(
+            code: str,
+            title: str,
+            detail: str,
+            progress: int,
+        ) -> None:
+            if progress_callback is not None:
+                progress_callback(
+                    code,
+                    title,
+                    detail,
+                    progress,
+                )
+
+        emit(
+            "adaptive_signal_analysis",
+            "Analyzing adaptive crop",
+            (
+                "Recomputing image signals on the final "
+                "adaptive person crop."
+            ),
+            46,
+        )
+
         image_signals = (
             self.image_extractor.extract(
                 query_image
@@ -172,10 +197,30 @@ class AdaptiveReIDPipeline:
 
         plan = initial_plan
 
+        emit(
+            "tokenization",
+            "Tokenizing person crop",
+            (
+                "Splitting the normalized person image into "
+                "visual-patch proxy units."
+            ),
+            49,
+        )
+
         prepared = (
             self.encoder.prepare(
                 query_image
             )
+        )
+
+        emit(
+            "tokenization_complete",
+            "Visual patches prepared",
+            (
+                f"Created {prepared.total_tokens} proxy patches "
+                "before adaptive pruning."
+            ),
+            51,
         )
 
         progressive = (
@@ -198,6 +243,33 @@ class AdaptiveReIDPipeline:
             1,
             5,
         ):
+            stage_base = min(
+                79,
+                52
+                + (
+                    stage_number - 1
+                )
+                * 9,
+            )
+
+            emit(
+                (
+                    f"stage_{stage_number}"
+                    "_identity_pruning"
+                ),
+                (
+                    f"Stage {stage_number}: "
+                    "identity-aware pruning"
+                ),
+                (
+                    f"Selecting the most useful "
+                    f"{plan.token_retention:.0%} of proxy patches "
+                    "while preserving upper-, middle- and "
+                    "lower-body identity anchors."
+                ),
+                stage_base,
+            )
+
             stage_started = (
                 time.perf_counter()
             )
@@ -213,6 +285,47 @@ class AdaptiveReIDPipeline:
                 encoded.new_tokens_processed
             )
 
+            emit(
+                (
+                    f"stage_{stage_number}"
+                    "_pruning_complete"
+                ),
+                (
+                    f"Stage {stage_number}: "
+                    "patch selection complete"
+                ),
+                (
+                    f"Retained {encoded.retained_tokens}/"
+                    f"{encoded.total_tokens}; "
+                    f"processed {encoded.new_tokens_processed} "
+                    "new patches; "
+                    f"{cumulative_tokens} unique patches so far."
+                ),
+                min(
+                    82,
+                    stage_base + 2,
+                ),
+            )
+
+            emit(
+                (
+                    f"stage_{stage_number}"
+                    "_gallery_search"
+                ),
+                (
+                    f"Stage {stage_number}: "
+                    "searching gallery"
+                ),
+                (
+                    f"Comparing the current descriptor against "
+                    f"the gallery and requesting Top-{plan.top_k}."
+                ),
+                min(
+                    84,
+                    stage_base + 4,
+                ),
+            )
+
             candidates = (
                 self.gallery.search(
                     encoded.descriptor,
@@ -224,6 +337,27 @@ class AdaptiveReIDPipeline:
                 raise RuntimeError(
                     "At least two gallery candidates are required."
                 )
+
+            emit(
+                (
+                    f"stage_{stage_number}"
+                    "_candidate_ranking"
+                ),
+                (
+                    f"Stage {stage_number}: "
+                    "ranking candidates"
+                ),
+                (
+                    f"Current top match is "
+                    f"{candidates[0].label} "
+                    f"with proxy score "
+                    f"{candidates[0].score:.3f}."
+                ),
+                min(
+                    85,
+                    stage_base + 5,
+                ),
+            )
 
             decision = (
                 self.controller.route_after_retrieval(
@@ -239,6 +373,26 @@ class AdaptiveReIDPipeline:
             stage_elapsed = (
                 time.perf_counter()
                 - stage_started
+            )
+
+            emit(
+                (
+                    f"stage_{stage_number}"
+                    "_confidence_routing"
+                ),
+                (
+                    f"Stage {stage_number}: "
+                    "confidence decision"
+                ),
+                (
+                    f"Top-1={decision.top1:.3f}; "
+                    f"margin={decision.margin:.3f}. "
+                    f"{decision.reason}"
+                ),
+                min(
+                    87,
+                    stage_base + 7,
+                ),
             )
 
             stages.append(
@@ -285,15 +439,30 @@ class AdaptiveReIDPipeline:
                 )
             )
 
-            final_candidates = (
-                candidates
-            )
+            final_candidates = candidates
 
             if decision.action == "refine":
                 if decision.next_plan is None:
                     raise RuntimeError(
                         "Refinement requested without next plan."
                     )
+
+                emit(
+                    (
+                        f"stage_{stage_number}"
+                        "_refinement"
+                    ),
+                    "Progressive refinement",
+                    (
+                        "Confidence is insufficient. "
+                        "Restoring additional proxy patches "
+                        "instead of recomputing previous ones."
+                    ),
+                    min(
+                        88,
+                        stage_base + 8,
+                    ),
+                )
 
                 plan = (
                     decision.next_plan

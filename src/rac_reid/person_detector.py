@@ -581,7 +581,22 @@ class PersonQueryPreprocessor:
         self,
         scene_path: str | Path,
         workspace: str | Path,
+        progress_callback=None,
     ) -> PreparedPersonQuery:
+        def emit(
+            code: str,
+            title: str,
+            detail: str,
+            progress: int,
+        ) -> None:
+            if progress_callback is not None:
+                progress_callback(
+                    code,
+                    title,
+                    detail,
+                    progress,
+                )
+
         workspace_path = Path(
             workspace
         )
@@ -591,10 +606,28 @@ class PersonQueryPreprocessor:
             exist_ok=True,
         )
 
+        emit(
+            "person_detection",
+            "Locating person",
+            "YOLO is scanning the uploaded image for people.",
+            12,
+        )
+
         detection = (
             self.detector.detect(
                 scene_path
             )
+        )
+
+        emit(
+            "person_localized",
+            "Person located",
+            (
+                f"Detected {detection.person_count} person(s); "
+                f"primary confidence "
+                f"{detection.primary.confidence:.3f}."
+            ),
+            21,
         )
 
         evidence = (
@@ -606,11 +639,31 @@ class PersonQueryPreprocessor:
             / "tight-person.jpg"
         )
 
+        emit(
+            "tight_crop",
+            "Creating tight person crop",
+            (
+                "Cropping the primary detected person before "
+                "difficulty analysis."
+            ),
+            25,
+        )
+
         self.detector.crop_primary(
             scene_path,
             detection,
             tight_crop,
             margin=0.0,
+        )
+
+        emit(
+            "signal_analysis",
+            "Analyzing query quality",
+            (
+                "Measuring blur, visual entropy and image "
+                "structure for resource allocation."
+            ),
+            29,
         )
 
         signals = (
@@ -638,15 +691,55 @@ class PersonQueryPreprocessor:
             ),
         )
 
+        emit(
+            "difficulty_scoring",
+            "Calculating query difficulty",
+            (
+                "Combining detector confidence, foreground "
+                "occupancy, blur, entropy, occlusion and crowding."
+            ),
+            33,
+        )
+
+        difficulty_score = (
+            self.controller
+            .difficulty_score(
+                query_signals
+            )
+        )
+
         plan = (
             self.controller.initial_plan(
                 query_signals
             )
         )
 
+        emit(
+            "resource_allocation",
+            "Allocating initial resources",
+            (
+                f"Difficulty={plan.difficulty.value} "
+                f"({difficulty_score:.3f}); "
+                f"proxy patch budget="
+                f"{plan.token_retention:.0%}; "
+                f"Top-K={plan.top_k}."
+            ),
+            37,
+        )
+
         adaptive_crop = (
             workspace_path
             / "person.jpg"
+        )
+
+        emit(
+            "adaptive_crop",
+            "Applying adaptive context crop",
+            (
+                f"Expanding the selected person by "
+                f"{plan.crop_margin:.0%} context."
+            ),
+            40,
         )
 
         self.detector.crop_primary(
@@ -663,6 +756,16 @@ class PersonQueryPreprocessor:
                 detection.image_height,
                 plan.crop_margin,
             )
+        )
+
+        emit(
+            "preprocessing_complete",
+            "Query preprocessing complete",
+            (
+                f"Adaptive crop ready at "
+                f"{bbox[2] - bbox[0]}×{bbox[3] - bbox[1]} pixels."
+            ),
+            42,
         )
 
         return PreparedPersonQuery(
