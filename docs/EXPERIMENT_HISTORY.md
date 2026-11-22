@@ -24,3 +24,5 @@ failed experiments merely to obtain a passing result.
 
 The standard Market-1501 test query/gallery split remains reserved for the
 final frozen-architecture evaluation.
+
+| 29G | Production-observable low-resolution confidence controller | No calibration threshold passed all predefined gates | Do not deploy; redesign controller |

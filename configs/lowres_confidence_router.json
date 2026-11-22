@@ -1,0 +1,13 @@
+{
+  "controller": null,
+  "deployable": false,
+  "gates": {
+    "maximum_hybrid_rank1_drop": 0.005,
+    "minimum_exit_precision": 0.97,
+    "minimum_projected_cpu_saving": 0.05
+  },
+  "source_checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+  "standard_market_test_used": false,
+  "status": "failed_calibration",
+  "version": 1
+}

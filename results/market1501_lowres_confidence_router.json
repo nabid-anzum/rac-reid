@@ -1,0 +1,145 @@
+{
+  "architecture": {
+    "gallery_embedding_resolution": [
+      256,
+      128
+    ],
+    "low_resolution": [
+      160,
+      80
+    ],
+    "refinement_resolution": [
+      256,
+      128
+    ],
+    "same_multiresolution_backbone": true
+  },
+  "base_checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+  "candidate_models": [
+    {
+      "best_diagnostic_threshold": {
+        "exit_agreement_precision": 0.9829457364341085,
+        "exit_precision": 0.9503875968992248,
+        "exit_rate": 0.5129224652087475,
+        "full_rank1": 0.8636182902584493,
+        "hybrid_rank1": 0.8664015904572565,
+        "hybrid_rank1_delta_vs_full": 0.002783300198807237,
+        "low_rank1": 0.8536779324055666,
+        "normalized_progressive_cost": 1.1786766123822925,
+        "projected_cpu_saving": -0.1786766123822925,
+        "refine_rate": 0.4870775347912525,
+        "threshold": 0.6308145705461502
+      },
+      "calibration_full_correct_rate": 0.8636182902584493,
+      "calibration_low_correct_rate": 0.8536779324055666,
+      "calibration_raw_low_full_agreement": 0.9248508946322067,
+      "model": "linear",
+      "router_full_cost_ratio": 0.00015690867113005283,
+      "router_median_seconds": 6.9302041083574295e-06,
+      "selected_threshold": null,
+      "training_loss": 0.5063170790672302
+    },
+    {
+      "best_diagnostic_threshold": {
+        "exit_agreement_precision": 1.0,
+        "exit_precision": 1.0,
+        "exit_rate": 0.0035785288270377734,
+        "full_rank1": 0.8636182902584493,
+        "hybrid_rank1": 0.8636182902584493,
+        "hybrid_rank1_delta_vs_full": 0.0,
+        "low_rank1": 0.8536779324055666,
+        "normalized_progressive_cost": 1.6883336755288756,
+        "projected_cpu_saving": -0.6883336755288756,
+        "refine_rate": 0.9964214711729622,
+        "threshold": 0.999968983411789
+      },
+      "calibration_full_correct_rate": 0.8636182902584493,
+      "calibration_low_correct_rate": 0.8536779324055666,
+      "calibration_raw_low_full_agreement": 0.9248508946322067,
+      "model": "mlp",
+      "router_full_cost_ratio": 0.00047003543600336063,
+      "router_median_seconds": 2.076011151075363e-05,
+      "selected_threshold": null,
+      "training_loss": 0.37640175223350525
+    }
+  ],
+  "controller": null,
+  "date": "2026-11-22",
+  "deployable": false,
+  "development_split": {
+    "calibration": {
+      "identities": 144,
+      "images": 2515,
+      "rule": "PID % 5 == 3"
+    },
+    "gradient_training": {
+      "identities": 449,
+      "images": 7811,
+      "rule": "PID % 5 in {0,1,2}"
+    },
+    "heldout_validation": {
+      "identities": 158,
+      "images": 2610,
+      "rule": "PID % 5 == 4"
+    },
+    "standard_market_test_used": false
+  },
+  "embedding_cache": {
+    "checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+    "embedding_dim": 512,
+    "full_resolution": [
+      256,
+      128
+    ],
+    "images": 12936,
+    "low_resolution": [
+      160,
+      80
+    ],
+    "seconds": 589.2066023470834
+  },
+  "experiment": "production-observable 160x80 confidence controller",
+  "features": {
+    "count": 18,
+    "description": "Features are derived only from the 160x80 query retrieval score distribution. Ground-truth identity and camera labels are used only offline for training targets and evaluation masks.",
+    "names": [
+      "top1_similarity",
+      "top2_similarity",
+      "top1_top2_margin",
+      "top1_top3_margin",
+      "top1_top5_margin",
+      "top1_top10_margin",
+      "top5_mean",
+      "top5_std",
+      "top10_mean",
+      "top10_std",
+      "top20_mean",
+      "top20_std",
+      "top1_zscore_top20",
+      "normalized_entropy_top20",
+      "top1_softmax_share_top20",
+      "near_top1_count_002",
+      "near_top1_count_005",
+      "top5_top10_mean_gap"
+    ],
+    "production_observable_only": true
+  },
+  "gates": {
+    "maximum_hybrid_rank1_drop": 0.005,
+    "minimum_exit_precision": 0.97,
+    "minimum_projected_cpu_saving": 0.05
+  },
+  "heldout_validation": null,
+  "measured_compute": {
+    "four_thread_full_seconds": 0.04416712000966072,
+    "four_thread_low_seconds": 0.030539009254425764,
+    "low_full_ratio": 0.69144216891991,
+    "low_only_saving": 0.30855783108009005
+  },
+  "scientific_note": "The controller is selected using calibration identities and evaluated once on held-out development identities. The standard Market-1501 query/gallery test remains untouched.",
+  "seed": 29602,
+  "selected_calibration": null,
+  "selected_model": null,
+  "standard_market_test_used": false,
+  "status": "failed_calibration"
+}

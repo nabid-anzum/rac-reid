@@ -191,3 +191,25 @@ Then train a small confidence controller using only production-observable
 Only if that passes the predetermined development gates will the complete
 adaptive architecture be frozen and evaluated on the untouched standard
 Market-1501 query/gallery test.
+
+## Step 29G - Low-resolution confidence controller
+
+The next adaptive component was trained using only information that will be observable during a real 160x80 search.
+
+Controller inputs include retrieval similarity strength, score margins, top-ranked score dispersion and ambiguity/entropy measurements.
+
+Person identity and camera labels are **not** controller inputs. They are used only offline to create training targets and evaluation masks.
+
+Experiment status: **failed_calibration**.
+
+Deployable under the predeclared gates: **False**.
+
+Selected controller: **None**.
+
+Predeclared gates:
+
+- early-exit precision >= 97%
+- adaptive Rank-1 drop <= 0.5 percentage points versus full resolution
+- projected CPU saving >= 5%
+
+The standard Market-1501 query/gallery test remains untouched.
