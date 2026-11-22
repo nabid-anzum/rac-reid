@@ -34,6 +34,8 @@ from rac_reid import (
 )
 
 
+from rac_reid.learned_reid import MultiResolutionOSNetReIDEncoder
+
 ROOT = Path(
     __file__
 ).resolve().parents[1]
@@ -58,6 +60,17 @@ MODEL_PATH = (
 REID_CACHE = (
     RUNTIME
     / "reid-cache"
+)
+
+MULTIRES_CHECKPOINT = (
+    RUNTIME
+    / "models"
+    / "multires"
+    / "osnet_x1_0_multires_160x80.pt"
+)
+
+MULTIRES_CHECKPOINT_SHA = (
+    "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec"
 )
 
 ADMIN_TOKEN_FILE = (
@@ -895,6 +908,104 @@ class GalleryStore:
         )
 
 
+    def learned_search_all(
+        self,
+        query_crop: Path,
+        mode: str = "efficient",
+    ):
+        """
+        Search every learned gallery embedding.
+
+        Gallery embeddings are precomputed once
+        at 256x128. The query uses either 160x80
+        efficient mode or explicit 256x128 full
+        mode.
+        """
+        entries = self.entries()
+
+        if len(entries) < 2:
+            raise ValueError(
+                "Add at least two gallery "
+                "identities before searching."
+            )
+
+        learned = {}
+
+        changed = False
+
+        for entry in entries:
+            label = str(
+                entry["label"]
+            )
+
+            embedding_value = (
+                entry.get(
+                    "embedding"
+                )
+            )
+
+            if embedding_value:
+                embedding_path = Path(
+                    embedding_value
+                )
+
+            else:
+                embedding_path = (
+                    self.embeddings
+                    / f"{entry['id']}.npy"
+                )
+
+            if not embedding_path.is_file():
+                self.learned_encoder.save_embedding(
+                    Path(
+                        entry["crop"]
+                    ),
+                    embedding_path,
+                )
+
+                entry[
+                    "embedding"
+                ] = str(
+                    embedding_path
+                )
+
+                changed = True
+
+            learned[
+                label
+            ] = (
+                self.learned_encoder
+                .load_embedding(
+                    embedding_path
+                )
+            )
+
+        if changed:
+            self._write(
+                entries
+            )
+
+        cheap_scores = {
+            label: 0.0
+            for label
+            in learned
+        }
+
+        return (
+            self.learned_encoder
+            .rerank_precomputed_mode(
+                query_path=query_crop,
+                gallery_embeddings=(
+                    learned
+                ),
+                cheap_scores=(
+                    cheap_scores
+                ),
+                mode=mode,
+            )
+        )
+
+
 class AppState:
     def __init__(
         self,
@@ -933,11 +1044,25 @@ class AppState:
         )
 
         self.learned_encoder = (
-            OSNetReIDEncoder(
+            MultiResolutionOSNetReIDEncoder(
                 cache_dir=(
                     REID_CACHE
                 ),
-                torch_threads=2,
+                checkpoint_path=(
+                    MULTIRES_CHECKPOINT
+                ),
+                expected_sha256=(
+                    MULTIRES_CHECKPOINT_SHA
+                ),
+                query_size=(
+                    160,
+                    80,
+                ),
+                gallery_size=(
+                    256,
+                    128,
+                ),
+                torch_threads=4,
             )
         )
 
@@ -1164,6 +1289,160 @@ class AppState:
         return (
             prepared,
             result,
+            learned_result,
+            timings,
+        )
+
+    def search_multires(
+        self,
+        uploaded: Path,
+        mode: str = "efficient",
+        progress_callback=None,
+    ):
+        """
+        Direct trained-OSNet gallery search.
+
+        This is the backend path that the next
+        frontend milestone will expose.
+        """
+        resolution = (
+            self.learned_encoder
+            .resolution_for_mode(
+                mode
+            )
+        )
+
+        total_started = (
+            time.perf_counter()
+        )
+
+        identifier = (
+            uuid.uuid4().hex
+        )
+
+        workspace = (
+            RUNTIME
+            / "query-work"
+            / identifier
+        )
+
+        preprocess_started = (
+            time.perf_counter()
+        )
+
+        prepared = (
+            self.preprocessor.prepare(
+                uploaded,
+                workspace,
+                progress_callback=(
+                    progress_callback
+                ),
+            )
+        )
+
+        preprocess_seconds = (
+            time.perf_counter()
+            - preprocess_started
+        )
+
+        if progress_callback is not None:
+            progress_callback(
+                "multires_query",
+                (
+                    "Efficient query embedding"
+                    if mode == "efficient"
+                    else
+                    "Full-quality query embedding"
+                ),
+                (
+                    f"Running the trained OSNet "
+                    f"checkpoint at "
+                    f"{resolution[0]}x"
+                    f"{resolution[1]} for the "
+                    f"query crop."
+                ),
+                58,
+            )
+
+        learned_started = (
+            time.perf_counter()
+        )
+
+        learned_result = (
+            self.gallery
+            .learned_search_all(
+                prepared.crop_path,
+                mode=mode,
+            )
+        )
+
+        learned_seconds = (
+            time.perf_counter()
+            - learned_started
+        )
+
+        if progress_callback is not None:
+            progress_callback(
+                "multires_gallery_match",
+                "Searching learned gallery",
+                (
+                    f"Compared one 512-D "
+                    f"{resolution[0]}x"
+                    f"{resolution[1]} query "
+                    f"embedding against all "
+                    f"stored 256x128 gallery "
+                    f"embeddings. "
+                    f"Top cosine="
+                    f"{learned_result.top1:.4f}; "
+                    f"margin="
+                    f"{learned_result.margin:.4f}."
+                ),
+                94,
+            )
+
+            progress_callback(
+                "final_ranking",
+                "Finalizing learned ranking",
+                (
+                    "Returning the complete "
+                    "OSNet gallery ranking."
+                ),
+                98,
+            )
+
+        total_seconds = (
+            time.perf_counter()
+            - total_started
+        )
+
+        timings = {
+            "preprocess_seconds":
+                preprocess_seconds,
+
+            "learned_seconds":
+                learned_seconds,
+
+            "total_seconds":
+                total_seconds,
+
+            "query_height":
+                resolution[0],
+
+            "query_width":
+                resolution[1],
+
+            "gallery_height":
+                256,
+
+            "gallery_width":
+                128,
+
+            "mode":
+                mode,
+        }
+
+        return (
+            prepared,
             learned_result,
             timings,
         )

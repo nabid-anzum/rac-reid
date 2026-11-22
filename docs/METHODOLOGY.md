@@ -601,3 +601,35 @@ See:
 Large datasets, pretrained-model caches, learned checkpoint binaries and
 temporary NPY/NPZ feature caches remain outside GitHub, while the repository
 stores their scientific role, configuration and hashes.
+
+
+## Production multi-resolution inference architecture
+
+The production-oriented learned ReID design uses one jointly trained OSNet x1.0
+backbone.
+
+Gallery enrollment:
+
+1. detect and crop the person
+2. preprocess the crop
+3. run the trained backbone at 256x128
+4. store one normalized 512-D embedding
+
+Efficient query:
+
+1. detect and crop the person
+2. run the trained backbone at 160x80
+3. compare the resulting 512-D embedding against all stored 256x128 gallery
+   embeddings
+
+Full-quality query:
+
+1. use the same person crop
+2. run the same trained backbone at 256x128
+3. compare against the same stored gallery embeddings
+
+The previously evaluated learned routers are not part of production because
+they failed the predetermined held-out validation gates.
+
+The full learned gallery is searched directly; proxy Top-K pruning is not used
+to restrict the learned candidate population.

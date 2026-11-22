@@ -270,3 +270,32 @@ Held-out result:
 - projected CPU saving: **+27.658%**
 
 The standard Market-1501 query/gallery test remains untouched.
+
+
+## Step 29H-B - Trained multi-resolution backend integration
+
+The real web backend now contains the jointly trained epoch-8 OSNet checkpoint
+adapter.
+
+Backend search modes:
+
+- `efficient`: query embedding at 160x80
+- `full`: query embedding at 256x128
+
+Gallery embeddings are generated once at 256x128 and stored as normalized
+512-dimensional vectors.
+
+The backend also contains a direct learned-gallery search path that compares
+the query against every stored learned gallery embedding. This intentionally
+avoids the historical proxy Top-K candidate bottleneck identified in Step 28C.
+
+The failed confidence/refinement routers are not deployed.
+
+The trained checkpoint remains runtime-only and is verified by SHA-256 before
+loading.
+
+This milestone adds backend capability only. The following frontend milestone
+will switch the public search workflow to the direct trained-OSNet path and
+expose efficient/full search modes to the user.
+
+The standard Market-1501 test split remains untouched.
