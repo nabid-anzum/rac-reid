@@ -28,3 +28,5 @@ final frozen-architecture evaluation.
 | 29G | Production-observable low-resolution confidence controller | No calibration threshold passed all predefined gates | Do not deploy; redesign controller |
 
 | 29G1 | Low/full refinement headroom audit | full rescues low on 4.3% of calibration queries; fixed-low saving 30.9%; perfect-router saving 26.6% | Use measured rescue headroom to choose the next controller target |
+
+| 29G2 | Refinement-benefit router | adaptive R1 88.7%, refine 3.2%, CPU +27.7% | Do not deploy; retain fixed-low baseline |

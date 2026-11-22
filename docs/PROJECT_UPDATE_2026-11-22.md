@@ -241,3 +241,32 @@ Interpretation:
 A refinement-benefit router remains scientifically worth testing. Train it to predict whether full resolution is likely to rescue a low-resolution failure, rather than merely predicting whether the low-resolution result is correct.
 
 The standard Market-1501 query/gallery test remains untouched.
+
+## Step 29G2 - Refinement-benefit router
+
+The previous controller attempted to predict whether the low-resolution result itself was correct. Step 29G2 instead predicts the decision that actually matters operationally:
+
+**Will running 256x128 improve this 160x80 query?**
+
+The router uses only statistics available from the real 160x80 retrieval result. Ground-truth labels are used only offline to define whether refinement rescued, harmed or did not change correctness.
+
+Status: **failed_heldout_validation**.
+
+Deployable: **False**.
+
+Selected router: **linear**.
+
+Held-out result:
+
+- low Rank-1: **88.697%**
+- full Rank-1: **88.314%**
+- adaptive Rank-1: **88.697%**
+- adaptive delta vs full: **+0.383%**
+- adaptive delta vs low: **+0.000%**
+- refine rate: **3.180%**
+- exit rate: **96.820%**
+- refined rescues: **10**
+- refined harms: **10**
+- projected CPU saving: **+27.658%**
+
+The standard Market-1501 query/gallery test remains untouched.
