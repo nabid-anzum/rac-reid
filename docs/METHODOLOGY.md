@@ -389,3 +389,28 @@ MSMT17 identities.
 It is therefore unsuitable for unbiased evaluation on MSMT17.
 
 Market-1501 can be used for cross-domain evaluation of this checkpoint.
+
+
+## Milestone 9: Standard Market-1501 Baseline
+
+The complete Market-1501 retrieval protocol was executed using the
+cross-domain pretrained OSNet x1.0 encoder.
+
+Results:
+
+- mAP: 37.368%
+- Rank-1: 66.330%
+- Rank-5: 80.285%
+- Rank-10: 85.748%
+- mINP: 6.079%
+- scored queries: 3,368
+- gallery images: 19,732
+- evaluation wall time: 1360.025 seconds
+
+This measurement is designated the full learned baseline.
+
+The next experiment must compare this full-compute baseline against the
+resource-adaptive RAC-ReID cascade using accuracy, learned-model invocation
+rate, patch budget, and latency.
+
+No adaptive-compute improvement is claimed from this baseline alone.

@@ -331,3 +331,41 @@ Permanent gallery modification requires a random server-side token stored at:
 The token is ignored by Git and has mode 600.
 
 Public search remains available without the token.
+
+
+## Implemented Milestone 9: Market-1501 Learned Baseline
+
+The pretrained OSNet stage was evaluated using the complete standard
+Market-1501 query/gallery protocol.
+
+This is the learned cross-domain baseline, not the final adaptive RAC-ReID
+experiment.
+
+Observed results:
+
+- mAP: 37.368%
+- Rank-1: 66.330%
+- Rank-5: 80.285%
+- Rank-10: 85.748%
+- mINP: 6.079%
+- queries evaluated: 3,368
+- gallery images: 19,732
+- evaluation wall time: 1360.025 seconds
+- distance: Euclidean
+- device: CPU
+
+Dataset archive SHA-256:
+
+    416bb77b5a2449b32e936f623cbee58becf1a9e7e936f36380cb8f9ab928fe96
+
+The result is committed at:
+
+    results/market1501_osnet_crossdomain.json
+
+The observed Rank-1 and mAP reproduce the independent documented
+cross-domain baseline to within a small fraction of one percentage point.
+
+This experiment establishes the full-compute learned OSNet baseline.
+
+It does not yet demonstrate an RAC-ReID compute/accuracy advantage.
+That requires the adaptive ablation experiment.

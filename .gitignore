@@ -40,3 +40,5 @@ results/*
 logs/
 .runtime/
 data/gallery/
+data/datasets/
+.runtime/benchmarks/
