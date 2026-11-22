@@ -1,0 +1,129 @@
+{
+  "architecture": {
+    "base_model": "osnet_x1_0_msmt17_combineall",
+    "candidate_exit_points": [
+      "conv2",
+      "conv3"
+    ],
+    "duplicate_backbone_execution": false,
+    "hard_query_continues_from_shared_features": true,
+    "selected_exit_point": "conv3"
+  },
+  "audit_timing_seconds": {
+    "conv1": 0.000778,
+    "conv2": 0.018213,
+    "conv3": 0.013697,
+    "conv4": 0.008295,
+    "conv5": 0.000519,
+    "fc": 0.000193,
+    "global_avgpool": 4.5e-05,
+    "maxpool": 0.001188
+  },
+  "cache_reused": false,
+  "candidate_results": {
+    "conv2": {
+      "calibration": {
+        "agreement_precision": 1.0,
+        "early_rank1": 0.04294234592445328,
+        "exit_count": 1,
+        "exit_rate": 0.00039761431411530816,
+        "hybrid_rank1": 0.672365805168986,
+        "hybrid_rank1_delta": 0.0,
+        "margin_threshold": 0.04361550450325013,
+        "projected_backbone_reduction": -0.00214920675706165,
+        "teacher_rank1": 0.672365805168986,
+        "top1_threshold": 0.8675726878492138
+      },
+      "head_latency": {
+        "max_seconds": 0.0027118297293782234,
+        "mean_seconds": 0.00011986305005848408,
+        "median_seconds": 0.0001013064756989479
+      },
+      "model_sha256": "7ce27f38da2eef0f9c9dd039bf561a1a9ac9c511a30b98a50d7abc697d4fc207",
+      "runtime_model": "/root/rac-reid/.runtime/models/shared-early-exit/osnet_x1_0_conv2_exit_head.pt",
+      "status": "not_selected",
+      "teacher_cosine": 0.700259268283844,
+      "training_seconds": 33.72829435672611
+    },
+    "conv3": {
+      "calibration": {
+        "agreement_precision": 1.0,
+        "early_rank1": 0.1848906560636183,
+        "exit_count": 8,
+        "exit_rate": 0.0031809145129224653,
+        "hybrid_rank1": 0.6711729622266401,
+        "hybrid_rank1_delta": -0.0011928429423458953,
+        "margin_threshold": 0.026960715734505942,
+        "projected_backbone_reduction": -0.0018903131277459018,
+        "teacher_rank1": 0.672365805168986,
+        "top1_threshold": 0.8810763899887664
+      },
+      "head_latency": {
+        "max_seconds": 0.0002194116823375225,
+        "mean_seconds": 0.000116125981323421,
+        "median_seconds": 0.00010994100011885166
+      },
+      "model_sha256": "577ca6d17e8197542dc1d835fb46e9aa8e8f41e13d5aa6038945fc567376168e",
+      "runtime_model": "/root/rac-reid/.runtime/models/shared-early-exit/osnet_x1_0_conv3_exit_head.pt",
+      "status": "selected",
+      "teacher_cosine": 0.7708250880241394,
+      "training_seconds": 34.84608190972358
+    }
+  },
+  "experiment": "shared-backbone OSNet early exit",
+  "feature_head": {
+    "distillation_losses": [
+      "teacher cosine",
+      "batch relational similarity"
+    ],
+    "output_dimension": 512,
+    "pooling": "global-average + global-max",
+    "teacher_gallery_space": true
+  },
+  "full_backbone_seconds": 0.042928,
+  "prefix_seconds": {
+    "conv2": 0.020179,
+    "conv3": 0.033876
+  },
+  "requirements": {
+    "calibration_agreement_precision": 0.98,
+    "maximum_hybrid_rank1_drop": 0.01,
+    "minimum_projected_backbone_reduction": 0.1,
+    "minimum_validation_exit_rate": 0.2,
+    "validation_agreement_precision": 0.95
+  },
+  "runtime_model": {
+    "path": "/root/rac-reid/.runtime/models/shared-early-exit/osnet_x1_0_conv3_exit_head.pt",
+    "sha256": "577ca6d17e8197542dc1d835fb46e9aa8e8f41e13d5aa6038945fc567376168e"
+  },
+  "scientific_notes": [
+    "The early exit and final x1.0 path share the same backbone prefix.",
+    "Hard queries continue computation instead of running a second network.",
+    "The early head is trained only on Market-1501 training identities.",
+    "Exit stage and gate thresholds are selected using calibration identities.",
+    "Held-out training identities are evaluated only after selection.",
+    "Market-1501 test query/gallery images remain untouched.",
+    "Projected compute uses measured stage timings from the Step 29D-A audit."
+  ],
+  "selected_gate": {
+    "margin_threshold": 0.026960715734505942,
+    "top1_threshold": 0.8810763899887664
+  },
+  "split": {
+    "exit_stage_and_threshold_calibration": "PID % 5 == 3",
+    "head_training": "PID % 5 in {0,1,2}",
+    "held_out_validation": "PID % 5 == 4",
+    "market_test_used": false
+  },
+  "status": "failed_validation",
+  "validation": {
+    "agreement_precision": 0.8823529411764706,
+    "early_rank1": 0.1789272030651341,
+    "exit_count": 17,
+    "exit_rate": 0.006513409961685823,
+    "hybrid_rank1": 0.6793103448275862,
+    "hybrid_rank1_delta": 0.0003831417624521327,
+    "projected_backbone_reduction": -0.0011876074623944355,
+    "teacher_rank1": 0.6789272030651341
+  }
+}

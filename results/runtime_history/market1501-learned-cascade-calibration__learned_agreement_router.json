@@ -1,0 +1,265 @@
+{
+  "calibration": {
+    "coverage": 0.5705765407554672,
+    "exits": 1435,
+    "precision": 0.9902439117431641,
+    "threshold": 0.9288522005081177
+  },
+  "candidate_models": {
+    "linear": {
+      "calibration": {
+        "coverage": 0.5705765407554672,
+        "exits": 1435,
+        "precision": 0.9902439117431641,
+        "threshold": 0.9288522005081177
+      },
+      "status": "selected",
+      "training_seconds": 0.2836887617595494
+    },
+    "mlp_48_24": {
+      "calibration": {
+        "coverage": 0.24572564612326045,
+        "exits": 618,
+        "precision": 0.9902912378311157,
+        "threshold": 0.9989185333251953
+      },
+      "status": "not_selected",
+      "training_seconds": 3.2701894133351743
+    }
+  },
+  "compute_projection": {
+    "projected_inference_only_cpu_reduction": 0.0233091213035842,
+    "projected_reference_gflop_reduction": 0.5382907185862851,
+    "reference_gflop_break_even_exit_rate": 0.0816326530612245
+  },
+  "diagnostics": {
+    "calibration_x0_25_rank1": 0.6015904572564612,
+    "calibration_x1_0_rank1": 0.672365805168986,
+    "train_x0_25_rank1": 0.6051721930610677,
+    "train_x1_0_rank1": 0.653565484573038,
+    "validation_x0_25_rank1": 0.6302681992337165,
+    "validation_x1_0_rank1": 0.6789272030651341
+  },
+  "feature_names": [
+    "top1",
+    "top2",
+    "top3",
+    "top5",
+    "top10",
+    "top20",
+    "margin_1_2",
+    "margin_1_3",
+    "margin_1_5",
+    "margin_1_10",
+    "margin_1_20",
+    "top5_mean",
+    "top5_std",
+    "top10_mean",
+    "top10_std",
+    "top20_mean",
+    "top20_std",
+    "top1_minus_top5_mean",
+    "top1_minus_top10_mean",
+    "top1_minus_top20_mean",
+    "top5_softmax_peak",
+    "top10_softmax_peak",
+    "top20_softmax_peak",
+    "top5_entropy",
+    "top10_entropy",
+    "top20_entropy",
+    "aspect_ratio",
+    "brightness",
+    "contrast",
+    "visual_entropy",
+    "blur",
+    "edge_density",
+    "foreground_ratio_estimate"
+  ],
+  "latency": {
+    "inference_only_break_even_exit_rate": 0.5966142503439253,
+    "sample_count": 24,
+    "x0_25_seconds": {
+      "max": 0.02570565091446042,
+      "mean": 0.023644581243085366,
+      "median": 0.023721015080809593,
+      "min": 0.021968163084238768
+    },
+    "x1_0_seconds": {
+      "max": 0.04439035803079605,
+      "mean": 0.03991284256335348,
+      "median": 0.039759384002536535,
+      "min": 0.036829658318310976
+    }
+  },
+  "normalization": {
+    "mean": [
+      0.876738965511322,
+      0.8473315834999084,
+      0.8298681974411011,
+      0.8083837032318115,
+      0.7797971367835999,
+      0.7528769969940186,
+      0.029407676309347153,
+      0.04687441512942314,
+      0.06835734099149704,
+      0.09694411605596542,
+      0.12386271357536316,
+      0.8360648155212402,
+      0.025534145534038544,
+      0.8128034472465515,
+      0.030787786468863487,
+      0.7880944609642029,
+      0.0339592881500721,
+      0.040676314383745193,
+      0.0639374777674675,
+      0.08864787966012955,
+      0.39482930302619934,
+      0.29881471395492554,
+      0.2351629137992859,
+      0.8886198997497559,
+      0.8740085363388062,
+      0.8627747297286987,
+      0.5,
+      0.3929938077926636,
+      0.3772661089897156,
+      0.9049010872840881,
+      0.7441670298576355,
+      0.10573218762874603,
+      0.6262984275817871
+    ],
+    "std": [
+      0.05014516040682793,
+      0.05317697674036026,
+      0.05389126017689705,
+      0.05416790395975113,
+      0.054394371807575226,
+      0.05417652428150177,
+      0.02935514785349369,
+      0.03471317142248154,
+      0.039547841995954514,
+      0.045203547924757004,
+      0.049424272030591965,
+      0.05023135617375374,
+      0.015089903026819229,
+      0.05074523389339447,
+      0.014785205945372581,
+      0.05123433098196983,
+      0.014276029542088509,
+      0.026633456349372864,
+      0.03370088338851929,
+      0.03973045572638512,
+      0.13986438512802124,
+      0.13910844922065735,
+      0.13173159956932068,
+      0.1255577802658081,
+      0.12116917967796326,
+      0.11883767694234848,
+      1.0,
+      0.0772128701210022,
+      0.07156085968017578,
+      0.03218480944633484,
+      0.12568062543869019,
+      0.040747907012701035,
+      0.11870715022087097
+    ]
+  },
+  "oracle_teacher_student_identity_agreement": {
+    "calibration": 0.8743538856506348,
+    "train": 0.8805530667304993,
+    "validation": 0.8716475367546082
+  },
+  "population": {
+    "calibration": 2515,
+    "train": 7811,
+    "validation": 2610
+  },
+  "requirements": {
+    "absolute_minimum_validation_coverage": 0.15,
+    "break_even_safety_margin": 0.05,
+    "calibration_agreement_precision": 0.99,
+    "effective_required_validation_coverage": 0.6466142503439254,
+    "measured_inference_break_even": 0.5966142503439253,
+    "validation_agreement_precision": 0.97
+  },
+  "router_target": {
+    "camera_used_as_input": false,
+    "ground_truth_identity_used_as_input": false,
+    "meaning": "predict whether the heavy x1.0 model would return the same top identity as the lightweight x0.25 model",
+    "name": "x0.25/x1.0 top-identity agreement",
+    "teacher_output_used_as_training_target": true,
+    "teacher_output_used_at_production": false
+  },
+  "runtime": {
+    "agreement_feature_cache_reused": false,
+    "x1_0_embedding_cache_build_seconds": 462.5221390030347,
+    "x1_0_embedding_cache_reused": false
+  },
+  "scientific_notes": [
+    "The router predicts heavy-model agreement rather than ground-truth correctness.",
+    "This directly targets whether invoking OSNet x1.0 is likely to change the top identity result.",
+    "Router inputs contain only x0.25 retrieval statistics and observable query-image signals.",
+    "OSNet x1.0 output is used only as an offline teacher target.",
+    "The untouched Market-1501 test split is not used in router training, architecture selection, threshold calibration or held-out validation.",
+    "The measured CPU break-even is derived from steady-state single-query inference and excludes model cold-load time.",
+    "The complete untouched-test cascade benchmark remains required before production deployment."
+  ],
+  "selected_model": {
+    "architecture": "linear",
+    "probability_threshold": 0.9288522005081177,
+    "state_dict": {
+      "layer.bias": [
+        2.8890416622161865
+      ],
+      "layer.weight": [
+        [
+          0.18585912883281708,
+          0.02635231800377369,
+          -0.041021522134542465,
+          0.2690149247646332,
+          0.2573773264884949,
+          -0.4717162847518921,
+          0.14206579327583313,
+          0.17866544425487518,
+          -0.12182891368865967,
+          -0.18216215074062347,
+          0.8123634457588196,
+          0.3050377666950226,
+          0.24085520207881927,
+          0.17361897230148315,
+          0.7098910808563232,
+          -0.13279381394386292,
+          0.957099437713623,
+          -0.135432630777359,
+          0.1316337138414383,
+          0.297891765832901,
+          -0.1826210916042328,
+          0.28604406118392944,
+          -0.28280889987945557,
+          -0.4518029987812042,
+          0.24577440321445465,
+          1.4027241468429565,
+          0.02859094925224781,
+          0.06641820073127747,
+          -0.092635877430439,
+          -0.048435114324092865,
+          -0.1675155609846115,
+          -0.04295463114976883,
+          0.06379757076501846
+        ]
+      ]
+    }
+  },
+  "split": {
+    "architecture_and_threshold_calibration": "PID % 5 == 3",
+    "final_held_out_validation": "PID % 5 == 4",
+    "market_test_used": false,
+    "router_training": "PID % 5 in {0,1,2}"
+  },
+  "status": "failed_validation",
+  "validation": {
+    "coverage": 0.6199233716475095,
+    "exits": 1618,
+    "precision": 0.9814586043357849
+  },
+  "version": 1
+}

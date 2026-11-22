@@ -577,3 +577,27 @@ or choose its threshold.
 
 The next required experiment is a complete untouched-test evaluation of the
 learned coarse-to-fine cascade.
+
+
+## Research Traceability - 22 November 2026
+
+The repository now retains both successful and unsuccessful development
+experiments.
+
+Negative results are preserved because they justify architecture changes and
+prevent post-hoc threshold manipulation.
+
+The current direction is joint cross-resolution OSNet training at 160x80 and
+256x128 with conv1 and conv2 frozen.
+
+See:
+
+- `docs/PROJECT_UPDATE_2026-11-22.md`
+- `docs/EXPERIMENT_HISTORY.md`
+- `docs/MULTIRESOLUTION_TRAINING_PROTOCOL.md`
+- `results/market1501_multiresolution_training.json`
+- `results/runtime_history/`
+
+Large datasets, pretrained-model caches, learned checkpoint binaries and
+temporary NPY/NPZ feature caches remain outside GitHub, while the repository
+stores their scientific role, configuration and hashes.

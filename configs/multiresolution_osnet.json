@@ -1,0 +1,26 @@
+{
+  "backbone_learning_rate": 5e-05,
+  "base_model": "osnet_x1_0_msmt17_combineall",
+  "batch_size": 16,
+  "checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+  "classifier_learning_rate": 0.0005,
+  "epochs": 8,
+  "frozen_modules": [
+    "conv1",
+    "conv2"
+  ],
+  "full_resolution": [
+    256,
+    128
+  ],
+  "low_resolution": [
+    160,
+    80
+  ],
+  "optimizer": "AdamW",
+  "selected_epoch": 8,
+  "strategy": "joint multi-resolution OSNet",
+  "test_set_used": false,
+  "version": 1,
+  "weight_decay": 0.0005
+}

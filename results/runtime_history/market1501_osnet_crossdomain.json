@@ -1,0 +1,56 @@
+{
+  "benchmark": "Market-1501 standard cross-domain retrieval",
+  "dataset": {
+    "archive_sha256": "416bb77b5a2449b32e936f623cbee58becf1a9e7e936f36380cb8f9ab928fe96",
+    "gallery_images": 19732,
+    "name": "Market-1501-v15.09.15",
+    "query_images": 3368,
+    "scored_queries": 3368,
+    "training_images": 12936
+  },
+  "difference_from_reference_pp": {
+    "map": -0.032076030876268646,
+    "rank1": 0.0301662707838517
+  },
+  "metrics_percent": {
+    "map": 37.36792396912373,
+    "minp": 6.079309546269615,
+    "rank1": 66.33016627078385,
+    "rank10": 85.74821852731591,
+    "rank5": 80.28503562945369
+  },
+  "model": {
+    "alias": "osnet_x1_0_msmt17_combineall",
+    "architecture": "OSNet x1.0",
+    "device": "cpu",
+    "evaluation_relationship": "cross-domain on Market-1501",
+    "training_source": "MSMT17 all splits combined"
+  },
+  "protocol": {
+    "distance": "euclidean",
+    "junk_filtering": "reid standard Market-1501 protocol"
+  },
+  "reference_crossdomain_percent": {
+    "distance": "euclidean",
+    "map_percent": 37.4,
+    "purpose": "Independent cross-domain sanity reference, not a target assertion.",
+    "rank1_percent": 66.3,
+    "source": "Roboflow re-ID metrics documentation"
+  },
+  "research_scope": "OSNet learned baseline; not RAC adaptive ablation",
+  "runtime": {
+    "evaluation_wall_seconds": 1360.0246941288933,
+    "machine": "x86_64",
+    "model_load_seconds": 0.4958087960258126,
+    "processor": "x86_64",
+    "python": "3.12.3",
+    "torch": "2.15.0+cpu",
+    "torch_threads": 4
+  },
+  "scientific_notes": [
+    "This is the learned OSNet baseline, not the final RAC-ReID result.",
+    "The checkpoint is appropriate for cross-domain Market-1501 evaluation.",
+    "Do not use this checkpoint for an unbiased MSMT17 benchmark because MSMT17 test identities were included during its training.",
+    "Latency values from the full benchmark are environment measurements and are not per-query RAC-ReID latency."
+  ]
+}

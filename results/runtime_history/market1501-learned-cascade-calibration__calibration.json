@@ -1,0 +1,9 @@
+{
+  "calibration_rank1": 0.6127323509582973,
+  "dataset_signature": "b43859a40698a6e41718159358a7c984a1119ae79380623881d1117b7ed69e06",
+  "model_sha256": "cf55163d78fc44c62c82f85ab62d39f10438679b5abe8c698ae08cfa84aa6e18",
+  "overall_rank1": 0.6095392702535559,
+  "status": "no_safe_threshold",
+  "target_calibration_precision": 0.99,
+  "validation_rank1": 0.5965530748139444
+}

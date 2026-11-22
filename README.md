@@ -579,3 +579,30 @@ approximately 0.08 GFLOPs for OSNet x0.25 and 0.98 GFLOPs for OSNet x1.0.
 This is still a training-data controller result. The complete learned
 x0.25 -> x1.0 cascade must next be evaluated on the untouched Market-1501
 test query/gallery protocol before production routing is changed.
+
+
+## Current Research Update - 22 November 2026
+
+The current research phase uses a jointly trained multi-resolution OSNet
+backbone at 160x80 and 256x128.
+
+The latest training completed 8 epochs and selected epoch 8.
+
+Detailed teacher-facing update:
+
+- `docs/PROJECT_UPDATE_2026-11-22.md`
+
+Complete experiment history:
+
+- `docs/EXPERIMENT_HISTORY.md`
+
+Training protocol:
+
+- `docs/MULTIRESOLUTION_TRAINING_PROTOCOL.md`
+
+Machine-readable result:
+
+- `results/market1501_multiresolution_training.json`
+
+The standard Market-1501 query/gallery test remains untouched for the final
+frozen-architecture evaluation.

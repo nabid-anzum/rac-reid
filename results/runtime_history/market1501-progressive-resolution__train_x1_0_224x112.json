@@ -1,0 +1,12 @@
+{
+  "complete": true,
+  "count": 12936,
+  "dataset_signature": "539032e2487e9aa7ef0bd0785db2dbdae00a1676ff688308cd0d68c2ff1a3d25",
+  "embedding_dim": 512,
+  "final_build_segment_seconds": 330.49205747712404,
+  "model": "osnet_x1_0_msmt17_combineall",
+  "resolution": [
+    224,
+    112
+  ]
+}

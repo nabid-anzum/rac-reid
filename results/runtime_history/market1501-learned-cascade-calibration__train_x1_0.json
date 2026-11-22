@@ -1,0 +1,8 @@
+{
+  "build_seconds": 462.5221390030347,
+  "complete": true,
+  "count": 12936,
+  "dataset_signature": "b43859a40698a6e41718159358a7c984a1119ae79380623881d1117b7ed69e06",
+  "embedding_dim": 512,
+  "model": "osnet_x1_0_msmt17_combineall"
+}

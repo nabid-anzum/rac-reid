@@ -1,0 +1,343 @@
+{
+  "frontier": {
+    "margin_only": {
+      "0.9": {
+        "calibration": {
+          "coverage": 0.01752865260522007,
+          "exits": 182,
+          "precision": 0.9230769230769231
+        },
+        "margin_threshold": 0.0705072927474974,
+        "top1_threshold": null,
+        "validation": {
+          "coverage": 0.012925969447708578,
+          "exits": 33,
+          "precision": 0.9090909090909091
+        }
+      },
+      "0.95": {
+        "calibration": {
+          "coverage": 0.005008186458634306,
+          "exits": 52,
+          "precision": 0.9615384615384616
+        },
+        "margin_threshold": 0.09028134047985086,
+        "top1_threshold": null,
+        "validation": {
+          "coverage": 0.0039169604386995694,
+          "exits": 10,
+          "precision": 0.9
+        }
+      },
+      "0.97": {
+        "calibration": {
+          "coverage": 0.0010594240585572571,
+          "exits": 11,
+          "precision": 1.0
+        },
+        "margin_threshold": 0.11304011130332951,
+        "top1_threshold": null,
+        "validation": {
+          "coverage": 0.0007833920877399138,
+          "exits": 2,
+          "precision": 1.0
+        }
+      },
+      "0.98": {
+        "calibration": {
+          "coverage": 0.0010594240585572571,
+          "exits": 11,
+          "precision": 1.0
+        },
+        "margin_threshold": 0.11304011130332951,
+        "top1_threshold": null,
+        "validation": {
+          "coverage": 0.0007833920877399138,
+          "exits": 2,
+          "precision": 1.0
+        }
+      },
+      "0.99": {
+        "calibration": {
+          "coverage": 0.0010594240585572571,
+          "exits": 11,
+          "precision": 1.0
+        },
+        "margin_threshold": 0.11304011130332951,
+        "top1_threshold": null,
+        "validation": {
+          "coverage": 0.0007833920877399138,
+          "exits": 2,
+          "precision": 1.0
+        }
+      }
+    },
+    "top1_and_margin": {
+      "0.9": {
+        "calibration": {
+          "coverage": 0.06741789463546181,
+          "exits": 700,
+          "precision": 0.9014285714285715
+        },
+        "margin_threshold": 0.007841379642486572,
+        "top1_threshold": 0.9020546674728394,
+        "validation": {
+          "coverage": 0.07207207207207207,
+          "exits": 184,
+          "precision": 0.8858695652173914
+        }
+      },
+      "0.95": {
+        "calibration": {
+          "coverage": 0.019262255610131947,
+          "exits": 200,
+          "precision": 0.95
+        },
+        "margin_threshold": 0.027377068996429447,
+        "top1_threshold": 0.9095825701951981,
+        "validation": {
+          "coverage": 0.014492753623188406,
+          "exits": 37,
+          "precision": 0.8378378378378378
+        }
+      },
+      "0.97": {
+        "calibration": {
+          "coverage": 0.01069055186362323,
+          "exits": 111,
+          "precision": 0.972972972972973
+        },
+        "margin_threshold": 0.05288925826549528,
+        "top1_threshold": 0.8912095689773559,
+        "validation": {
+          "coverage": 0.007442224833529181,
+          "exits": 19,
+          "precision": 0.7894736842105263
+        }
+      },
+      "0.98": {
+        "calibration": {
+          "coverage": 0.009727439083116633,
+          "exits": 101,
+          "precision": 0.9801980198019802
+        },
+        "margin_threshold": 0.05559613943099971,
+        "top1_threshold": 0.8912095689773559,
+        "validation": {
+          "coverage": 0.005483744614179397,
+          "exits": 14,
+          "precision": 0.7857142857142857
+        }
+      },
+      "0.99": {
+        "calibration": {
+          "coverage": 0.004622941346431667,
+          "exits": 48,
+          "precision": 1.0
+        },
+        "margin_threshold": 0.07318641245365143,
+        "top1_threshold": 0.8838594961166382,
+        "validation": {
+          "coverage": 0.0023501762632197414,
+          "exits": 6,
+          "precision": 1.0
+        }
+      }
+    },
+    "top1_only": {
+      "0.9": {
+        "calibration": {
+          "coverage": 0.03255321198112299,
+          "exits": 338,
+          "precision": 0.9023668639053254
+        },
+        "margin_threshold": null,
+        "top1_threshold": 0.9211720463633538,
+        "validation": {
+          "coverage": 0.03172737955346651,
+          "exits": 81,
+          "precision": 0.8518518518518519
+        }
+      },
+      "0.95": {
+        "calibration": {
+          "coverage": 0.0010594240585572571,
+          "exits": 11,
+          "precision": 1.0
+        },
+        "margin_threshold": null,
+        "top1_threshold": 0.9550287325382235,
+        "validation": {
+          "coverage": 0.0007833920877399138,
+          "exits": 2,
+          "precision": 1.0
+        }
+      },
+      "0.97": {
+        "calibration": {
+          "coverage": 0.0010594240585572571,
+          "exits": 11,
+          "precision": 1.0
+        },
+        "margin_threshold": null,
+        "top1_threshold": 0.9550287325382235,
+        "validation": {
+          "coverage": 0.0007833920877399138,
+          "exits": 2,
+          "precision": 1.0
+        }
+      },
+      "0.98": {
+        "calibration": {
+          "coverage": 0.0010594240585572571,
+          "exits": 11,
+          "precision": 1.0
+        },
+        "margin_threshold": null,
+        "top1_threshold": 0.9550287325382235,
+        "validation": {
+          "coverage": 0.0007833920877399138,
+          "exits": 2,
+          "precision": 1.0
+        }
+      },
+      "0.99": {
+        "calibration": {
+          "coverage": 0.0010594240585572571,
+          "exits": 11,
+          "precision": 1.0
+        },
+        "margin_threshold": null,
+        "top1_threshold": 0.9550287325382235,
+        "validation": {
+          "coverage": 0.0007833920877399138,
+          "exits": 2,
+          "precision": 1.0
+        }
+      }
+    }
+  },
+  "maximum_precision_by_minimum_exit_count": {
+    "1": {
+      "calibration": {
+        "coverage": 0.004622941346431667,
+        "exits": 48,
+        "precision": 1.0
+      },
+      "margin_threshold": 0.07318641245365143,
+      "top1_threshold": 0.8838594961166382,
+      "validation": {
+        "coverage": 0.0023501762632197414,
+        "exits": 6,
+        "precision": 1.0
+      }
+    },
+    "10": {
+      "calibration": {
+        "coverage": 0.004622941346431667,
+        "exits": 48,
+        "precision": 1.0
+      },
+      "margin_threshold": 0.07318641245365143,
+      "top1_threshold": 0.8838594961166382,
+      "validation": {
+        "coverage": 0.0023501762632197414,
+        "exits": 6,
+        "precision": 1.0
+      }
+    },
+    "100": {
+      "calibration": {
+        "coverage": 0.009727439083116633,
+        "exits": 101,
+        "precision": 0.9801980198019802
+      },
+      "margin_threshold": 0.05559613943099971,
+      "top1_threshold": 0.8912095689773559,
+      "validation": {
+        "coverage": 0.005483744614179397,
+        "exits": 14,
+        "precision": 0.7857142857142857
+      }
+    },
+    "1000": {
+      "calibration": {
+        "coverage": 0.10054897428488876,
+        "exits": 1044,
+        "precision": 0.8831417624521073
+      },
+      "margin_threshold": 0.027377068996429447,
+      "top1_threshold": 0.8503902673721313,
+      "validation": {
+        "coverage": 0.09714061887974931,
+        "exits": 248,
+        "precision": 0.8185483870967742
+      }
+    },
+    "250": {
+      "calibration": {
+        "coverage": 0.02542617740537417,
+        "exits": 264,
+        "precision": 0.9393939393939394
+      },
+      "margin_threshold": 0.05559613943099971,
+      "top1_threshold": 0.8478787565231323,
+      "validation": {
+        "coverage": 0.019584802193497845,
+        "exits": 50,
+        "precision": 0.88
+      }
+    },
+    "30": {
+      "calibration": {
+        "coverage": 0.004622941346431667,
+        "exits": 48,
+        "precision": 1.0
+      },
+      "margin_threshold": 0.07318641245365143,
+      "top1_threshold": 0.8838594961166382,
+      "validation": {
+        "coverage": 0.0023501762632197414,
+        "exits": 6,
+        "precision": 1.0
+      }
+    },
+    "50": {
+      "calibration": {
+        "coverage": 0.0066454781854955215,
+        "exits": 69,
+        "precision": 0.9855072463768116
+      },
+      "margin_threshold": 0.05559613943099971,
+      "top1_threshold": 0.904125988483429,
+      "validation": {
+        "coverage": 0.0027418723070896985,
+        "exits": 7,
+        "precision": 0.8571428571428571
+      }
+    },
+    "500": {
+      "calibration": {
+        "coverage": 0.0504671096985457,
+        "exits": 524,
+        "precision": 0.9179389312977099
+      },
+      "margin_threshold": 0.012124896049499512,
+      "top1_threshold": 0.904125988483429,
+      "validation": {
+        "coverage": 0.0509204857030944,
+        "exits": 130,
+        "precision": 0.9076923076923077
+      }
+    }
+  },
+  "population": {
+    "calibration": 10383,
+    "validation": 2553
+  },
+  "rank1": {
+    "calibration": 0.6127323509582973,
+    "overall": 0.6095392702535559,
+    "validation": 0.5965530748139444
+  }
+}

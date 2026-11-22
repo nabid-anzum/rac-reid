@@ -1,0 +1,263 @@
+{
+  "architecture": {
+    "frozen_modules": [
+      "conv1",
+      "conv2"
+    ],
+    "full_resolution": [
+      256,
+      128
+    ],
+    "low_resolution": [
+      160,
+      80
+    ],
+    "same_backbone_both_resolutions": true,
+    "trainable_backbone_parameters": 1925340
+  },
+  "base_model": "osnet_x1_0_msmt17_combineall",
+  "calibration_recovery": {
+    "full_delta_vs_teacher": 0.0656063618290258,
+    "full_rank1": 0.8636182902584493,
+    "low_full_embedding_cosine": 0.9222760796546936,
+    "low_full_identity_agreement": 0.9248508946322067,
+    "low_rank1": 0.8536779324055666,
+    "rank1_gap": 0.00994035785288272,
+    "teacher_full_rank1": 0.7980119284294235
+  },
+  "checkpoint": {
+    "binary_committed_to_git": false,
+    "bytes": 8971382,
+    "runtime_path": "/root/rac-reid/.runtime/models/multires/osnet_x1_0_multires_160x80.pt",
+    "sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec"
+  },
+  "dataset": {
+    "development_identities": 751,
+    "development_images": 12936,
+    "filename_size_manifest_sha256": "0da69f5484f8d21e621ba0efeaf1115cfe10ef7590169ba5577d457d8ff213f5",
+    "name": "Market-1501",
+    "raw_dataset_committed_to_git": false
+  },
+  "date": "2026-11-22",
+  "development_split": {
+    "calibration": {
+      "identities": 144,
+      "images": 2515,
+      "rule": "PID % 5 == 3"
+    },
+    "gradient_training": {
+      "identities": 449,
+      "images": 7811,
+      "rule": "PID % 5 in {0,1,2}"
+    },
+    "held_out_validation": {
+      "identities": 158,
+      "images": 2610,
+      "rule": "PID % 5 == 4"
+    },
+    "standard_market_test_used": false
+  },
+  "experiment": "joint multi-resolution OSNet fine-tuning",
+  "held_out_validation": {
+    "full_rank1": 0.8831417624521073,
+    "full_rank1_delta_vs_original_teacher": 0.0685823754789272,
+    "low_full_embedding_cosine": 0.9185940027236938,
+    "low_full_identity_agreement": 0.936015325670498,
+    "low_rank1": 0.8869731800766284,
+    "low_rank1_gain_vs_original": 0.2409961685823755,
+    "original_full_teacher_rank1": 0.8145593869731801,
+    "original_low_rank1": 0.6459770114942529,
+    "rank1_gap": -0.003831417624521105
+  },
+  "metric_scope_warning": "The 88% development numbers are identity-disjoint development metrics from the Market-1501 training population. They are NOT the final standard Market-1501 query/gallery benchmark.",
+  "recovery_note": "All eight Step 29F-B training epochs completed and epoch 8 was saved. The original batch failed after training because of a timing-loop bug that left one timing list empty. The preserved model was reloaded and evaluated without retraining.",
+  "standard_market_test_used": false,
+  "status": "passed",
+  "timing": {
+    "1": {
+      "full_median_seconds": 0.056818187003955245,
+      "low_160x80_including_resize_median_seconds": 0.03148657875135541,
+      "low_full_ratio": 0.5541637354455459,
+      "low_resolution_reduction": 0.44583626455445413,
+      "samples_per_path": 100
+    },
+    "4": {
+      "full_median_seconds": 0.04416712000966072,
+      "low_160x80_including_resize_median_seconds": 0.030539009254425764,
+      "low_full_ratio": 0.69144216891991,
+      "low_resolution_reduction": 0.30855783108009005,
+      "samples_per_path": 100
+    }
+  },
+  "training": {
+    "backbone_learning_rate": 5e-05,
+    "batch_size": 16,
+    "classifier_learning_rate": 0.0005,
+    "epoch_history": [
+      {
+        "calibration": {
+          "full_rank1": 0.7208747514910536,
+          "low_full_embedding_cosine": 0.8943716883659363,
+          "low_full_identity_agreement": 0.8823061630218688,
+          "low_rank1": 0.7196819085487077,
+          "rank1_gap": 0.0011928429423458953
+        },
+        "calibration_full_delta_vs_teacher": -0.07713717693836986,
+        "calibration_low_gain_vs_baseline": 0.09145129224652082,
+        "epoch": 1,
+        "training": {
+          "mean_classification_loss": 5.877530733744304,
+          "mean_full_cosine_loss": 0.17251472936939363,
+          "mean_low_cosine_loss": 0.20982369814060461,
+          "mean_total_loss": 3.2266698668583285,
+          "wall_seconds": 412.3243200080469
+        }
+      },
+      {
+        "calibration": {
+          "full_rank1": 0.7423459244532803,
+          "low_full_embedding_cosine": 0.8999846577644348,
+          "low_full_identity_agreement": 0.8846918489065606,
+          "low_rank1": 0.7610337972166998,
+          "rank1_gap": -0.018687872763419544
+        },
+        "calibration_full_delta_vs_teacher": -0.055666003976143186,
+        "calibration_low_gain_vs_baseline": 0.13280318091451293,
+        "epoch": 2,
+        "training": {
+          "mean_classification_loss": 5.418138107151585,
+          "mean_full_cosine_loss": 0.15065419960363266,
+          "mean_low_cosine_loss": 0.1600562729291877,
+          "mean_total_loss": 2.926217308317469,
+          "wall_seconds": 423.1087878276594
+        }
+      },
+      {
+        "calibration": {
+          "full_rank1": 0.7630218687872763,
+          "low_full_embedding_cosine": 0.9046929478645325,
+          "low_full_identity_agreement": 0.8842942345924454,
+          "low_rank1": 0.7757455268389662,
+          "rank1_gap": -0.012723658051689957
+        },
+        "calibration_full_delta_vs_teacher": -0.03499005964214719,
+        "calibration_low_gain_vs_baseline": 0.14751491053677934,
+        "epoch": 3,
+        "training": {
+          "mean_classification_loss": 4.994314967976513,
+          "mean_full_cosine_loss": 0.15038806641881938,
+          "mean_low_cosine_loss": 0.15396167535967134,
+          "mean_total_loss": 2.7045402609741274,
+          "wall_seconds": 416.5010153981857
+        }
+      },
+      {
+        "calibration": {
+          "full_rank1": 0.7996023856858847,
+          "low_full_embedding_cosine": 0.9099414944648743,
+          "low_full_identity_agreement": 0.8926441351888668,
+          "low_rank1": 0.8007952286282306,
+          "rank1_gap": -0.0011928429423458953
+        },
+        "calibration_full_delta_vs_teacher": 0.0015904572564612307,
+        "calibration_low_gain_vs_baseline": 0.1725646123260437,
+        "epoch": 4,
+        "training": {
+          "mean_classification_loss": 4.57030160392964,
+          "mean_full_cosine_loss": 0.15718864928359635,
+          "mean_low_cosine_loss": 0.1552812193495608,
+          "mean_total_loss": 2.4945772908216606,
+          "wall_seconds": 421.033723725006
+        }
+      },
+      {
+        "calibration": {
+          "full_rank1": 0.815506958250497,
+          "low_full_embedding_cosine": 0.9217381477355957,
+          "low_full_identity_agreement": 0.9057654075546719,
+          "low_rank1": 0.8,
+          "rank1_gap": 0.015506958250496972
+        },
+        "calibration_full_delta_vs_teacher": 0.017495029821073538,
+        "calibration_low_gain_vs_baseline": 0.17176938369781314,
+        "epoch": 5,
+        "training": {
+          "mean_classification_loss": 4.15615776516421,
+          "mean_full_cosine_loss": 0.16828174215640515,
+          "mean_low_cosine_loss": 0.15999893216389577,
+          "mean_total_loss": 2.294625387601326,
+          "wall_seconds": 427.99981623888016
+        }
+      },
+      {
+        "calibration": {
+          "full_rank1": 0.7813121272365805,
+          "low_full_embedding_cosine": 0.9107600450515747,
+          "low_full_identity_agreement": 0.856858846918489,
+          "low_rank1": 0.7972166998011928,
+          "rank1_gap": -0.015904572564612307
+        },
+        "calibration_full_delta_vs_teacher": -0.016699801192842978,
+        "calibration_low_gain_vs_baseline": 0.1689860834990059,
+        "epoch": 6,
+        "training": {
+          "mean_classification_loss": 3.7578869758208104,
+          "mean_full_cosine_loss": 0.17765830792410486,
+          "mean_low_cosine_loss": 0.16532439279897568,
+          "mean_total_loss": 2.101894865250539,
+          "wall_seconds": 423.3611848228611
+        }
+      },
+      {
+        "calibration": {
+          "full_rank1": 0.8385685884691849,
+          "low_full_embedding_cosine": 0.9177513122558594,
+          "low_full_identity_agreement": 0.8958250497017892,
+          "low_rank1": 0.836182902584493,
+          "rank1_gap": 0.0023856858846919016
+        },
+        "calibration_full_delta_vs_teacher": 0.04055666003976144,
+        "calibration_low_gain_vs_baseline": 0.2079522862823061,
+        "epoch": 7,
+        "training": {
+          "mean_classification_loss": 3.3739103900386755,
+          "mean_full_cosine_loss": 0.18770414441519231,
+          "mean_low_cosine_loss": 0.1713792801147102,
+          "mean_total_loss": 1.9180917954396128,
+          "wall_seconds": 426.69772998290136
+        }
+      },
+      {
+        "calibration": {
+          "full_rank1": 0.8636182902584493,
+          "low_full_embedding_cosine": 0.9222760796546936,
+          "low_full_identity_agreement": 0.9248508946322067,
+          "low_rank1": 0.8536779324055666,
+          "rank1_gap": 0.00994035785288272
+        },
+        "calibration_full_delta_vs_teacher": 0.0656063618290258,
+        "calibration_low_gain_vs_baseline": 0.22544731610337965,
+        "epoch": 8,
+        "training": {
+          "mean_classification_loss": 3.007033712293473,
+          "mean_full_cosine_loss": 0.1959675161628879,
+          "mean_low_cosine_loss": 0.17592418163344417,
+          "mean_total_loss": 1.741233496821975,
+          "wall_seconds": 443.49632075103
+        }
+      }
+    ],
+    "epochs": 8,
+    "loss_weights": {
+      "cross_resolution_consistency": 0.25,
+      "full_teacher_cosine": 0.25,
+      "identity_classification": 0.5,
+      "low_teacher_cosine": 1.0,
+      "relational_similarity": 0.5
+    },
+    "optimizer": "AdamW",
+    "seed": 29601,
+    "selected_epoch": 8,
+    "weight_decay": 0.0005
+  }
+}

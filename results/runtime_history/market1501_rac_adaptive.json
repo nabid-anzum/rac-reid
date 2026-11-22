@@ -1,0 +1,105 @@
+{
+  "baseline_full_osnet_percent": {
+    "map": 37.36792396912373,
+    "minp": 6.079309546269615,
+    "rank1": 66.33016627078385,
+    "rank10": 85.74821852731591,
+    "rank5": 80.28503562945369
+  },
+  "benchmark": "Market-1501 RAC-ReID retrieval-layer adaptive ablation",
+  "dataset": {
+    "gallery_images": 19732,
+    "gallery_junk_pids": [
+      -1
+    ],
+    "name": "Market-1501-v15.09.15",
+    "query_images": 3368,
+    "scored_queries": 3368
+  },
+  "dataset_signature": "0d41f4c548eb1a4ab4aa6a0c26e28e501b21ae2a4c450a86f4039cbe0f1d9ab2",
+  "delta_vs_full_osnet_pp": {
+    "map": -35.35270695359377,
+    "minp": -5.89702476952426,
+    "rank1": -52.07838479809976,
+    "rank10": -68.52731591448931,
+    "rank5": -63.50950118764847
+  },
+  "efficiency": {
+    "average_adaptive_stages": 3.0,
+    "average_osnet_query_inference_seconds_when_invoked": 0.04285563630905807,
+    "average_proxy_patches_processed": 103.0,
+    "average_proxy_query_seconds": 0.022506524426276372,
+    "early_exit_rate": 0.0,
+    "hard_candidate_positive_recall_when_invoked": 0.1736935866983373,
+    "osnet_invocation_rate": 1.0,
+    "proxy_patch_saving": 0.1953125,
+    "query_side_osnet_forward_reduction": 0.0
+  },
+  "metrics_percent": {
+    "map": 2.015217015529964,
+    "minp": 0.18228477674535468,
+    "rank1": 14.251781472684085,
+    "rank10": 17.220902612826603,
+    "rank5": 16.775534441805224
+  },
+  "model": {
+    "alias": "osnet_x1_0_msmt17_combineall",
+    "learned_architecture": "OSNet x1.0",
+    "learned_rerank_similarity": "cosine on normalized embeddings",
+    "proxy_encoder": "handcrafted identity-aware visual-patch descriptor"
+  },
+  "policy_sha256": "9d11f8357dd09b8a8177c154a53c125e6a3bb0449ee0cf0b0d908c088b25fe12",
+  "protocol": {
+    "gallery_junk_pids": [
+      -1
+    ],
+    "map": "mean precision at each valid positive rank",
+    "minp": "valid positives divided by rank of last positive",
+    "pid_zero": "retained as distractor if present",
+    "same_identity_same_camera": "ignored"
+  },
+  "routing": {
+    "final_routes": {
+      "invoke_vllm": 3368
+    },
+    "initial_difficulty": {
+      "easy": 3368
+    },
+    "stage_exit_counts": {
+      "3": 3368
+    }
+  },
+  "runtime": {
+    "device": "cpu",
+    "machine": "x86_64",
+    "osnet_gallery_cache_build_seconds": 885.6576686939225,
+    "osnet_gallery_cache_reused": false,
+    "proxy_gallery_cache_build_seconds": 265.3195693269372,
+    "proxy_gallery_cache_reused": false,
+    "python": "3.12.3",
+    "query_evaluation_wall_seconds": 222.73657697765157,
+    "threads": 4,
+    "total_step_wall_seconds": 1374.4053928172216
+  },
+  "scientific_notes": [
+    "The patch budget is a handcrafted visual-patch proxy and is not a transformer token count.",
+    "OSNet gallery embeddings are offline precomputation, matching the deployed gallery workflow.",
+    "Only queries routed to the learned stage receive an OSNet query forward pass.",
+    "When OSNet is invoked, it reranks only the adaptive proxy candidate set; the remaining gallery retains proxy order.",
+    "This fixed policy was not tuned on the Market-1501 test queries.",
+    "Because Market-1501 contains pedestrian crops, detector-derived difficulty evidence is neutralized in this ablation.",
+    "Accuracy loss is reported even if it shows the current adaptive policy is not yet competitive."
+  ],
+  "scope": {
+    "detector_evidence": {
+      "crowding": 0.0,
+      "detector_confidence": 1.0,
+      "foreground_ratio": 1.0,
+      "occlusion": 0.0
+    },
+    "reason": "Market-1501 provides person crops; YOLO is excluded to match the full-OSNet retrieval baseline scope.",
+    "threshold_tuning_on_test_set": false,
+    "type": "retrieval-layer ablation",
+    "yolo_included": false
+  }
+}

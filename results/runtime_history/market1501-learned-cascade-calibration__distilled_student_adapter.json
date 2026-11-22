@@ -1,0 +1,89 @@
+{
+  "adapter_latency": {
+    "max_seconds": 8.444208651781082e-05,
+    "mean_seconds": 6.327941548079253e-05,
+    "median_seconds": 6.122048944234848e-05
+  },
+  "baseline_calibration": {
+    "mapped_rank1": 0.0015904572564612327,
+    "mapped_teacher_identity_agreement": 0.0019880715705765406,
+    "queries": 2515,
+    "student_rank1": 0.6015904572564612,
+    "student_teacher_identity_agreement": 0.8743538767395627,
+    "teacher_rank1": 0.672365805168986
+  },
+  "candidate_models": {
+    "linear_512": {
+      "calibration": {
+        "mapped_rank1": 0.4226640159045726,
+        "mapped_teacher_identity_agreement": 0.7328031809145129,
+        "queries": 2515,
+        "student_rank1": 0.6015904572564612,
+        "student_teacher_identity_agreement": 0.8743538767395627,
+        "teacher_rank1": 0.672365805168986
+      },
+      "parameters": 262656,
+      "teacher_cosine": 0.8472058176994324,
+      "training_seconds": 12.435681244824082
+    },
+    "residual_128": {
+      "calibration": {
+        "mapped_rank1": 0.410337972166998,
+        "mapped_teacher_identity_agreement": 0.7172962226640159,
+        "queries": 2515,
+        "student_rank1": 0.6015904572564612,
+        "student_teacher_identity_agreement": 0.8743538767395627,
+        "teacher_rank1": 0.672365805168986
+      },
+      "parameters": 131712,
+      "teacher_cosine": 0.8469006419181824,
+      "training_seconds": 13.33400506991893
+    }
+  },
+  "experiment": "teacher-distilled student embedding-space adapter",
+  "requirements": {
+    "maximum_adapter_median_seconds": 0.003,
+    "maximum_teacher_rank1_gap": 0.04,
+    "minimum_agreement_gain": 0.04,
+    "minimum_mapped_rank1_gain": 0.01,
+    "minimum_teacher_agreement": 0.92
+  },
+  "runtime_semantics": {
+    "adapter_output_space": "osnet_x1_0",
+    "gallery_embedding_space": "osnet_x1_0",
+    "query_encoder": "osnet_x0_25",
+    "teacher_query_forward_required": false
+  },
+  "scientific_notes": [
+    "The adapter is trained only from paired Market-1501 training embeddings.",
+    "The x1.0 network acts as an offline teacher.",
+    "At runtime the distilled route requires only x0.25 plus the small adapter.",
+    "The mapped query searches gallery embeddings already stored in the x1.0 embedding space.",
+    "Architecture selection uses calibration identities only.",
+    "The held-out training identities are evaluated only after architecture selection.",
+    "The Market-1501 test query/gallery split remains untouched."
+  ],
+  "selected_model": "linear_512",
+  "selected_parameters": 262656,
+  "split": {
+    "architecture_selection": "PID % 5 == 3",
+    "held_out_validation": "PID % 5 == 4",
+    "market_test_used": false,
+    "training": "PID % 5 in {0,1,2}"
+  },
+  "status": "failed_validation",
+  "student": "osnet_x0_25",
+  "teacher": "osnet_x1_0_msmt17_combineall",
+  "validation": {
+    "mapped_rank1": 0.47509578544061304,
+    "mapped_teacher_identity_agreement": 0.746360153256705,
+    "queries": 2610,
+    "rank1_gain": -0.15517241379310343,
+    "student_rank1": 0.6302681992337165,
+    "student_teacher_identity_agreement": 0.8716475095785441,
+    "teacher_agreement_gain": -0.12528735632183907,
+    "teacher_cosine": 0.8432989716529846,
+    "teacher_rank1": 0.6789272030651341,
+    "teacher_rank1_gap": 0.20383141762452106
+  }
+}

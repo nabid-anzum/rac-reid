@@ -1,0 +1,11 @@
+{
+  "build_seconds": 79.57646153820679,
+  "complete": true,
+  "count": 12936,
+  "dataset_signature": "b43859a40698a6e41718159358a7c984a1119ae79380623881d1117b7ed69e06",
+  "model_sha256": "cf55163d78fc44c62c82f85ab62d39f10438679b5abe8c698ae08cfa84aa6e18",
+  "shape": [
+    12936,
+    512
+  ]
+}
