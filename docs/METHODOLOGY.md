@@ -540,3 +540,40 @@ invoking the heavy learned model for every test query.
 
 Thresholds for learned early exit must be calibrated on training data rather
 than tuned on Market-1501 test queries.
+
+
+## Milestone 14: Learned Confidence Controller
+
+The rectangular Top-1/margin confidence rule did not generalize sufficiently
+to unseen training identities, so it was rejected.
+
+The replacement confidence controller uses logistic regression over 18
+features derived from the lightweight OSNet x0.25 Top-10 similarity
+distribution.
+
+The controller is not a ReID model. It predicts whether the current x0.25
+Top-1 identity is reliable enough to skip OSNet x1.0.
+
+Development uses three identity-disjoint partitions of Market-1501 training
+data:
+
+- model fitting: PID modulo 5 in {0, 1, 2}
+- probability-threshold calibration: PID modulo 5 == 3
+- held-out validation: PID modulo 5 == 4
+
+The selected operating point achieved:
+
+- calibration precision: 97.163%
+- calibration early-exit coverage: 11.213%
+- held-out validation precision: 95.968%
+- held-out validation early-exit coverage: 14.253%
+
+The theoretical learned-model compute reduction at this validation exit rate
+is 6.090%, before measured runtime
+overheads.
+
+No Market-1501 test query or gallery label was used to train the controller
+or choose its threshold.
+
+The next required experiment is a complete untouched-test evaluation of the
+learned coarse-to-fine cascade.

@@ -541,3 +541,41 @@ is changed.
 The failed handcrafted proxy-first candidate shortlist remains historical
 experimental evidence and will not be used as the identity candidate gate in
 the redesigned production cascade.
+
+
+## Implemented Milestone 14: Learned Confidence Controller
+
+Simple Top-1/margin thresholds were rejected because they failed to
+generalize across held-out Market-1501 training identities.
+
+A learned confidence controller is now trained to predict whether the
+OSNet x0.25 Top-1 identity can safely exit without invoking OSNet x1.0.
+
+The controller is a compact logistic model over 18 statistics derived from
+the x0.25 Top-10 similarity distribution.
+
+All controller development uses Market-1501 training identities only.
+
+Identity-disjoint partitions:
+
+- controller training: PID modulo 5 in {0, 1, 2}
+- threshold calibration: PID modulo 5 == 3
+- final held-out validation: PID modulo 5 == 4
+
+The Market-1501 test query/gallery split is untouched.
+
+Selected controller:
+
+- probability threshold: 0.929637
+- calibration precision: 97.163%
+- calibration coverage: 11.213%
+- held-out validation precision: 95.968%
+- held-out validation coverage: 14.253%
+- projected learned-compute reduction: 6.090%
+
+The projected reduction is based on the reference complexity values of
+approximately 0.08 GFLOPs for OSNet x0.25 and 0.98 GFLOPs for OSNet x1.0.
+
+This is still a training-data controller result. The complete learned
+x0.25 -> x1.0 cascade must next be evaluated on the untouched Market-1501
+test query/gallery protocol before production routing is changed.
