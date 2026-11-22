@@ -213,3 +213,31 @@ Predeclared gates:
 - projected CPU saving >= 5%
 
 The standard Market-1501 query/gallery test remains untouched.
+
+
+## Step 29G1 - Refinement headroom audit
+
+Before redesigning the confidence controller, the existing cached embeddings
+were audited to answer a more fundamental question:
+
+**When 160x80 is wrong, how often does 256x128 actually fix the query?**
+
+Calibration results:
+
+- 160x80 Rank-1: **85.368%**
+- 256x128 Rank-1: **86.362%**
+- both correct: **82.068%**
+- low correct / full wrong: **3.300%**
+- low wrong / full correct rescue: **4.294%**
+- both wrong: **10.338%**
+- when low is wrong, full resolution rescues: **29.348%**
+- oracle adaptive Rank-1: **89.662%**
+- fixed 160x80 measured CPU saving: **30.856%**
+- perfect-router projected saving before controller overhead:
+  **26.562%**
+
+Interpretation:
+
+A refinement-benefit router remains scientifically worth testing. Train it to predict whether full resolution is likely to rescue a low-resolution failure, rather than merely predicting whether the low-resolution result is correct.
+
+The standard Market-1501 query/gallery test remains untouched.

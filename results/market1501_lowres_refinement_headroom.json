@@ -1,0 +1,52 @@
+{
+  "calibration": {
+    "compute": {
+      "break_even_required_exit_rate_ignoring_router": 0.69144216891991,
+      "five_percent_saving_required_exit_rate_ignoring_router": 0.74144216891991,
+      "fixed_low_saving": 0.30855783108009005,
+      "low_full_ratio": 0.69144216891991,
+      "oracle_exit_rate": 0.9570576540755468,
+      "oracle_progressive_saving_ignoring_router": 0.2656154851556368,
+      "oracle_refine_only_actual_rescues_rate": 0.04294234592445328
+    },
+    "full_rank1": 0.8636182902584493,
+    "full_rescue_given_low_wrong": 0.29347826086956524,
+    "low_minus_full_rank1": -0.00994035785288272,
+    "low_rank1": 0.8536779324055666,
+    "low_wrong_rate": 0.1463220675944334,
+    "oracle_adaptive_rank1": 0.8966202783300199,
+    "oracle_gain_vs_full": 0.03300198807157062,
+    "oracle_gain_vs_low": 0.04294234592445334,
+    "outcome_categories": {
+      "both_correct": {
+        "count": 2064,
+        "rate": 0.820675944333996
+      },
+      "both_wrong": {
+        "count": 260,
+        "rate": 0.10337972166998012
+      },
+      "low_correct_full_wrong": {
+        "count": 83,
+        "rate": 0.03300198807157058
+      },
+      "low_wrong_full_correct_rescue": {
+        "count": 108,
+        "rate": 0.04294234592445328
+      }
+    },
+    "queries": 2515,
+    "raw_low_full_identity_agreement": 0.9248508946322067
+  },
+  "experiment": "low-resolution refinement headroom audit",
+  "heldout_validation": null,
+  "interpretation": {
+    "calibration_full_rescue_rate": 0.04294234592445328,
+    "calibration_low_only_advantage_rate": 0.03300198807157058,
+    "recommendation": "A refinement-benefit router remains scientifically worth testing. Train it to predict whether full resolution is likely to rescue a low-resolution failure, rather than merely predicting whether the low-resolution result is correct."
+  },
+  "production_changed": false,
+  "purpose": "Measure whether full-resolution inference actually rescues errors made by the 160x80 query path, before training another router.",
+  "standard_market_test_used": false,
+  "status": "completed"
+}
