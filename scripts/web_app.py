@@ -686,7 +686,7 @@ class GalleryStore:
         )
 
         prepared = (
-            self.preprocessor.prepare(
+            self.preprocessor.prepare_reid(
                 uploaded,
                 workspace,
             )
@@ -1331,7 +1331,7 @@ class AppState:
         )
 
         prepared = (
-            self.preprocessor.prepare(
+            self.preprocessor.prepare_reid(
                 uploaded,
                 workspace,
                 progress_callback=(
@@ -3769,8 +3769,9 @@ class ReIDHandler(
 
           <p class="small">
             Jointly trained epoch-8 OSNet is active.
-            The current 30/55/80% resource values are
-            visual-patch proxy budgets.
+            Efficient queries use 160x80; full-quality
+            queries use 256x128. Gallery embeddings are
+            stored using the 256x128 full-quality path.
           </p>
         </div>
 
@@ -3805,42 +3806,34 @@ class ReIDHandler(
 
           <div class="pipeline-step">
             <span>03</span>
-            <strong>Analyze</strong>
-            <small>Detected person crop</small>
+            <strong>Crop</strong>
+            <small>Fixed 10% person context</small>
           </div>
 
           <div class="pipeline-step">
             <span>04</span>
-            <strong>Prune</strong>
-            <small>160x80 / 256x128 -> 512-D</small>
+            <strong>Resize</strong>
+            <small>160x80 or 256x128</small>
           </div>
 
           <div class="pipeline-step">
             <span>05</span>
-            <strong>Search</strong>
-            <small>Full learned gallery search</small>
+            <strong>Embed</strong>
+            <small>Trained OSNet -> 512-D</small>
           </div>
 
           <div class="pipeline-step">
             <span>06</span>
-            <strong>Refine</strong>
-            <small>Compare stored gallery vectors</small>
+            <strong>Search</strong>
+            <small>Full learned gallery comparison</small>
           </div>
 
           <div class="pipeline-step">
             <span>07</span>
-            <strong>Rerank</strong>
+            <strong>Rank</strong>
             <small>Cosine identity ranking</small>
           </div>
 
-        </div>
-
-        <div class="science-note">
-          <strong>Research terminology:</strong>
-          pruning currently refers to handcrafted
-          visual-patch proxy selection.
-          It is deliberately not presented as learned
-          transformer-token pruning.
         </div>
 
       </section>
@@ -4105,7 +4098,7 @@ class ReIDHandler(
       </div>
 
       <footer>
-        RAC-ReID · MSc research prototype ·
+        RAC-ReID · MSc research implementation ·
         live backend instrumentation ·
         CPU-only research deployment
       </footer>

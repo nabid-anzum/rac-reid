@@ -333,3 +333,35 @@ Repeated production-wrapper timing on this VPS measured:
 - measured low-resolution saving: 28.022%
 
 The standard Market-1501 query/gallery test remains untouched.
+
+
+## Step 29H-D - Production path cleanup
+
+The live application now separates the current trained multi-resolution
+person-ReID system from the historical adaptive visual-patch experiments.
+
+Current public query path:
+
+1. validate the upload
+2. locate the primary person using YOLO
+3. crop the person using a deterministic 10% context margin
+4. resize to 160x80 for efficient mode or 256x128 for full-quality mode
+5. generate one normalized 512-D embedding using the jointly trained epoch-8
+   OSNet
+6. compare the query embedding with the complete stored learned gallery
+7. rank identities using cosine similarity
+
+Image-quality scoring, difficulty classification, proxy resource allocation,
+and adaptive difficulty-based cropping are not executed by the live search
+path.
+
+Gallery enrollment uses the same deterministic person-crop policy before its
+256x128 embedding is stored.
+
+The historical proxy implementation remains in the repository as experimental
+research history.
+
+The obsolete pruning terminology notice and legacy Analyze/Prune/Refine
+architecture cards were removed from the live frontend.
+
+The official Market-1501 test remains untouched.

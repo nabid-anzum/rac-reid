@@ -787,3 +787,140 @@ class PersonQueryPreprocessor:
             ),
             bbox=bbox,
         )
+
+
+    def prepare_reid(
+        self,
+        scene_path: str | Path,
+        workspace: str | Path,
+        progress_callback=None,
+        crop_margin: float = 0.10,
+    ) -> PreparedPersonQuery:
+        """
+        Production person-ReID preprocessing.
+
+        Live inference intentionally excludes
+        historical image-quality scoring,
+        difficulty classification, proxy resource
+        allocation, and adaptive crop decisions.
+
+        Current path:
+            YOLO detect -> fixed context crop -> OSNet.
+        """
+        workspace_path = Path(
+            workspace
+        )
+
+        workspace_path.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        margin = float(
+            crop_margin
+        )
+
+        if not (
+            0.0 <= margin <= 0.50
+        ):
+            raise ValueError(
+                "crop_margin must be "
+                "between 0.0 and 0.50."
+            )
+
+        if progress_callback is not None:
+            progress_callback(
+                "locating_person",
+                "Locating person",
+                (
+                    "YOLO is scanning the uploaded "
+                    "image for people."
+                ),
+                14,
+            )
+
+        detection = (
+            self.detector.detect(
+                scene_path
+            )
+        )
+
+        evidence = (
+            detection.evidence()
+        )
+
+        if progress_callback is not None:
+            progress_callback(
+                "person_located",
+                "Person located",
+                (
+                    f"Detected "
+                    f"{detection.person_count} "
+                    f"person(s); primary confidence "
+                    f"{detection.primary.confidence:.3f}."
+                ),
+                28,
+            )
+
+            progress_callback(
+                "person_crop",
+                "Creating person crop",
+                (
+                    "Cropping the primary detected "
+                    "person with a fixed 10% "
+                    "context margin."
+                ),
+                38,
+            )
+
+        crop_path = (
+            workspace_path
+            / "person.jpg"
+        )
+
+        self.detector.crop_primary(
+            scene_path,
+            detection,
+            crop_path,
+            margin=margin,
+        )
+
+        bbox = (
+            self.detector.expanded_box(
+                detection.primary,
+                detection.image_width,
+                detection.image_height,
+                margin,
+            )
+        )
+
+        if progress_callback is not None:
+            progress_callback(
+                "reid_preprocessing_complete",
+                "Person crop ready",
+                (
+                    "YOLO localization and fixed "
+                    "person cropping are complete. "
+                    "The crop is ready for trained "
+                    "OSNet inference."
+                ),
+                48,
+            )
+
+        return PreparedPersonQuery(
+            crop_path=crop_path,
+            evidence=evidence,
+            initial_difficulty=(
+                "not_used"
+            ),
+            crop_margin=margin,
+            person_count=(
+                detection.person_count
+            ),
+            primary_confidence=(
+                detection
+                .primary
+                .confidence
+            ),
+            bbox=bbox,
+        )

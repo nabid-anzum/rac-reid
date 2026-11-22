@@ -653,3 +653,16 @@ Each query is embedded once. The full learned gallery is searched directly.
 
 The historical proxy Top-K restriction and failed learned routers are not part
 of the public production search path.
+
+
+## Deterministic live ReID preprocessing
+
+Public search and gallery enrollment use a fixed 10% context margin after YOLO
+person localization.
+
+The production multi-resolution search does not execute the historical image
+quality extractor, query difficulty controller, proxy patch budget, or adaptive
+crop-margin selection.
+
+The historical components remain preserved for experiment reproducibility but
+are separated from live inference.
