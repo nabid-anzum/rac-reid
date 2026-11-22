@@ -127,3 +127,95 @@ fabricated from raw pixel statistics:
 The next integration stage will combine image-derived evidence with
 detector-derived evidence before the Resource Budget Controller chooses
 the query compute budget.
+
+## Milestones 3-4: Identity-Aware Dynamic Token Retrieval
+
+The resource controller is now connected to executable visual token
+processing and gallery retrieval.
+
+### Patch Tokenization
+
+Each normalized 128 x 256 query image is divided into 16 x 16 patches,
+producing 128 initial visual tokens.
+
+Each patch currently stores lightweight visual statistics:
+
+- mean RGB values
+- RGB standard deviation
+- luminance
+- local edge activity
+
+### Patch Saliency
+
+Patch importance is approximated from:
+
+- local texture
+- edge activity
+- a weak horizontal center prior
+
+This gives the adaptive controller an executable token-pruning mechanism
+without requiring a GPU.
+
+### Identity Anchors
+
+Pure saliency pruning can remove visually quiet but identity-relevant body
+areas.
+
+RAC-ReID therefore forces representation from three vertical regions:
+
+- upper region
+- middle region
+- lower region
+
+At least one token from each region is retained before the remaining token
+budget is filled according to saliency.
+
+### Progressive Token Restoration
+
+The complete token set is generated once for a query.
+
+Depending on retrieval difficulty, RAC-ReID progressively increases the
+retained subset:
+
+    30 percent -> 55 percent -> 80 percent
+
+This allows easy queries to consume fewer visual tokens while ambiguous
+queries progressively receive additional visual evidence.
+
+### Budgeted Descriptor
+
+The current CPU baseline aggregates retained patch features into a
+fixed-dimensional visual descriptor using:
+
+- global retained-token mean
+- global retained-token standard deviation
+- upper-region mean
+- middle-region mean
+- lower-region mean
+
+Gallery descriptors are generated at full lightweight budget and can be
+precomputed before query-time search.
+
+### Retrieval and Early Exit
+
+Gallery candidates are ranked using a normalized exponential similarity
+derived from descriptor RMS distance.
+
+The Resource Budget Controller then uses the existing Top-1 score and
+Top-1/Top-2 margin rules.
+
+A confident result exits immediately.
+
+An ambiguous result receives a larger token budget.
+
+A hard result that remains ambiguous becomes eligible for the future VLLM
+semantic reranking stage.
+
+### Current Research Boundary
+
+The handcrafted visual descriptor is not presented as the final learned
+person ReID model.
+
+Its role is to make the proposed resource-adaptive orchestration fully
+executable and measurable before integrating a learned ReID backbone such
+as OSNet.

@@ -144,3 +144,49 @@ Project-local runtime dependencies are pinned in requirements.txt:
 Run the image-signal demonstration with:
 
     PYTHONPATH=src .venv/bin/python scripts/image_signal_demo.py
+
+## Implemented Milestones 3-4: Dynamic Tokens and Adaptive Retrieval
+
+RAC-ReID now contains an executable resource-adaptive visual retrieval
+pipeline.
+
+The implementation performs the following stages:
+
+1. Extract low-cost image quality signals.
+2. Combine image signals with detector-provided evidence.
+3. Normalize the query to a person-ReID image canvas.
+4. Split the image into lightweight visual patch tokens.
+5. Estimate patch saliency using texture, edge activity, and a center prior.
+6. Preserve identity anchors from upper, middle, and lower body regions.
+7. Retain a query-specific percentage of visual tokens.
+8. Build a fixed-size descriptor from the retained tokens.
+9. Search against precomputed full-budget gallery descriptors.
+10. Exit early when retrieval confidence is sufficient.
+11. Restore additional tokens for ambiguous queries.
+12. Route unresolved hard queries toward the future VLLM stage.
+
+The default 128 x 256 canvas with 16 x 16 patches produces 128 visual
+tokens.
+
+Current default token budgets are:
+
+| Difficulty | Retention | Tokens |
+|---|---:|---:|
+| Easy | 30% | 39 / 128 |
+| Medium | 55% | 71 / 128 |
+| Hard | 80% | 103 / 128 |
+
+The query image is tokenized once. Progressive refinement reuses the same
+prepared token set and increases the retained subset instead of repeatedly
+decoding and tokenizing the image.
+
+Gallery descriptors are precomputed at the full lightweight budget, moving
+gallery feature generation outside the query-time retrieval path.
+
+Run the full pipeline demonstration with:
+
+    PYTHONPATH=src .venv/bin/python scripts/pipeline_demo.py
+
+The current descriptor is a lightweight engineering baseline used to test
+the adaptive routing and token-budget methodology. A learned ReID backbone
+will be introduced in a later milestone.
