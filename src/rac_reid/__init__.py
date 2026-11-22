@@ -4,6 +4,11 @@ from .image_signals import (
     ImageSignalExtractor,
     ImageSignals,
 )
+from .learned_reid import (
+    LearnedCandidate,
+    LearnedReIDResult,
+    OSNetReIDEncoder,
+)
 from .person_detector import (
     NoPersonDetectedError,
     PersonDetection,
@@ -48,7 +53,10 @@ __all__ = [
     "IdentityAwareTokenPruner",
     "ImageSignalExtractor",
     "ImageSignals",
+    "LearnedCandidate",
+    "LearnedReIDResult",
     "NoPersonDetectedError",
+    "OSNetReIDEncoder",
     "PersonDetection",
     "PersonDetectionResult",
     "PersonQueryPreprocessor",
@@ -66,4 +74,4 @@ __all__ = [
     "YOLOPersonDetector",
 ]
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"

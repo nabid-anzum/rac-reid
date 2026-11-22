@@ -271,3 +271,63 @@ The application supports:
 
 The application currently binds only to localhost. Public DNS and HTTPS will
 be configured only after the existing VPS reverse-proxy routing is inspected.
+
+## Implemented Milestone 8: Conditional Learned Person ReID
+
+RAC-ReID now includes a pretrained OSNet x1.0 appearance encoder:
+
+    osnet_x1_0_msmt17_combineall
+
+The learned model runs on CPU.
+
+The cascade is now:
+
+    YOLO person detection
+      -> adaptive context crop
+      -> cheap adaptive visual-patch retrieval
+      -> early exit when sufficient
+      -> conditional OSNet reranking when ambiguous
+      -> future semantic VLLM stage
+
+OSNet is not loaded during normal server startup.
+
+It is loaded lazily only when learned embedding work is required.
+
+Gallery OSNet embeddings are precomputed when an administrator adds an
+identity. Query-time learned reranking therefore computes only the query
+embedding and reuses stored gallery embeddings.
+
+The web interface reports whether OSNet was invoked, learned inference
+latency, embedding dimensionality, cosine ranking, and top-1/top-2 margin.
+
+OSNet cosine similarity is not treated as a calibrated probability.
+Threshold calibration will be performed during benchmark evaluation.
+
+### Headless server dependency
+
+The upstream `reid` package declares `opencv-python`.
+
+RAC-ReID runs on a headless VPS and uses `opencv-python-headless` instead.
+Both provide the `cv2` Python API required by the project, while the
+headless build avoids GUI/OpenGL dependencies.
+
+Only one OpenCV wheel is installed in the RAC-ReID virtual environment.
+
+### Evaluation boundary
+
+`osnet_x1_0_msmt17_combineall` was trained with all MSMT17 identities,
+including test identities.
+
+It must not be reported as an unbiased MSMT17 evaluation checkpoint.
+
+It can be used as a cross-domain pretrained baseline on Market-1501.
+
+## Gallery administration
+
+Permanent gallery modification requires a random server-side token stored at:
+
+    .runtime/admin.token
+
+The token is ignored by Git and has mode 600.
+
+Public search remains available without the token.

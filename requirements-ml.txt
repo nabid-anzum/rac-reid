@@ -1,4 +1,12 @@
-# RAC-ReID CPU detector dependency.
-# Install CPU PyTorch/torchvision first from:
+# RAC-ReID CPU ML dependencies.
+#
+# CPU PyTorch/torchvision are installed from:
 # https://download.pytorch.org/whl/cpu
+#
+# reid declares opencv-python in package metadata.
+# RAC-ReID deliberately substitutes opencv-python-headless
+# because this is a headless VPS and no cv2 GUI functions are used.
+
 ultralytics-opencv-headless==8.4.216
+opencv-python-headless==5.1.0.95
+reid==0.1.0

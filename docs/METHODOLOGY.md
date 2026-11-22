@@ -331,3 +331,61 @@ The web interface exposes the resource-adaptive process, including:
 
 The current server is intentionally bound to localhost until reverse-proxy
 and HTTPS deployment are completed.
+
+## Milestone 8: Conditional Learned ReID
+
+A real learned appearance encoder is now present in the resource-adaptive
+cascade.
+
+The lightweight patch descriptor remains the cheapest retrieval stage.
+
+When the cheap stage reaches its ambiguous escalation path, RAC-ReID invokes
+OSNet x1.0 and reranks the selected candidates using normalized
+512-dimensional appearance embeddings.
+
+Easy queries that exit earlier avoid the OSNet query forward pass.
+
+### Gallery precomputation
+
+Learned gallery embeddings are generated when identities are added and are
+persisted for reuse.
+
+At conditional query time only the query embedding is computed.
+
+This separates offline gallery computation from online query computation.
+
+### Learned metrics recorded
+
+The system records:
+
+- whether OSNet was invoked
+- cold model-loading latency
+- query embedding latency
+- embedding dimensionality
+- learned cosine ranking
+- learned top-1 score
+- learned top-1/top-2 margin
+- cheap retrieval score for comparison
+
+No learned similarity threshold is claimed as final before experimental
+calibration.
+
+### Scientific boundary
+
+The adaptive visual "tokens" in the current prototype are pre-encoder image
+patches.
+
+They are not OSNet internal tokens and are not VLM transformer tokens.
+
+Conditional OSNet demonstrates adaptive backbone invocation.
+
+Actual model-level visual-token pruning remains a later experimental stage.
+
+### Dataset boundary
+
+The pretrained `osnet_x1_0_msmt17_combineall` checkpoint contains all
+MSMT17 identities.
+
+It is therefore unsuitable for unbiased evaluation on MSMT17.
+
+Market-1501 can be used for cross-domain evaluation of this checkpoint.

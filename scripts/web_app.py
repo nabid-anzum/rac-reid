@@ -4,6 +4,7 @@ import argparse
 import cgi
 import html
 import json
+import secrets
 import shutil
 import uuid
 from http.server import (
@@ -13,6 +14,7 @@ from http.server import (
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 from PIL import Image
 
 from rac_reid import (
@@ -21,6 +23,7 @@ from rac_reid import (
     GalleryIndex,
     ImageSignalExtractor,
     NoPersonDetectedError,
+    OSNetReIDEncoder,
     PersonQueryPreprocessor,
     ResourceController,
     YOLOPersonDetector,
@@ -48,6 +51,16 @@ MODEL_PATH = (
     / "yolo26n.pt"
 )
 
+REID_CACHE = (
+    RUNTIME
+    / "reid-cache"
+)
+
+ADMIN_TOKEN_FILE = (
+    RUNTIME
+    / "admin.token"
+)
+
 MAX_UPLOAD = (
     12
     * 1024
@@ -67,10 +80,14 @@ class GalleryStore:
         self,
         root: Path,
         preprocessor: PersonQueryPreprocessor,
+        learned_encoder: OSNetReIDEncoder,
     ) -> None:
         self.root = root
         self.preprocessor = (
             preprocessor
+        )
+        self.learned_encoder = (
+            learned_encoder
         )
 
         self.originals = (
@@ -81,6 +98,11 @@ class GalleryStore:
         self.crops = (
             root
             / "crops"
+        )
+
+        self.embeddings = (
+            root
+            / "embeddings"
         )
 
         self.metadata = (
@@ -94,6 +116,11 @@ class GalleryStore:
         )
 
         self.crops.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        self.embeddings.mkdir(
             parents=True,
             exist_ok=True,
         )
@@ -214,15 +241,41 @@ class GalleryStore:
             / f"{identifier}.jpg"
         )
 
-        shutil.copy2(
-            uploaded,
-            original_target,
+        embedding_target = (
+            self.embeddings
+            / f"{identifier}.npy"
         )
 
-        shutil.copy2(
-            prepared.crop_path,
-            crop_target,
-        )
+        try:
+            shutil.copy2(
+                uploaded,
+                original_target,
+            )
+
+            shutil.copy2(
+                prepared.crop_path,
+                crop_target,
+            )
+
+            self.learned_encoder.save_embedding(
+                crop_target,
+                embedding_target,
+            )
+
+        except Exception:
+            original_target.unlink(
+                missing_ok=True
+            )
+
+            crop_target.unlink(
+                missing_ok=True
+            )
+
+            embedding_target.unlink(
+                missing_ok=True
+            )
+
+            raise
 
         entry = {
             "id": identifier,
@@ -232,6 +285,9 @@ class GalleryStore:
             ),
             "crop": str(
                 crop_target
+            ),
+            "embedding": str(
+                embedding_target
             ),
             "confidence": (
                 prepared
@@ -284,6 +340,105 @@ class GalleryStore:
 
         return self._cached_index
 
+    def learned_rerank(
+        self,
+        query_crop: Path,
+        cheap_candidates,
+    ):
+        entries = self.entries()
+
+        by_label = {
+            item["label"]:
+                item
+            for item in entries
+        }
+
+        labels = [
+            candidate.label
+            for candidate
+            in cheap_candidates
+        ]
+
+        cheap_scores = {
+            candidate.label:
+                candidate.score
+            for candidate
+            in cheap_candidates
+        }
+
+        learned = {}
+
+        changed = False
+
+        for label in labels:
+            entry = by_label.get(
+                label
+            )
+
+            if entry is None:
+                continue
+
+            embedding_value = (
+                entry.get(
+                    "embedding"
+                )
+            )
+
+            if embedding_value:
+                embedding_path = Path(
+                    embedding_value
+                )
+            else:
+                embedding_path = (
+                    self.embeddings
+                    / f"{entry['id']}.npy"
+                )
+
+            if not embedding_path.is_file():
+                self.learned_encoder.save_embedding(
+                    Path(
+                        entry["crop"]
+                    ),
+                    embedding_path,
+                )
+
+                entry[
+                    "embedding"
+                ] = str(
+                    embedding_path
+                )
+
+                changed = True
+
+            learned[
+                label
+            ] = (
+                self.learned_encoder
+                .load_embedding(
+                    embedding_path
+                )
+            )
+
+        if changed:
+            self._write(
+                entries
+            )
+
+        if len(learned) < 2:
+            raise RuntimeError(
+                "At least two learned gallery "
+                "embeddings are required."
+            )
+
+        return (
+            self.learned_encoder
+            .rerank_precomputed(
+                query_path=query_crop,
+                gallery_embeddings=learned,
+                cheap_scores=cheap_scores,
+            )
+        )
+
 
 class AppState:
     def __init__(
@@ -322,10 +477,20 @@ class AppState:
             )
         )
 
+        self.learned_encoder = (
+            OSNetReIDEncoder(
+                cache_dir=(
+                    REID_CACHE
+                ),
+                torch_threads=2,
+            )
+        )
+
         self.gallery = (
             GalleryStore(
                 GALLERY_ROOT,
                 self.preprocessor,
+                self.learned_encoder,
             )
         )
 
@@ -378,9 +543,24 @@ class AppState:
             )
         )
 
+        learned_result = None
+
+        if (
+            result.final_action
+            == "invoke_vllm"
+        ):
+            learned_result = (
+                self.gallery
+                .learned_rerank(
+                    prepared.crop_path,
+                    result.candidates,
+                )
+            )
+
         return (
             prepared,
             result,
+            learned_result,
         )
 
 
@@ -406,6 +586,16 @@ class ReIDHandler(
                 ),
                 "model": (
                     MODEL_PATH.name
+                ),
+                "learned_model": (
+                    self.state
+                    .learned_encoder
+                    .model_name
+                ),
+                "learned_model_loaded": (
+                    self.state
+                    .learned_encoder
+                    .loaded
                 ),
                 "device": "cpu",
             }
@@ -439,6 +629,10 @@ class ReIDHandler(
             if self.path == "/gallery":
                 form = (
                     self._form()
+                )
+
+                self._require_admin(
+                    form
                 )
 
                 label = (
@@ -486,7 +680,11 @@ class ReIDHandler(
                     )
                 )
 
-                prepared, result = (
+                (
+                    prepared,
+                    result,
+                    learned_result,
+                ) = (
                     self.state.search(
                         upload
                     )
@@ -499,6 +697,7 @@ class ReIDHandler(
                             self._result_html(
                                 prepared,
                                 result,
+                                learned_result,
                             )
                         )
                     ),
@@ -510,6 +709,14 @@ class ReIDHandler(
                 404,
                 self._page(
                     message="Not found."
+                ),
+            )
+
+        except PermissionError as exc:
+            self._html(
+                403,
+                self._page(
+                    message=str(exc)
                 ),
             )
 
@@ -533,6 +740,40 @@ class ReIDHandler(
                         f"{exc}"
                     )
                 ),
+            )
+
+    def _require_admin(
+        self,
+        form,
+    ) -> None:
+        if not ADMIN_TOKEN_FILE.is_file():
+            raise PermissionError(
+                "Gallery administration "
+                "is unavailable."
+            )
+
+        expected = (
+            ADMIN_TOKEN_FILE
+            .read_text(
+                encoding="utf-8"
+            )
+            .strip()
+        )
+
+        provided = (
+            form.getfirst(
+                "admin_token",
+                "",
+            )
+            .strip()
+        )
+
+        if not expected or not secrets.compare_digest(
+            provided,
+            expected,
+        ):
+            raise PermissionError(
+                "Invalid gallery admin token."
             )
 
     def _form(
@@ -774,16 +1015,23 @@ th, td {{
 Resource-Adaptive Cascaded Person Re-Identification research demo.
 </p>
 <p class="small">
-CPU-only detector and adaptive token pipeline.
-The semantic VLLM reranking stage is not connected yet.
+CPU-only YOLO detection, adaptive visual-patch processing,
+and conditional OSNet person-ReID reranking.
+A future semantic VLLM stage remains unconnected.
 </p>
 {message_html}
 
 <div class="card">
 <h2>1. Add gallery identity</h2>
+<p class="small">
+Gallery writes require the server admin token.
+OSNet embeddings are precomputed when an identity is added.
+</p>
 <form method="post" action="/gallery" enctype="multipart/form-data">
 <label>Identity label</label><br>
 <input name="label" required maxlength="80"><br>
+<label>Admin token</label><br>
+<input type="password" name="admin_token" autocomplete="off" required><br>
 <label>Image</label><br>
 <input type="file" name="image" accept="image/*" required><br>
 <button type="submit">Add to gallery</button>
@@ -812,6 +1060,7 @@ The semantic VLLM reranking stage is not connected yet.
         self,
         prepared,
         result,
+        learned_result,
     ) -> str:
         candidate_rows = ""
 
@@ -847,18 +1096,64 @@ The semantic VLLM reranking stage is not connected yet.
                 "</tr>"
             )
 
-        semantic_note = ""
+        if learned_result is None:
+            learned_html = """
+<h3>Conditional learned ReID</h3>
+<p>
+<strong>OSNet invocation: skipped.</strong>
+</p>
+<p class="small">
+The cheap adaptive path did not require learned reranking.
+</p>
+"""
 
-        if (
-            result.final_action
-            == "invoke_vllm"
-        ):
-            semantic_note = (
-                '<p class="small">'
-                "Visual retrieval reached the semantic-routing threshold. "
-                "The future VLLM stage would rerank these candidates."
-                "</p>"
-            )
+        else:
+            learned_rows = ""
+
+            for rank, candidate in enumerate(
+                learned_result.candidates,
+                start=1,
+            ):
+                learned_rows += (
+                    "<tr>"
+                    f"<td>{rank}</td>"
+                    "<td>"
+                    + html.escape(
+                        candidate.label
+                    )
+                    + "</td>"
+                    f"<td>{candidate.cosine_similarity:.4f}</td>"
+                    f"<td>{candidate.cheap_score:.4f}</td>"
+                    "</tr>"
+                )
+
+            learned_html = f"""
+<h3>Conditional learned ReID</h3>
+<p>
+<strong>OSNet invocation: yes.</strong><br>
+Model: {html.escape(learned_result.model_name)}<br>
+Embedding dimensions: {learned_result.embedding_dim}<br>
+Query inference: {learned_result.inference_seconds:.4f} s<br>
+Cold model load: {learned_result.model_load_seconds:.4f} s<br>
+OSNet top-1 cosine: {learned_result.top1:.4f}<br>
+OSNet top-1/top-2 margin: {learned_result.margin:.4f}
+</p>
+
+<table>
+<tr>
+<th>Rank</th>
+<th>Identity</th>
+<th>OSNet cosine</th>
+<th>Cheap score</th>
+</tr>
+{learned_rows}
+</table>
+
+<p class="small">
+Cosine similarity is not treated as a calibrated probability.
+Thresholds will be calibrated during benchmark evaluation.
+</p>
+"""
 
         return f"""
 <div class="card">
@@ -873,8 +1168,6 @@ Unique tokens processed: {result.total_query_tokens_processed}<br>
 Token saving vs full query: {result.token_saving_ratio:.1%}<br>
 Final action: {html.escape(result.final_action)}
 </p>
-
-{semantic_note}
 
 <h3>Adaptive stages</h3>
 <table>
@@ -900,6 +1193,8 @@ Final action: {html.escape(result.final_action)}
 </tr>
 {candidate_rows}
 </table>
+
+{learned_html}
 </div>
 """
 
@@ -1006,6 +1301,16 @@ def main() -> None:
                     ),
                     "model": (
                         MODEL_PATH.name
+                    ),
+                    "learned_model": (
+                        state
+                        .learned_encoder
+                        .model_name
+                    ),
+                    "learned_model_loaded": (
+                        state
+                        .learned_encoder
+                        .loaded
                     ),
                     "device": "cpu",
                 },
