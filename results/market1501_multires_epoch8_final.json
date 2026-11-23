@@ -1,0 +1,81 @@
+{
+  "architecture": "OSNet x1.0",
+  "checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+  "comparison": {
+    "map_delta_pp_efficient_minus_full": -3.2995254805774508,
+    "map_retention_percent": 94.42634104925641,
+    "minp_delta_pp_efficient_minus_full": -2.7929967977216172,
+    "rank10_delta_pp_efficient_minus_full": 0.7422802850356334,
+    "rank1_delta_pp_efficient_minus_full": -1.4548693586698391,
+    "rank1_retention_percent": 98.17095931317655,
+    "rank5_delta_pp_efficient_minus_full": 0.3859857482185163
+  },
+  "completed_utc": "2026-11-23T09:14:59+00:00",
+  "dataset": {
+    "gallery_images": 19732,
+    "gallery_manifest_sha256": "919e78042694b5ae70e8dc78be8f5131c504a52dee30b69d50f84f7b28e78e5e",
+    "name": "Market-1501",
+    "query_images": 3368,
+    "query_manifest_sha256": "3deb3a5d37cbaadf688e98b4f469b78b48b833076bbd1d88388db02592eabc78"
+  },
+  "date": "2026-11-23",
+  "device": "cpu",
+  "efficient_160x80": {
+    "map": 55.89902810399838,
+    "metric_wall_seconds": 5.8466082671657205,
+    "minp": 18.160435755918826,
+    "rank1": 78.08788598574822,
+    "rank10": 92.48812351543944,
+    "rank5": 89.5190023752969,
+    "scored_queries": 3368
+  },
+  "embedding_dim": 512,
+  "embedding_extraction": {
+    "gallery_full_wall_seconds": 911.6027431306429,
+    "query_efficient_wall_seconds": 108.6411718800664,
+    "query_full_wall_seconds": 150.37631912901998
+  },
+  "experiment": "Frozen epoch-8 multi-resolution OSNet final Market-1501 evaluation",
+  "frozen_git_commit": "222cf935974e6d8c10a336eebe4eb04167f71c8b",
+  "full_256x128": {
+    "map": 59.19855358457583,
+    "metric_wall_seconds": 5.784966149833053,
+    "minp": 20.953432553640443,
+    "rank1": 79.54275534441805,
+    "rank10": 91.7458432304038,
+    "rank5": 89.13301662707839,
+    "scored_queries": 3368
+  },
+  "model": "osnet_x1_0_multires_epoch8",
+  "protocol": {
+    "distance": "cosine similarity on L2-normalized embeddings",
+    "efficient_query_resolution": [
+      160,
+      80
+    ],
+    "euclidean_equivalence_note": "For L2-normalized embeddings, cosine and squared Euclidean produce identical rankings.",
+    "full_query_resolution": [
+      256,
+      128
+    ],
+    "gallery_resolution": [
+      256,
+      128
+    ],
+    "junk_pid_minus_1_removed": true,
+    "pid_0_distractors_retained": true,
+    "query_person_detection": false,
+    "reason_no_yolo": "Market-1501 query/gallery images are already person crops.",
+    "reranking": false,
+    "same_pid_same_camera_removed": true,
+    "standard_market1501": true
+  },
+  "scientific_policy": {
+    "post_test_tuning_allowed": false,
+    "result_is_final": true,
+    "test_set_used_for_epoch_selection": false,
+    "test_set_used_for_training": false
+  },
+  "status": "FINAL",
+  "torch_threads": 4
+}

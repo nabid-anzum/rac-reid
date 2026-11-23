@@ -79,6 +79,38 @@ cross-domain baseline:
 That baseline is preserved separately from the trained multiresolution
 experiment.
 
+
+## Final frozen Market-1501 result
+
+The architecture and epoch-8 checkpoint were frozen before the one-time
+official Market-1501 test.
+
+| Metric | Efficient 160x80 | Full 256x128 |
+|---|---:|---:|
+| mAP | **55.899%** | **59.199%** |
+| Rank-1 | **78.088%** | **79.543%** |
+| Rank-5 | 89.519% | 89.133% |
+| Rank-10 | 92.488% | 91.746% |
+| mINP | 18.160% | 20.953% |
+
+Efficient vs Full:
+
+- Rank-1 delta: **-1.455 pp**
+- mAP delta: **-3.300 pp**
+- Rank-1 retention: **98.171%**
+- controlled median OSNet saving: **+22.973%**
+
+**Final research headline:** the 160x80 query path retains
+**98.171%** of full-resolution Rank-1 while reducing
+median OSNet query inference by **22.973%**.
+
+Full final-test record:
+
+- `docs/FINAL_MARKET1501_EVALUATION.md`
+- `results/market1501_multires_epoch8_final.json`
+
+No post-test tuning is permitted.
+
 ## Controlled production benchmark — 2026-11-23
 
 Protocol:
@@ -155,7 +187,8 @@ Full record:
 
 ## Scientific safeguards
 
-- official trained-model Market-1501 final query/gallery test remains untouched
+- the frozen trained-model Market-1501 final evaluation was completed once on 2026-11-23
+- no post-test tuning is allowed
 - held-out development identities are separate from parameter updates and epoch selection
 - failed learned routers are not deployed
 - true PID/camera metadata is not used by runtime search

@@ -621,5 +621,9 @@ Key machine-readable evidence:
 - [`results/production_multires_benchmark_2026-11-23.json`](results/production_multires_benchmark_2026-11-23.json)
 - [`results/project_test_summary_2026-11-23.json`](results/project_test_summary_2026-11-23.json)
 
-The final trained-model Market-1501 query/gallery evaluation remains deferred
-until the research architecture is frozen.
+The frozen epoch-8 model has now completed its one-time final standard
+Market-1501 evaluation. See
+[`docs/FINAL_MARKET1501_EVALUATION.md`](docs/FINAL_MARKET1501_EVALUATION.md)
+and
+[`results/market1501_multires_epoch8_final.json`](results/market1501_multires_epoch8_final.json).
+No post-test model or threshold tuning is permitted.

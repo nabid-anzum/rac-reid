@@ -66,3 +66,50 @@ Evidence:
 
 The benchmark image is used for timing only and is not treated as retrieval
 accuracy evidence.
+
+
+## Step 29H-F — Final frozen Market-1501 evaluation
+
+The epoch-8 architecture and checkpoint were frozen before the official
+Market-1501 test was used.
+
+Standard protocol:
+
+- 3,368 query images
+- 19,732 gallery images
+- Efficient query: 160x80
+- Full query: 256x128
+- gallery: 256x128
+- no YOLO because Market-1501 provides person crops
+- same-PID/same-camera exclusion
+- PID -1 junk filtering
+- no re-ranking
+
+Final Efficient 160x80:
+
+- mAP: **55.899%**
+- Rank-1: **78.088%**
+- Rank-5: **89.519%**
+- Rank-10: **92.488%**
+- mINP: **18.160%**
+
+Final Full 256x128:
+
+- mAP: **59.199%**
+- Rank-1: **79.543%**
+- Rank-5: **89.133%**
+- Rank-10: **91.746%**
+- mINP: **20.953%**
+
+Efficient relative to Full:
+
+- Rank-1 delta: **-1.455 pp**
+- mAP delta: **-3.300 pp**
+- Rank-1 retention: **98.171%**
+- controlled OSNet median saving: **+22.973%**
+
+Final result SHA-256:
+
+`a7b14a330d5dd6691635d32199aa72ace3c1389d5f00e88b78a05665da3bc8f1`
+
+The official test set is now consumed. No post-test tuning is permitted.
