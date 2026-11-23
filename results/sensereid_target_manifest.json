@@ -1,0 +1,50 @@
+{
+  "archive": {
+    "bytes": 46987438,
+    "sha256": "10f02fda87794853c174f2de9bff7343edcd12421483273329780e7150cfaa57"
+  },
+  "dataset": "SenseReID",
+  "model_inference_before_experiment4_checkpoint_freeze": false,
+  "observed_archive_statistics": {
+    "all_query_identities_present_in_gallery": true,
+    "gallery": {
+      "camera_labels": [
+        0,
+        1
+      ],
+      "filename_size_manifest_sha256": "4e8392d697ff8527d9a187d71320e45352c6063d557170f564c5c57c66efde93",
+      "identities": 1718,
+      "images": 3388
+    },
+    "query": {
+      "camera_labels": [
+        0,
+        1
+      ],
+      "filename_size_manifest_sha256": "044427adcb3b5925a005db4668b968e0dd219f01f89655d9612fbfa033994f46",
+      "identities": 521,
+      "images": 1040
+    }
+  },
+  "published_metadata_discrepancy": {
+    "handling": "No files or person IDs are modified. Experiment 4 uses the downloaded archive exactly as observed and records its cryptographic manifests.",
+    "later_lreid_literature_corroborates_observed_ids": true,
+    "observed_downloaded_archive": {
+      "gallery_identities": 1718,
+      "gallery_images": 3388,
+      "query_identities": 521,
+      "query_images": 1040
+    },
+    "original_spindle_net_and_torchreid_docstring": {
+      "gallery_identities": 1717,
+      "gallery_images": 3388,
+      "query_identities": 522,
+      "query_images": 1040
+    }
+  },
+  "role": "Experiment-4 untouched evaluation-only target",
+  "training_images": 0,
+  "used_for_epoch_selection": false,
+  "used_for_hyperparameter_selection": false,
+  "used_for_training": false
+}

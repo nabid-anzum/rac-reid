@@ -279,3 +279,48 @@ Post-benchmark tuning is prohibited.
 Result SHA-256:
 
 `55430f6e21358abc6d80f8987558302a687e18bf3c05ac569a185b5ac0a401c5`
+
+
+## Step 32A — Experiment 4 multi-domain preregistration
+
+Experiment 4 was preregistered before any multi-domain gradient update.
+
+Sources:
+
+- Market-1501
+- CUHK03-NP Detected
+
+Untouched target:
+
+- SenseReID
+
+The downloaded SenseReID archive contains:
+
+- 1,040 query images / 521 query identities
+- 3,388 gallery images / 1,718 gallery identities
+
+The archive differs by one identity in each split from the 522/1,717
+headline statistics in the original paper and Torchreid documentation.
+
+The observed 521/1,718 identity statistics are also reported by later
+lifelong/generalization ReID literature.
+
+No archive contents were modified.
+
+No SenseReID model inference occurred before preregistration.
+
+SenseReID cannot influence training, checkpoint selection, or
+hyperparameter selection.
+
+Exactly one target evaluation is permitted after the Experiment-4
+checkpoint is frozen.
+
+Post-target tuning is prohibited.
+
+Protocol:
+
+`configs/experiment4_multidomain_market_cuhk_sensereid.json`
+
+Target manifest:
+
+`results/sensereid_target_manifest.json`

@@ -1,0 +1,138 @@
+{
+  "date": "2026-11-23",
+  "epoch_selection": {
+    "held_out_used": false,
+    "primary": "highest macro-average Efficient calibration Rank-1 across Market-1501 and CUHK03",
+    "sense_reid_used": false,
+    "tie_break_1": "highest macro-average Full calibration Rank-1",
+    "tie_break_2": "highest macro-average low/full embedding cosine"
+  },
+  "experiment": "Experiment 4 - joint Market-1501 + CUHK03 multi-domain training with unseen SenseReID evaluation",
+  "final_target_evaluation": {
+    "efficient_query": [
+      160,
+      80
+    ],
+    "full_query": [
+      256,
+      128
+    ],
+    "gallery": [
+      256,
+      128
+    ],
+    "metrics": [
+      "mAP",
+      "Rank-1",
+      "Rank-5",
+      "Rank-10",
+      "mINP"
+    ],
+    "post_target_tuning_allowed": false,
+    "reranking": false,
+    "similarity": "cosine on L2-normalized embeddings"
+  },
+  "model": {
+    "architecture": "OSNet x1.0",
+    "efficient_resolution": [
+      160,
+      80
+    ],
+    "frozen_modules": [
+      "conv1",
+      "conv2"
+    ],
+    "full_resolution": [
+      256,
+      128
+    ],
+    "initialization": "osnet_x1_0_msmt17_combineall",
+    "use_experiment1_checkpoint": false,
+    "use_experiment3_checkpoint": false
+  },
+  "production": {
+    "changed": false,
+    "experiment4_model_deployed": false
+  },
+  "research_question": "Can joint source-domain training on Market-1501 and CUHK03 improve generalization to an untouched third domain while preserving the 160x80 Efficient versus 256x128 Full relationship?",
+  "source_domains": {
+    "classification_identity_namespace": "dataset-scoped",
+    "cuhk03_np_detected": {
+      "calibration": {
+        "identities": 157,
+        "images": 1515,
+        "rule": "PID % 5 == 3"
+      },
+      "gradient": {
+        "identities": 452,
+        "images": 4352,
+        "rule": "PID % 5 in {0,1,2}"
+      },
+      "held_out": {
+        "identities": 158,
+        "images": 1498,
+        "rule": "PID % 5 == 4"
+      },
+      "identities": 767,
+      "images": 7365,
+      "manifest_sha256": "daab40687766fc4ccad1c08cce65b64ce06142c3ed86ed9e7589ca4cc21f3aa6"
+    },
+    "market1501": {
+      "calibration": {
+        "identities": 144,
+        "images": 2515,
+        "rule": "PID % 5 == 3"
+      },
+      "gradient": {
+        "identities": 449,
+        "images": 7811,
+        "rule": "PID % 5 in {0,1,2}"
+      },
+      "held_out": {
+        "identities": 158,
+        "images": 2610,
+        "rule": "PID % 5 == 4"
+      },
+      "identities": 751,
+      "images": 12936,
+      "manifest_sha256": "9f413d5102106d9a1ca192a372c118ffd0ff73039f4fb36ed3b431838853e9af"
+    }
+  },
+  "status": "PRE_REGISTERED_BEFORE_TRAINING",
+  "training": {
+    "backbone_learning_rate": 5e-05,
+    "batch_size": 16,
+    "classifier_learning_rate": 0.0005,
+    "device": "CPU",
+    "epochs": 8,
+    "loss_weights": {
+      "classification": 0.5,
+      "cross_resolution": 0.25,
+      "full_teacher_cosine": 0.25,
+      "low_teacher_cosine": 1.0,
+      "relational": 0.5
+    },
+    "optimizer": "AdamW",
+    "sampling": "combined source-domain gradient population with deterministic epoch shuffle",
+    "seed": 42,
+    "teacher": "original pretrained full-resolution OSNet",
+    "torch_threads": 4,
+    "weight_decay": 0.0005
+  },
+  "unseen_target": {
+    "archive_sha256": "10f02fda87794853c174f2de9bff7343edcd12421483273329780e7150cfaa57",
+    "dataset": "SenseReID",
+    "evaluation_count": 1,
+    "gallery_identities": 1718,
+    "gallery_images": 3388,
+    "gallery_manifest_sha256": "4e8392d697ff8527d9a187d71320e45352c6063d557170f564c5c57c66efde93",
+    "metadata_discrepancy_documented": true,
+    "model_inference_before_checkpoint_freeze": false,
+    "query_identities": 521,
+    "query_images": 1040,
+    "query_manifest_sha256": "044427adcb3b5925a005db4668b968e0dd219f01f89655d9612fbfa033994f46",
+    "used_for_epoch_selection": false,
+    "used_for_hyperparameter_selection": false,
+    "used_for_training": false
+  }
+}
