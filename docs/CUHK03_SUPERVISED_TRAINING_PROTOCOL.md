@@ -145,3 +145,48 @@ Experiment 3 is research-only.
 
 The current production RAC-ReID checkpoint is not replaced by this experiment
 unless a later, explicitly separate deployment decision is made.
+
+## Experiment-3 implementation-frozen loss definitions
+
+The original Experiment-1 repository preserved the objective names and
+coefficients but did not preserve the original optimizer loop as a reusable
+trainer script.
+
+Therefore Experiment 3 freezes the exact mathematical implementation below
+before the first CUHK03 gradient update.
+
+All embeddings are L2-normalized for cosine-based terms.
+
+### Low-resolution teacher cosine
+
+`L_low = 1 - mean(cos(student_160x80, teacher_256x128))`
+
+### Full-resolution teacher cosine
+
+`L_full = 1 - mean(cos(student_256x128, teacher_256x128))`
+
+### Relational similarity
+
+For each minibatch, form pairwise cosine-similarity matrices for the
+low-resolution student, full-resolution student, and frozen teacher.
+
+`L_rel = 0.5*MSE(S_low, S_teacher) + 0.5*MSE(S_full, S_teacher)`
+
+### Cross-resolution consistency
+
+`L_cross = 1 - mean(cos(student_160x80, student_256x128))`
+
+### Identity classification
+
+A separate linear classifier is trained on the 512-D embeddings of the
+gradient-training identities.
+
+`L_cls = 0.5*CE(classifier(low_raw), identity) + 0.5*CE(classifier(full_raw), identity)`
+
+### Total objective
+
+`L = 1.00*L_low + 0.25*L_full + 0.50*L_rel + 0.25*L_cross + 0.50*L_cls`
+
+These formulas are committed to Git before Experiment-3 training starts.
+They are the frozen Experiment-3 implementation and are not claimed to be a
+byte-for-byte recovery of the historical Step 29F-B optimizer loop.
