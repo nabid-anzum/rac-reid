@@ -240,3 +240,16 @@ Full analysis:
 6. `docs/REAL_WORLD_E2E_TEST_2026-11-23.md`
 7. `results/project_test_summary_2026-11-23.json`
 8. `docs/EXPERIMENT_HISTORY.md`
+
+
+## Reproducibility evidence
+
+For the exact evaluator code, experiment audit markers, dataset checksums,
+split manifests, raw per-variant metric records, and complete software-test
+evidence, see:
+
+`docs/REPRODUCIBILITY_EVIDENCE.md`
+
+This repository intentionally does not redistribute the raw third-party
+research image datasets. Instead, their archive SHA-256 values and split
+manifests are recorded so the exact dataset copies can be verified.

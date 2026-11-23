@@ -1,0 +1,10 @@
+{
+  "completed_utc": "2026-11-23T09:41:39+00:00",
+  "primary_variant": "detected",
+  "result_path": "/root/rac-reid/.runtime/experiments/cuhk03-zero-shot/cuhk03_zero_shot_epoch8_final.json",
+  "result_sha256": "9cf940063b73af21b1b67d84b7ed590ba378f6ff5c89105ffabee806259a34d7",
+  "secondary_variant": "labeled",
+  "status": "ZERO_SHOT_EVALUATION_COMPLETE",
+  "training_on_cuhk03": false,
+  "tuning_on_cuhk03": false
+}

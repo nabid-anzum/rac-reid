@@ -648,3 +648,24 @@ See:
 - `docs/CUHK03_ZERO_SHOT_EVALUATION.md`
 - `results/cuhk03_zero_shot_epoch8_final.json`
 - `results/cuhk03_zero_shot_protocol.json`
+
+
+## Reproducibility package
+
+A complete reviewer-facing evidence index is available at:
+
+**[`docs/REPRODUCIBILITY_EVIDENCE.md`](docs/REPRODUCIBILITY_EVIDENCE.md)**
+
+It includes links to:
+
+- training and final Market-1501 results
+- the CUHK03-NP preregistered protocol
+- the exact CUHK03 zero-shot evaluator
+- raw Detected and Labeled metric records
+- experiment start/completion audit markers
+- dataset archive checksums and split manifests
+- controlled efficiency measurements
+- software-test logs and summaries
+
+Raw third-party research datasets and temporary embedding caches are not
+committed to the repository; their hashes and provenance are recorded instead.

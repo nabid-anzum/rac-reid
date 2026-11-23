@@ -1,0 +1,11 @@
+{
+  "frozen_checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+  "frozen_source_commit": "f4f49db012c6c12004c0c6495fc778728aa134b9",
+  "policy": "Report both variants. Detected remains primary regardless of result.",
+  "primary_variant": "detected",
+  "secondary_variant": "labeled",
+  "started_utc": "2026-11-23T09:29:12+00:00",
+  "status": "ZERO_SHOT_EVALUATION_STARTED",
+  "training_on_cuhk03": false,
+  "tuning_on_cuhk03": false
+}

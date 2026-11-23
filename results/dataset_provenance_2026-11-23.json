@@ -1,0 +1,70 @@
+{
+  "cuhk03_np": {
+    "archive_bytes": 1225247366,
+    "archive_filename": "cuhk03-np.zip",
+    "archive_sha256": "9a11f21f6b3dd175bb1be41baaf88298b894dcce3b9efdbffb4ee247f019ae93",
+    "dataset_manifests": {
+      "detected": {
+        "bounding_box_test": {
+          "filename_size_manifest_sha256": "f61fc82da3f78452b4df191975d7ff6613b08aec73f6df1be610ce90c1425d51",
+          "images": 5332
+        },
+        "bounding_box_train": {
+          "filename_size_manifest_sha256": "daab40687766fc4ccad1c08cce65b64ce06142c3ed86ed9e7589ca4cc21f3aa6",
+          "images": 7365
+        },
+        "query": {
+          "filename_size_manifest_sha256": "9e60de74c816d0999464294e5ef32fa22264b8b1593efa5406ed8658dabec7d3",
+          "images": 1400
+        }
+      },
+      "labeled": {
+        "bounding_box_test": {
+          "filename_size_manifest_sha256": "4557120c6b09b58709dc9daa0809d60eed9f7462fafc1e25734997babfdd250e",
+          "images": 5328
+        },
+        "bounding_box_train": {
+          "filename_size_manifest_sha256": "5c259c8ac877fb03aee379b7169a3f20afe47b785f703bf235bd1fa96f6f7274",
+          "images": 7368
+        },
+        "query": {
+          "filename_size_manifest_sha256": "21ab4673fc58fc3146c7bd2a8dae9dbe0f895e282ddac524e753b45ea97799a7",
+          "images": 1400
+        }
+      }
+    },
+    "detected_raw_metrics": "results/cuhk03_detected_zero_shot_metrics.json",
+    "download_file_id": "1pBCIAGSZ81pgvqjC-lUHtl0OYV1icgkz",
+    "evaluation_document": "docs/CUHK03_ZERO_SHOT_EVALUATION.md",
+    "evaluator": "scripts/evaluate_cuhk03_zero_shot.py",
+    "final_result": "results/cuhk03_zero_shot_epoch8_final.json",
+    "labeled_raw_metrics": "results/cuhk03_labeled_zero_shot_metrics.json",
+    "name": "CUHK03-NP",
+    "primary_variant": "detected",
+    "protocol": "767/700 new protocol",
+    "protocol_record": "results/cuhk03_zero_shot_protocol.json",
+    "release_page": "https://github.com/zhunzhong07/person-re-ranking/tree/master/CUHK03-NP",
+    "release_reference": "zhunzhong07/person-re-ranking CUHK03-NP release",
+    "secondary_variant": "labeled",
+    "training_on_cuhk03": false,
+    "tuning_on_cuhk03": false
+  },
+  "date": "2026-11-23",
+  "market1501": {
+    "archive_filename": "Market-1501-v15.09.15.zip",
+    "archive_sha256": "416bb77b5a2449b32e936f623cbee58becf1a9e7e936f36380cb8f9ab928fe96",
+    "evaluation_document": "docs/FINAL_MARKET1501_EVALUATION.md",
+    "final_result": "results/market1501_multires_epoch8_final.json",
+    "name": "Market-1501",
+    "retrieval_source_record": "Downloaded during RAC-ReID Step 27 from the e8035669/reid-datasets Hugging Face dataset cache.",
+    "standard_test": {
+      "gallery_filename_size_manifest_sha256": "919e78042694b5ae70e8dc78be8f5131c504a52dee30b69d50f84f7b28e78e5e",
+      "gallery_images": 19732,
+      "query_filename_size_manifest_sha256": "3deb3a5d37cbaadf688e98b4f469b78b48b833076bbd1d88388db02592eabc78",
+      "query_images": 3368
+    }
+  },
+  "purpose": "Dataset provenance and integrity evidence for RAC-ReID experiments. Raw research images are intentionally not committed to Git.",
+  "raw_datasets_committed_to_git": false,
+  "reason_raw_datasets_not_committed": "Research datasets are large external artifacts. GitHub stores source, protocols, evaluator code, checksums, manifests, and results instead."
+}
