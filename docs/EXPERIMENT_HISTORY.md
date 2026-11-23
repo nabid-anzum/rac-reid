@@ -157,3 +157,41 @@ Result SHA-256:
 `9cf940063b73af21b1b67d84b7ed590ba378f6ff5c89105ffabee806259a34d7`
 
 Experiment 2 is frozen. Any CUHK03 training belongs to Experiment 3.
+
+
+## Step 31A — Experiment 3 CUHK03 supervised preregistration
+
+Experiment 3 was preregistered before any CUHK03-specific model training.
+
+Research question:
+
+Can supervised CUHK03-NP Detected training improve absolute CUHK03 retrieval
+accuracy while preserving the Efficient-vs-Full multi-resolution relationship?
+
+Fixed protocol:
+
+- CUHK03-NP Detected train only
+- 767 available training identities
+- identity-disjoint gradient/calibration/held-out split
+- same original MSMT17 OSNet x1.0 initialization as Experiment 1
+- 160x80 Efficient path
+- 256x128 Full path
+- conv1 and conv2 frozen
+- 8 epochs
+- fixed Experiment-1 loss coefficients and optimizer settings
+- calibration-only epoch selection
+- held-out validation after model selection
+- official CUHK03 benchmark only after freezing the selected checkpoint
+- no post-benchmark tuning
+- production model remains unchanged
+
+Important limitation:
+
+CUHK03 query/gallery was previously observed during Experiment 2, so the
+Experiment-3 post-training CUHK03 evaluation is a standardized benchmark,
+not a pristine blind test.
+
+Protocol:
+
+- `configs/cuhk03_supervised_multires_experiment.json`
+- `docs/CUHK03_SUPERVISED_TRAINING_PROTOCOL.md`

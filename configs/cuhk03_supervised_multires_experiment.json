@@ -1,0 +1,131 @@
+{
+  "dataset": {
+    "name": "CUHK03-NP",
+    "official_primary_test_variant": "detected",
+    "official_secondary_test_variant": "labeled",
+    "train_manifest_sha256": "daab40687766fc4ccad1c08cce65b64ce06142c3ed86ed9e7589ca4cc21f3aa6",
+    "training_identities": 767,
+    "training_images": 7365,
+    "training_split": "bounding_box_train",
+    "training_variant": "detected"
+  },
+  "date": "2026-11-23",
+  "development_identity_split": {
+    "calibration": {
+      "rule": "PID % 5 == 3"
+    },
+    "gradient_training": {
+      "rule": "PID % 5 in {0,1,2}"
+    },
+    "held_out_validation": {
+      "rule": "PID % 5 == 4"
+    },
+    "identity_disjoint": true
+  },
+  "epoch_selection": {
+    "dataset": "calibration identities only",
+    "official_test_used": false,
+    "primary_rule": "select epoch with highest calibration 160x80 Rank-1",
+    "tie_break_1": "higher calibration 256x128 Rank-1",
+    "tie_break_2": "higher low/full embedding cosine"
+  },
+  "experiment": "Experiment 3 - CUHK03-NP Detected supervised multi-resolution training",
+  "held_out_validation": {
+    "reported_metrics": [
+      "low Rank-1",
+      "full Rank-1",
+      "low/full agreement",
+      "low/full embedding cosine"
+    ],
+    "used_after_epoch_selection": true,
+    "used_for_epoch_selection": false
+  },
+  "important_test_status": {
+    "cuhk03_official_test_previously_observed": true,
+    "experiment_3_test_role": "standardized post-training benchmark; not a pristine unseen test",
+    "reason": "CUHK03 query/gallery was already evaluated in Experiment 2.",
+    "test_used_for_epoch_selection": false,
+    "test_used_for_hyperparameter_selection": false,
+    "test_used_for_training": false
+  },
+  "model": {
+    "architecture": "OSNet x1.0",
+    "frozen_modules": [
+      "conv1",
+      "conv2"
+    ],
+    "full_resolution": [
+      256,
+      128
+    ],
+    "initialization": "osnet_x1_0_msmt17_combineall",
+    "initialization_note": "Same original pretrained base used for Experiment 1; the Market-trained Experiment-1 checkpoint is NOT used as initialization for Experiment 3.",
+    "low_resolution": [
+      160,
+      80
+    ],
+    "new_checkpoint_runtime_path": "/root/rac-reid/.runtime/models/cuhk03-supervised/osnet_x1_0_cuhk03_multires.pt",
+    "same_backbone_both_resolutions": true
+  },
+  "official_post_training_benchmark": {
+    "gallery_resolution": [
+      256,
+      128
+    ],
+    "metrics": [
+      "mAP",
+      "Rank-1",
+      "Rank-5",
+      "Rank-10",
+      "mINP"
+    ],
+    "no_post_benchmark_tuning": true,
+    "primary_variant": "detected",
+    "query_modes": {
+      "efficient": [
+        160,
+        80
+      ],
+      "full": [
+        256,
+        128
+      ]
+    },
+    "run_only_after_model_is_frozen": true,
+    "secondary_variant": "labeled"
+  },
+  "production_policy": {
+    "deploy_experiment_3_model": false,
+    "existing_production_model_changed": false
+  },
+  "scientific_context": {
+    "experiment_1": "Market-1501 supervised multi-resolution training",
+    "experiment_2": "Frozen Market-trained model zero-shot on CUHK03-NP",
+    "experiment_2_primary_detected": {
+      "efficient_rank1_percent": 19.78571428571429,
+      "full_rank1_percent": 19.857142857142858,
+      "rank1_retention_percent": 99.64028776978418
+    },
+    "experiment_3_question": "Can CUHK03-specific supervised training improve absolute CUHK03 retrieval accuracy while preserving the 160x80 versus 256x128 multi-resolution relationship?"
+  },
+  "status": "PRE_REGISTERED_BEFORE_TRAINING",
+  "training": {
+    "backbone_learning_rate": 5e-05,
+    "batch_size": 16,
+    "classifier_learning_rate": 0.0005,
+    "device": "CPU",
+    "epochs": 8,
+    "objective_weights": {
+      "classification": 0.5,
+      "cross_resolution": 0.25,
+      "full_teacher_cosine": 0.25,
+      "low_teacher_cosine": 1.0,
+      "relational": 0.5
+    },
+    "optimizer": "AdamW",
+    "random_seed": 42,
+    "teacher": "original pretrained full-resolution OSNet base embeddings",
+    "torch_threads": 4,
+    "weight_decay": 0.0005
+  }
+}
