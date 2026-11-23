@@ -1,0 +1,132 @@
+{
+  "architecture": "OSNet x1.0",
+  "completed_utc": "2026-11-23T09:41:39+00:00",
+  "detected": {
+    "comparison": {
+      "map_delta_pp_efficient_minus_full": 0.22597618384089202,
+      "map_retention_percent": 101.13441098078388,
+      "minp_delta_pp_efficient_minus_full": -0.16959733605576766,
+      "rank10_delta_pp_efficient_minus_full": -0.0714285714285765,
+      "rank1_delta_pp_efficient_minus_full": -0.0714285714285694,
+      "rank1_retention_percent": 99.64028776978418,
+      "rank5_delta_pp_efficient_minus_full": 0.0
+    },
+    "efficient_160x80": {
+      "map": 20.14610986279582,
+      "metric_wall_seconds": 0.6029654280282557,
+      "minp": 12.513210724205104,
+      "rank1": 19.78571428571429,
+      "rank10": 44.21428571428571,
+      "rank5": 36.714285714285715,
+      "scored_queries": 1400
+    },
+    "efficient_query_embedding_wall_seconds": 48.79451060993597,
+    "full_256x128": {
+      "map": 19.92013367895493,
+      "metric_wall_seconds": 0.5956474640406668,
+      "minp": 12.682808060260871,
+      "rank1": 19.857142857142858,
+      "rank10": 44.285714285714285,
+      "rank5": 36.714285714285715,
+      "scored_queries": 1400
+    },
+    "full_query_embedding_wall_seconds": 67.69758946588263,
+    "gallery_embedding_wall_seconds": 255.60421596700326,
+    "gallery_images": 5332,
+    "gallery_manifest_sha256": "f61fc82da3f78452b4df191975d7ff6613b08aec73f6df1be610ce90c1425d51",
+    "query_images": 1400,
+    "query_manifest_sha256": "9e60de74c816d0999464294e5ef32fa22264b8b1593efa5406ed8658dabec7d3",
+    "test_identities": 700
+  },
+  "device": "cpu",
+  "embedding_dim": 512,
+  "evaluation_dataset": "CUHK03-NP",
+  "evaluation_protocol": {
+    "cosine_euclidean_rank_equivalence": true,
+    "distance": "cosine similarity on L2-normalized embeddings",
+    "pid_minus_1_is_junk": true,
+    "primary_variant": "detected",
+    "protocol": "CUHK03-NP new protocol",
+    "reranking": false,
+    "same_pid_same_camera_is_junk": true,
+    "secondary_variant": "labeled"
+  },
+  "experiment": "Experiment 2 - frozen Market-trained RAC-ReID zero-shot CUHK03-NP",
+  "frozen_checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+  "frozen_source_commit": "f4f49db012c6c12004c0c6495fc778728aa134b9",
+  "gallery_resolution": [
+    256,
+    128
+  ],
+  "labeled": {
+    "comparison": {
+      "map_delta_pp_efficient_minus_full": 0.40445589722354214,
+      "map_retention_percent": 102.00769212933658,
+      "minp_delta_pp_efficient_minus_full": -0.21950343874471656,
+      "rank10_delta_pp_efficient_minus_full": 1.7857142857142847,
+      "rank1_delta_pp_efficient_minus_full": 0.8571428571428577,
+      "rank1_retention_percent": 104.4280442804428,
+      "rank5_delta_pp_efficient_minus_full": 1.2857142857142918
+    },
+    "efficient_160x80": {
+      "map": 20.54977057538531,
+      "metric_wall_seconds": 0.5882586757652462,
+      "minp": 13.076451458475496,
+      "rank1": 20.214285714285715,
+      "rank10": 45.07142857142858,
+      "rank5": 35.85714285714286,
+      "scored_queries": 1400
+    },
+    "efficient_query_embedding_wall_seconds": 53.743485732004046,
+    "full_256x128": {
+      "map": 20.145314678161768,
+      "metric_wall_seconds": 0.5958554213866591,
+      "minp": 13.295954897220213,
+      "rank1": 19.357142857142858,
+      "rank10": 43.28571428571429,
+      "rank5": 34.57142857142857,
+      "scored_queries": 1400
+    },
+    "full_query_embedding_wall_seconds": 63.60674570593983,
+    "gallery_embedding_wall_seconds": 254.9366170479916,
+    "gallery_images": 5328,
+    "gallery_manifest_sha256": "4557120c6b09b58709dc9daa0809d60eed9f7462fafc1e25734997babfdd250e",
+    "query_images": 1400,
+    "query_manifest_sha256": "21ab4673fc58fc3146c7bd2a8dae9dbe0f895e282ddac524e753b45ea97799a7",
+    "test_identities": 700
+  },
+  "market1501_frozen_reference": {
+    "efficient_160x80": {
+      "map": 55.89902810399838,
+      "rank1": 78.08788598574822
+    },
+    "full_256x128": {
+      "map": 59.19855358457583,
+      "rank1": 79.54275534441805
+    }
+  },
+  "model": "osnet_x1_0_multires_epoch8",
+  "query_modes": {
+    "efficient": [
+      160,
+      80
+    ],
+    "full": [
+      256,
+      128
+    ]
+  },
+  "scientific_policy": {
+    "both_variants_reported": true,
+    "cuhk03_used_for_model_selection": false,
+    "cuhk03_used_for_threshold_tuning": false,
+    "cuhk03_used_for_training": false,
+    "detected_primary_was_preregistered": true,
+    "market_experiment_modified": false
+  },
+  "status": "ZERO_SHOT_FINAL",
+  "torch_threads": 4,
+  "training_dataset": "Market-1501 development population",
+  "training_on_cuhk03": false,
+  "tuning_on_cuhk03": false
+}

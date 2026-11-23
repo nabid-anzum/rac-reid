@@ -176,6 +176,40 @@ Full record:
 
 `docs/REAL_WORLD_E2E_TEST_2026-11-23.md`
 
+
+## Cross-dataset generalization — CUHK03-NP
+
+A second experiment evaluated the exact frozen Market-trained epoch-8 model
+zero-shot on CUHK03-NP.
+
+No CUHK03 training, adaptation or tuning was performed.
+
+Preregistered primary result — **Detected**:
+
+- Efficient 160x80 mAP: **20.146%**
+- Efficient Rank-1: **19.786%**
+- Full 256x128 mAP: **19.920%**
+- Full Rank-1: **19.857%**
+- Rank-1 delta: **-0.071 pp**
+- Efficient Rank-1 retention: **99.640%**
+
+Secondary Labeled result:
+
+- Efficient Rank-1: **20.214%**
+- Full Rank-1: **19.357%**
+
+Interpretation:
+
+Absolute retrieval accuracy drops substantially relative to Market-1501,
+showing strong cross-dataset domain shift. However, Efficient and Full remain
+almost identical on the preregistered Detected benchmark, demonstrating that
+the multi-resolution relationship itself transfers much better than absolute
+identity accuracy.
+
+Full analysis:
+
+`docs/CUHK03_ZERO_SHOT_EVALUATION.md`
+
 ## Software verification
 
 - complete unit tests: **42**

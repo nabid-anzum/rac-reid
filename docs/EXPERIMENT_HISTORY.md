@@ -113,3 +113,47 @@ Final result SHA-256:
 `a7b14a330d5dd6691635d32199aa72ace3c1389d5f00e88b78a05665da3bc8f1`
 
 The official test set is now consumed. No post-test tuning is permitted.
+
+
+## Step 30B — CUHK03-NP zero-shot generalization
+
+Experiment 2 evaluated the unchanged frozen Market-trained epoch-8 model on
+CUHK03-NP.
+
+The protocol was preregistered before testing:
+
+- Detected = primary
+- Labeled = secondary
+- no CUHK03 training
+- no CUHK03 adaptation
+- no threshold tuning
+- 160x80 Efficient query
+- 256x128 Full query
+- 256x128 gallery
+
+Primary Detected:
+
+- Efficient mAP: **20.146%**
+- Efficient Rank-1: **19.786%**
+- Full mAP: **19.920%**
+- Full Rank-1: **19.857%**
+- Rank-1 difference: **-0.071 pp**
+- Rank-1 retention: **99.640%**
+
+Secondary Labeled:
+
+- Efficient mAP: **20.550%**
+- Efficient Rank-1: **20.214%**
+- Full mAP: **20.145%**
+- Full Rank-1: **19.357%**
+
+Conclusion:
+
+Absolute zero-shot retrieval accuracy suffers substantial domain shift, while
+the Efficient-vs-Full resolution relationship remains highly stable.
+
+Result SHA-256:
+
+`9cf940063b73af21b1b67d84b7ed590ba378f6ff5c89105ffabee806259a34d7`
+
+Experiment 2 is frozen. Any CUHK03 training belongs to Experiment 3.

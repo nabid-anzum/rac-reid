@@ -1,0 +1,67 @@
+{
+  "checkpoint_origin": "Market-1501 development training only; epoch 8 selected before final Market testing",
+  "dataset_manifests": {
+    "detected": {
+      "bounding_box_test": {
+        "filename_size_manifest_sha256": "f61fc82da3f78452b4df191975d7ff6613b08aec73f6df1be610ce90c1425d51",
+        "images": 5332
+      },
+      "bounding_box_train": {
+        "filename_size_manifest_sha256": "daab40687766fc4ccad1c08cce65b64ce06142c3ed86ed9e7589ca4cc21f3aa6",
+        "images": 7365
+      },
+      "query": {
+        "filename_size_manifest_sha256": "9e60de74c816d0999464294e5ef32fa22264b8b1593efa5406ed8658dabec7d3",
+        "images": 1400
+      }
+    },
+    "labeled": {
+      "bounding_box_test": {
+        "filename_size_manifest_sha256": "4557120c6b09b58709dc9daa0809d60eed9f7462fafc1e25734997babfdd250e",
+        "images": 5328
+      },
+      "bounding_box_train": {
+        "filename_size_manifest_sha256": "5c259c8ac877fb03aee379b7169a3f20afe47b785f703bf235bd1fa96f6f7274",
+        "images": 7368
+      },
+      "query": {
+        "filename_size_manifest_sha256": "21ab4673fc58fc3146c7bd2a8dae9dbe0f895e282ddac524e753b45ea97799a7",
+        "images": 1400
+      }
+    }
+  },
+  "experiment": "Experiment 2 - CUHK03-NP zero-shot cross-dataset generalization",
+  "frozen_checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+  "frozen_source_commit": "f4f49db012c6c12004c0c6495fc778728aa134b9",
+  "gallery_resolution": [
+    256,
+    128
+  ],
+  "metrics": [
+    "mAP",
+    "Rank-1",
+    "Rank-5",
+    "Rank-10",
+    "mINP"
+  ],
+  "post_test_policy": "Do not alter the frozen Market experiment based on CUHK03 results. Any CUHK03 training is a new experiment.",
+  "primary_dataset_variant": "detected",
+  "primary_question": "Does the Market-trained RAC-ReID low-resolution accuracy/compute trade-off generalize zero-shot to CUHK03-NP?",
+  "protocol": "CUHK03-NP 767/700 new protocol",
+  "query_modes": {
+    "efficient": [
+      160,
+      80
+    ],
+    "full": [
+      256,
+      128
+    ]
+  },
+  "reporting_policy": "Report both detected and labeled variants. Detected is primary regardless of which scores higher.",
+  "same_backbone_both_modes": true,
+  "secondary_dataset_variant": "labeled",
+  "status": "PRE_REGISTERED_BEFORE_CUHK03_TEST",
+  "training_on_cuhk03": false,
+  "tuning_on_cuhk03": false
+}

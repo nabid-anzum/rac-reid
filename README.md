@@ -627,3 +627,24 @@ Market-1501 evaluation. See
 and
 [`results/market1501_multires_epoch8_final.json`](results/market1501_multires_epoch8_final.json).
 No post-test model or threshold tuning is permitted.
+
+
+## Cross-dataset evaluation
+
+The frozen epoch-8 Market-trained model was also evaluated zero-shot on
+CUHK03-NP without CUHK03 training or tuning.
+
+Preregistered primary CUHK03-NP Detected result:
+
+- Efficient 160x80: 20.146% mAP, 19.786% Rank-1
+- Full 256x128: 19.920% mAP, 19.857% Rank-1
+- Efficient Rank-1 retention: 99.640%
+
+The low/full relationship remains stable, while the low absolute accuracy
+reveals substantial cross-dataset domain shift.
+
+See:
+
+- `docs/CUHK03_ZERO_SHOT_EVALUATION.md`
+- `results/cuhk03_zero_shot_epoch8_final.json`
+- `results/cuhk03_zero_shot_protocol.json`
