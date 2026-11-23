@@ -226,3 +226,56 @@ Checkpoint SHA-256:
 
 The official CUHK03 query/gallery benchmark was not used during training or
 model selection.
+
+
+## Experiment 3 — standardized CUHK03 benchmark
+
+Frozen epoch-3 checkpoint SHA-256:
+
+`f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399`
+
+Fixed benchmark evaluator:
+
+`scripts/evaluate_cuhk03_supervised_benchmark.py`
+
+Fixed evaluator commit:
+
+`e1dc17a30a2671aad3756433726d05080d531e67`
+
+Evaluator SHA-256:
+
+`d7f0941d59c0d5a35f293961522e89dace56df9feade09a63f773f0e8f71a7a2`
+
+Benchmark start marker:
+
+`results/cuhk03_supervised_benchmark_started.json`
+
+Benchmark completion marker:
+
+`results/cuhk03_supervised_benchmark_complete.json`
+
+Primary Detected metrics:
+
+`results/cuhk03_supervised_detected_metrics.json`
+
+Secondary Labeled metrics:
+
+`results/cuhk03_supervised_labeled_metrics.json`
+
+Final benchmark result:
+
+`results/cuhk03_supervised_benchmark_final.json`
+
+Final result SHA-256:
+
+`55430f6e21358abc6d80f8987558302a687e18bf3c05ac569a185b5ac0a401c5`
+
+Human-readable analysis:
+
+`docs/CUHK03_SUPERVISED_BENCHMARK_RESULT.md`
+
+Cross-experiment comparison:
+
+`results/experiment_comparison_summary_2026-11-23.json`
+
+No post-benchmark tuning is permitted.

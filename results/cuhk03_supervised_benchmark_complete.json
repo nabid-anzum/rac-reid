@@ -1,0 +1,10 @@
+{
+  "checkpoint_sha256": "f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399",
+  "completed_utc": "2026-11-23T11:23:25+00:00",
+  "post_benchmark_tuning_allowed": false,
+  "primary_variant": "detected",
+  "result_path": "/root/rac-reid/.runtime/experiments/cuhk03-supervised-benchmark/cuhk03_supervised_benchmark_final.json",
+  "result_sha256": "55430f6e21358abc6d80f8987558302a687e18bf3c05ac569a185b5ac0a401c5",
+  "secondary_variant": "labeled",
+  "status": "BENCHMARK_COMPLETE"
+}

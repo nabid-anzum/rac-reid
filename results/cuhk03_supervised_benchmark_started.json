@@ -1,0 +1,14 @@
+{
+  "checkpoint_sha256": "f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399",
+  "evaluation_implementation": "Experiment-2 split/metric logic reused; benchmark-only epoch-3 checkpoint adapter mirrors the same RAC-ReID preprocessing/resizing path",
+  "experiment": 3,
+  "post_benchmark_tuning_allowed": false,
+  "primary_variant": "detected",
+  "reference_evaluator_sha256": "7e689881e569204477ea0f444833420ae065c9baa406408bb57a064682e2bbc3",
+  "secondary_variant": "labeled",
+  "selected_epoch": 3,
+  "started_utc": "2026-11-23T11:08:05+00:00",
+  "status": "BENCHMARK_STARTED",
+  "training_during_benchmark": false,
+  "tuning_during_benchmark": false
+}

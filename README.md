@@ -695,3 +695,34 @@ See:
 - `docs/CUHK03_SUPERVISED_TRAINING_PROTOCOL.md`
 - `docs/CUHK03_SUPERVISED_TRAINING_RESULT.md`
 - `results/cuhk03_supervised_training_result.json`
+
+
+## CUHK03 supervised benchmark
+
+The frozen Experiment-3 epoch-3 checkpoint was evaluated on CUHK03-NP after
+CUHK03-specific supervised training.
+
+Primary Detected:
+
+- Efficient 160x80 mAP: 28.256%
+- Efficient Rank-1: 27.929%
+- Full 256x128 mAP: 29.952%
+- Full Rank-1: 29.286%
+- Efficient Rank-1 retention: 95.366%
+
+Improvement over the Experiment-2 zero-shot CUHK03 result:
+
+- Efficient Rank-1: +8.143 pp
+- Full Rank-1: +9.429 pp
+
+CUHK03-specific training therefore improved absolute retrieval accuracy while
+retaining a lower-cost 160x80 query path.
+
+No post-benchmark tuning is permitted.
+
+See:
+
+- `docs/CUHK03_SUPERVISED_TRAINING_RESULT.md`
+- `docs/CUHK03_SUPERVISED_BENCHMARK_RESULT.md`
+- `results/cuhk03_supervised_benchmark_final.json`
+- `results/experiment_comparison_summary_2026-11-23.json`

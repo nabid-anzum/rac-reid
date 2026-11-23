@@ -291,3 +291,41 @@ The standardized CUHK03 post-training benchmark is still pending.
 Full training analysis:
 
 `docs/CUHK03_SUPERVISED_TRAINING_RESULT.md`
+
+
+## Experiment 3 — standardized CUHK03 benchmark
+
+The frozen CUHK03-supervised epoch-3 checkpoint was evaluated using the same
+CUHK03 split/metric protocol as Experiment 2.
+
+Primary Detected:
+
+- Efficient mAP: **28.256%**
+- Efficient Rank-1: **27.929%**
+- Full mAP: **29.952%**
+- Full Rank-1: **29.286%**
+- Efficient Rank-1 retention: **95.366%**
+
+Improvement over Experiment-2 zero-shot:
+
+- Efficient Rank-1: **+8.143 pp**
+- Full Rank-1: **+9.429 pp**
+
+Secondary Labeled:
+
+- Efficient Rank-1: **28.929%**
+- Full Rank-1: **29.071%**
+- Efficient Rank-1 retention: **99.509%**
+
+Interpretation:
+
+CUHK03-specific supervised training substantially improves absolute retrieval
+accuracy compared with zero-shot transfer. The primary Detected benchmark
+still shows a moderate Efficient-vs-Full gap, so the domain problem is only
+partially repaired.
+
+No post-benchmark tuning is allowed.
+
+Full result:
+
+`docs/CUHK03_SUPERVISED_BENCHMARK_RESULT.md`

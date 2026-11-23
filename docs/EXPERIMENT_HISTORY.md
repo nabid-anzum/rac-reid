@@ -229,3 +229,53 @@ Official CUHK03 query/gallery images were not used during training or model
 selection.
 
 The standardized post-training benchmark remains pending.
+
+
+## Step 31D — Experiment-3 standardized benchmark
+
+The frozen CUHK03-supervised epoch-3 checkpoint completed the standardized
+CUHK03-NP benchmark.
+
+A benchmark-only checkpoint loader was required because the production
+multi-resolution encoder deliberately accepts only the original epoch-8
+production checkpoint.
+
+The benchmark adapter was validated against the original epoch-8 encoder
+before testing:
+
+- Efficient embedding cosine: 1.000000000
+- Full embedding cosine: 1.000000119
+- maximum absolute embedding difference: 0
+
+The production encoder itself was not modified.
+
+Primary Detected:
+
+- Efficient mAP: **28.256%**
+- Efficient Rank-1: **27.929%**
+- Full mAP: **29.952%**
+- Full Rank-1: **29.286%**
+- Efficient Rank-1 retention: **95.366%**
+
+Gain over Experiment-2 zero-shot:
+
+- Efficient Rank-1: **+8.143 pp**
+- Full Rank-1: **+9.429 pp**
+
+Secondary Labeled:
+
+- Efficient Rank-1: **28.929%**
+- Full Rank-1: **29.071%**
+- Efficient Rank-1 retention: **99.509%**
+
+Conclusion:
+
+CUHK03-specific training improves absolute CUHK03 retrieval substantially,
+while preserving useful multi-resolution robustness. The domain gap is
+reduced but not eliminated.
+
+Post-benchmark tuning is prohibited.
+
+Result SHA-256:
+
+`55430f6e21358abc6d80f8987558302a687e18bf3c05ac569a185b5ac0a401c5`

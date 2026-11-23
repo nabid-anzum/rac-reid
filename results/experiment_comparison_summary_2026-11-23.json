@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-23",
+  "experiment_1_market1501": {
+    "efficient_160x80": {
+      "map": 55.89902810399838,
+      "rank1": 78.08788598574822
+    },
+    "full_256x128": {
+      "map": 59.19855358457583,
+      "rank1": 79.54275534441805
+    },
+    "rank1_retention_percent": 98.17095931317655,
+    "role": "Frozen Market-1501 final standard evaluation"
+  },
+  "experiment_2_cuhk03_zero_shot": {
+    "detected": {
+      "efficient_map": 20.14610986279582,
+      "efficient_rank1": 19.78571428571429,
+      "full_map": 19.92013367895493,
+      "full_rank1": 19.857142857142858,
+      "rank1_retention_percent": 99.64028776978418
+    },
+    "labeled": {
+      "efficient_rank1": 20.214285714285715,
+      "full_rank1": 19.357142857142858,
+      "rank1_retention_percent": 104.4280442804428
+    },
+    "primary_variant": "detected",
+    "role": "Market-trained model transferred unchanged to CUHK03-NP"
+  },
+  "experiment_3_cuhk03_supervised": {
+    "checkpoint_sha256": "f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399",
+    "detected": {
+      "efficient_map": 28.25582862988792,
+      "efficient_rank1": 27.92857142857143,
+      "efficient_rank1_gain_vs_zero_shot_pp": 8.142857142857142,
+      "full_map": 29.951547141336476,
+      "full_rank1": 29.28571428571429,
+      "full_rank1_gain_vs_zero_shot_pp": 9.42857142857143,
+      "rank1_retention_percent": 95.36585365853658
+    },
+    "labeled": {
+      "efficient_rank1": 28.92857142857143,
+      "full_rank1": 29.07142857142857,
+      "rank1_retention_percent": 99.50859950859953
+    },
+    "primary_variant": "detected",
+    "role": "CUHK03-specific supervised multi-resolution training followed by frozen standardized benchmark",
+    "selected_epoch": 3
+  },
+  "project": "RAC-ReID",
+  "scientific_interpretation": {
+    "domain_shift": "Experiment 2 demonstrated a large Market-to-CUHK03 zero-shot drop.",
+    "post_benchmark_tuning_allowed": false,
+    "resolution_robustness": "Efficient remained close to Full after CUHK03-specific training, although the primary Detected resolution gap widened relative to Experiment 2.",
+    "supervised_adaptation": "Experiment 3 substantially improved CUHK03 absolute retrieval accuracy but did not eliminate the gap."
+  }
+}
