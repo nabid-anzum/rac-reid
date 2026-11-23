@@ -194,6 +194,340 @@ def load_reference_module():
     return module
 
 
+class _CaptureBenchmarkInput(RuntimeError):
+    pass
+
+
+class BenchmarkCheckpointEncoder:
+    """
+    Benchmark-only OSNet checkpoint adapter.
+
+    This intentionally does NOT modify or weaken
+    MultiResolutionOSNetReIDEncoder, whose production
+    contract is the original epoch-8 checkpoint.
+
+    Preprocessing/resizing mirrors the RAC-ReID
+    multi-resolution training/evaluation path:
+      source preprocessing -> 256x128 full tensor
+      -> optional bilinear 160x80 resize
+      -> frozen checkpoint backbone
+      -> L2-normalized 512-D embedding.
+    """
+
+    BASE_MODEL = (
+        "osnet_x1_0_msmt17_combineall"
+    )
+
+    LOW_SIZE = (
+        160,
+        80,
+    )
+
+    FULL_SIZE = (
+        256,
+        128,
+    )
+
+    def __init__(
+        self,
+        checkpoint_path,
+        expected_sha256,
+        expected_epoch,
+    ):
+        import time
+
+        from reid import ReIDModel
+
+        self.checkpoint_path = Path(
+            checkpoint_path
+        )
+
+        self.expected_sha256 = (
+            expected_sha256
+        )
+
+        self.expected_epoch = int(
+            expected_epoch
+        )
+
+        if not self.checkpoint_path.is_file():
+            raise RuntimeError(
+                "Benchmark checkpoint missing: "
+                f"{self.checkpoint_path}"
+            )
+
+        actual_sha = sha256_file(
+            self.checkpoint_path
+        )
+
+        if actual_sha != self.expected_sha256:
+            raise RuntimeError(
+                "Benchmark checkpoint SHA mismatch."
+            )
+
+        torch.set_num_threads(
+            4
+        )
+
+        started = time.perf_counter()
+
+        self.capture_model = (
+            ReIDModel.from_pretrained(
+                self.BASE_MODEL,
+                device="cpu",
+            )
+        )
+
+        self.capture_backbone = (
+            self.capture_model._backbone
+        )
+
+        self.trained_model = (
+            ReIDModel.from_pretrained(
+                self.BASE_MODEL,
+                device="cpu",
+            )
+        )
+
+        checkpoint = torch.load(
+            self.checkpoint_path,
+            map_location="cpu",
+            weights_only=False,
+        )
+
+        actual_epoch = int(
+            checkpoint.get(
+                "epoch",
+                -1,
+            )
+        )
+
+        if actual_epoch != self.expected_epoch:
+            raise RuntimeError(
+                "Unexpected benchmark checkpoint "
+                f"epoch {actual_epoch}; expected "
+                f"{self.expected_epoch}."
+            )
+
+        selected_epoch = checkpoint.get(
+            "selected_epoch"
+        )
+
+        if (
+            selected_epoch is not None
+            and int(selected_epoch)
+            != self.expected_epoch
+        ):
+            raise RuntimeError(
+                "Checkpoint selected_epoch does "
+                "not match expected benchmark epoch."
+            )
+
+        state = checkpoint.get(
+            "backbone_state_dict"
+        )
+
+        if not isinstance(
+            state,
+            dict,
+        ):
+            raise RuntimeError(
+                "Checkpoint is missing "
+                "backbone_state_dict."
+            )
+
+        self.trained_model._backbone.load_state_dict(
+            state,
+            strict=True,
+        )
+
+        self.trained_model._backbone.eval()
+        self.capture_backbone.eval()
+
+        self.model_load_seconds = (
+            time.perf_counter()
+            - started
+        )
+
+        self.checkpoint_sha256 = (
+            actual_sha
+        )
+
+    def _capture_preprocessed(
+        self,
+        image_path,
+    ):
+        path = Path(
+            image_path
+        )
+
+        if not path.is_file():
+            raise FileNotFoundError(
+                f"Image not found: {path}"
+            )
+
+        captured = {}
+
+        def hook(
+            module,
+            inputs,
+        ):
+            captured["tensor"] = (
+                inputs[0]
+                .detach()
+                .cpu()
+                .clone()
+            )
+
+            raise _CaptureBenchmarkInput()
+
+        handle = (
+            self.capture_backbone
+            .register_forward_pre_hook(
+                hook
+            )
+        )
+
+        try:
+            try:
+                self.capture_model.extract_embeddings_from_paths(
+                    [
+                        str(path),
+                    ]
+                )
+
+            except _CaptureBenchmarkInput:
+                pass
+
+        finally:
+            handle.remove()
+
+        tensor = captured.get(
+            "tensor"
+        )
+
+        if tensor is None:
+            raise RuntimeError(
+                "Could not capture benchmark "
+                "preprocessing tensor."
+            )
+
+        if tensor.ndim != 4:
+            raise RuntimeError(
+                "Unexpected preprocessing tensor "
+                f"shape: {tuple(tensor.shape)}"
+            )
+
+        return tensor.contiguous()
+
+    def embed_path_timed_mode(
+        self,
+        image_path,
+        mode,
+    ):
+        import time
+
+        import torch.nn.functional as F
+
+        normalized_mode = (
+            str(mode)
+            .strip()
+            .lower()
+        )
+
+        if normalized_mode == "efficient":
+            size = self.LOW_SIZE
+
+        elif normalized_mode == "full":
+            size = self.FULL_SIZE
+
+        else:
+            raise ValueError(
+                "Benchmark mode must be "
+                "'efficient' or 'full'."
+            )
+
+        tensor = (
+            self._capture_preprocessed(
+                image_path
+            )
+        )
+
+        if tuple(
+            tensor.shape[-2:]
+        ) != tuple(size):
+
+            tensor = F.interpolate(
+                tensor,
+                size=size,
+                mode="bilinear",
+                align_corners=False,
+            )
+
+        started = (
+            time.perf_counter()
+        )
+
+        with torch.no_grad():
+
+            raw = (
+                self.trained_model
+                ._backbone(
+                    tensor
+                )
+            )
+
+        inference_seconds = (
+            time.perf_counter()
+            - started
+        )
+
+        array = (
+            raw
+            .detach()
+            .cpu()
+            .numpy()
+            .astype(
+                np.float32
+            )
+            .reshape(-1)
+        )
+
+        if array.shape != (
+            512,
+        ):
+            raise RuntimeError(
+                "Unexpected benchmark embedding "
+                f"shape: {array.shape}"
+            )
+
+        norm = float(
+            np.linalg.norm(
+                array
+            )
+        )
+
+        if (
+            not np.isfinite(norm)
+            or norm <= 0.0
+        ):
+            raise RuntimeError(
+                "Invalid benchmark embedding norm."
+            )
+
+        embedding = (
+            array / norm
+        ).astype(
+            np.float32
+        )
+
+        return (
+            embedding,
+            inference_seconds,
+            0.0,
+        )
+
+
 def main():
 
     EXP.mkdir(
@@ -261,8 +595,14 @@ def main():
         load_reference_module()
     )
 
-    # Reuse the exact Experiment-2
-    # embedding and metric implementation.
+    # Reuse Experiment-2 dataset parsing,
+    # caching, split protocol and metric code.
+    #
+    # The production MultiResolution encoder
+    # is intentionally restricted to the
+    # original epoch-8 checkpoint, so the
+    # Experiment-3 checkpoint is loaded through
+    # the benchmark-only adapter defined above.
     reference.MODEL = MODEL
     reference.EXPECTED_MODEL_SHA = (
         MODEL_SHA
@@ -271,7 +611,11 @@ def main():
     reference.DATASET = DATASET
 
     encoder = (
-        reference.make_encoder()
+        BenchmarkCheckpointEncoder(
+            checkpoint_path=MODEL,
+            expected_sha256=MODEL_SHA,
+            expected_epoch=3,
+        )
     )
 
     if torch.get_num_threads() != 4:
@@ -355,9 +699,10 @@ def main():
 
                 "evaluation_implementation":
                     (
-                        "Exact metric/embedding "
-                        "functions reused from "
-                        "Experiment-2 evaluator"
+                        "Experiment-2 split/metric logic reused; "
+                        "benchmark-only epoch-3 checkpoint "
+                        "adapter mirrors the same RAC-ReID "
+                        "preprocessing/resizing path"
                     ),
 
                 "reference_evaluator_sha256":
@@ -623,8 +968,14 @@ def main():
             ),
 
         "evaluation_implementation": {
-            "reused_experiment_2_evaluator":
+            "reused_experiment_2_split_and_metrics":
                 True,
+
+            "benchmark_checkpoint_adapter":
+                (
+                    "Experiment-3-specific loader; "
+                    "production epoch-8 loader unchanged"
+                ),
 
             "reference_script":
                 (
