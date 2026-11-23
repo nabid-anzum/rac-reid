@@ -606,3 +606,20 @@ Machine-readable result:
 
 The standard Market-1501 query/gallery test remains untouched for the final
 frozen-architecture evaluation.
+
+
+## Teacher / evaluation entry point
+
+For current training, held-out development, controlled benchmark,
+real-browser sanity testing, and software verification, start here:
+
+**[`docs/TEACHER_RESULTS_SUMMARY.md`](docs/TEACHER_RESULTS_SUMMARY.md)**
+
+Key machine-readable evidence:
+
+- [`results/market1501_multiresolution_training.json`](results/market1501_multiresolution_training.json)
+- [`results/production_multires_benchmark_2026-11-23.json`](results/production_multires_benchmark_2026-11-23.json)
+- [`results/project_test_summary_2026-11-23.json`](results/project_test_summary_2026-11-23.json)
+
+The final trained-model Market-1501 query/gallery evaluation remains deferred
+until the research architecture is frozen.

@@ -30,3 +30,39 @@ final frozen-architecture evaluation.
 | 29G1 | Low/full refinement headroom audit | full rescues low on 4.3% of calibration queries; fixed-low saving 30.9%; perfect-router saving 26.6% | Use measured rescue headroom to choose the next controller target |
 
 | 29G2 | Refinement-benefit router | adaptive R1 88.7%, refine 3.2%, CPU +27.7% | Do not deploy; retain fixed-low baseline |
+
+
+## Step 29H-E — Controlled production multi-resolution benchmark
+
+A warm alternating benchmark was executed against the current production
+multi-resolution search code.
+
+Protocol:
+
+- 5 warm-up runs per resolution
+- 30 measured runs per resolution
+- 60 measured searches
+- same timing image
+- alternating resolution order
+- 4 Torch CPU threads
+- YOLO/crop/search path repeated
+- official trained-model Market-1501 test not used
+
+Results:
+
+- 160x80 OSNet median: **0.039837 s**
+- 256x128 OSNet median: **0.051718 s**
+- OSNet median saving: **+22.973%**
+- total-backend median saving: **+9.498%**
+- software tests: **42/42 passed**
+
+Evidence:
+
+- `results/production_multires_benchmark_2026-11-23.json`
+- `results/production_multires_benchmark_2026-11-23.csv`
+- `results/project_test_summary_2026-11-23.json`
+- `results/test_logs/2026-11-23_unittest.txt`
+- `docs/TEACHER_RESULTS_SUMMARY.md`
+
+The benchmark image is used for timing only and is not treated as retrieval
+accuracy evidence.

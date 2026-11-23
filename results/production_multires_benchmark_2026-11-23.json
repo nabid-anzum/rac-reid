@@ -1,0 +1,259 @@
+{
+  "benchmark_name": "RAC-ReID controlled production multi-resolution benchmark",
+  "checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+  "cpu": "AMD EPYC 9354P 32-Core Processor",
+  "date": "2026-11-23",
+  "device": "cpu",
+  "gallery_identity_count": 2,
+  "measured_runs_per_mode": 30,
+  "median_savings_percent": {
+    "learned_stage_median_percent": 22.52653805378352,
+    "osnet_inference_median_percent": 22.973195714831995,
+    "total_backend_median_percent": 9.498385039486923,
+    "wall_median_percent": 9.497289156318367
+  },
+  "methodology_notes": [
+    "Five warm-up runs per mode are excluded.",
+    "Thirty measured runs per mode are used.",
+    "Efficient/full ordering alternates within pairs.",
+    "The same input is used for both resolutions.",
+    "YOLO detection and crop are repeated for each search.",
+    "OSNet inference time is reported separately.",
+    "Timing input is an enrolled image and is not accuracy evidence.",
+    "Official trained-model Market-1501 test data is not used."
+  ],
+  "model": "osnet_x1_0_multires_epoch8",
+  "modes": {
+    "efficient": {
+      "metrics": {
+        "crop_seconds": {
+          "max": 0.030889489222317934,
+          "mean": 0.02174029833016296,
+          "median": 0.021380858030170202,
+          "min": 0.01477061677724123,
+          "n": 30,
+          "p95": 0.028555892035365103,
+          "stdev": 0.00534953532383255
+        },
+        "detector_seconds": {
+          "max": 0.1818566657602787,
+          "mean": 0.0725170047643284,
+          "median": 0.061481259763240814,
+          "min": 0.05314848618581891,
+          "n": 30,
+          "p95": 0.15451666994485996,
+          "stdev": 0.0335165198540212
+        },
+        "gallery_ranking_overhead_seconds": {
+          "max": 0.0013707643374800682,
+          "mean": 0.0010363702817509572,
+          "median": 0.0010400903411209583,
+          "min": 0.0008511599153280258,
+          "n": 30,
+          "p95": 0.0011713955551385879,
+          "stdev": 0.00010510258698181271
+        },
+        "learned_stage_seconds": {
+          "max": 0.08286005118861794,
+          "mean": 0.04202254757595559,
+          "median": 0.0408454742282629,
+          "min": 0.030603475868701935,
+          "n": 30,
+          "p95": 0.04833273764234035,
+          "stdev": 0.008748401017529684
+        },
+        "observed_embedding_to_gallery_seconds": {
+          "max": 0.082874511834234,
+          "mean": 0.042034564058606824,
+          "median": 0.040857245214283466,
+          "min": 0.030616457108408213,
+          "n": 30,
+          "p95": 0.04834347662981599,
+          "stdev": 0.00874887081793788
+        },
+        "osnet_inference_seconds": {
+          "max": 0.08185035130009055,
+          "mean": 0.04098617729420463,
+          "median": 0.03983673849143088,
+          "min": 0.02975231595337391,
+          "n": 30,
+          "p95": 0.04729775630403309,
+          "stdev": 0.008736169771771836
+        },
+        "preprocess_seconds": {
+          "max": 0.19882690673694015,
+          "mean": 0.09444948506231109,
+          "median": 0.08264701417647302,
+          "min": 0.07142874132841825,
+          "n": 30,
+          "p95": 0.17105812581721686,
+          "stdev": 0.032007525923046065
+        },
+        "total_backend_seconds": {
+          "max": 0.24147481005638838,
+          "mean": 0.13652779593442876,
+          "median": 0.12666522338986397,
+          "min": 0.10208693705499172,
+          "n": 30,
+          "p95": 0.20902888025157146,
+          "stdev": 0.0327227604542262
+        },
+        "wall_seconds": {
+          "max": 0.24148639105260372,
+          "mean": 0.13653894721840817,
+          "median": 0.1266765585169196,
+          "min": 0.10209772735834122,
+          "n": 30,
+          "p95": 0.2090395286213606,
+          "stdev": 0.03272288760981858
+        }
+      },
+      "resolution": "160x80",
+      "runs": 30,
+      "top1_cosine": {
+        "max": 0.796973705291748,
+        "mean": 0.796973705291748,
+        "median": 0.796973705291748,
+        "min": 0.796973705291748,
+        "n": 30,
+        "p95": 0.796973705291748,
+        "stdev": 0.0
+      },
+      "top1_top2_margin": {
+        "max": 0.393211305141449,
+        "mean": 0.393211305141449,
+        "median": 0.393211305141449,
+        "min": 0.393211305141449,
+        "n": 30,
+        "p95": 0.393211305141449,
+        "stdev": 0.0
+      },
+      "top_identity_counts": {
+        "nabid": 30
+      }
+    },
+    "full": {
+      "metrics": {
+        "crop_seconds": {
+          "max": 0.030882669147104025,
+          "mean": 0.02251635561697185,
+          "median": 0.02256938978098333,
+          "min": 0.015731157269328833,
+          "n": 30,
+          "p95": 0.02905318366829306,
+          "stdev": 0.0051351558778328504
+        },
+        "detector_seconds": {
+          "max": 0.1708095078356564,
+          "mean": 0.07166219349019229,
+          "median": 0.06154459482058883,
+          "min": 0.05344555899500847,
+          "n": 30,
+          "p95": 0.1533065609168261,
+          "stdev": 0.030212481008422283
+        },
+        "gallery_ranking_overhead_seconds": {
+          "max": 0.0012256233021616936,
+          "mean": 0.0010521672666072845,
+          "median": 0.0010609009768813848,
+          "min": 0.0007952176965773106,
+          "n": 30,
+          "p95": 0.0011987834703177213,
+          "stdev": 0.00011270234715125869
+        },
+        "learned_stage_seconds": {
+          "max": 0.06222399231046438,
+          "mean": 0.052440301437551774,
+          "median": 0.05272189108654857,
+          "min": 0.04127238970249891,
+          "n": 30,
+          "p95": 0.05944505096413194,
+          "stdev": 0.00492623169134219
+        },
+        "observed_embedding_to_gallery_seconds": {
+          "max": 0.06223811209201813,
+          "mean": 0.052452705490092434,
+          "median": 0.05273195100016892,
+          "min": 0.04128333926200867,
+          "n": 30,
+          "p95": 0.059458624385297296,
+          "stdev": 0.004927051745491553
+        },
+        "osnet_inference_seconds": {
+          "max": 0.06115209124982357,
+          "mean": 0.05138813417094449,
+          "median": 0.051718020578846335,
+          "min": 0.040222488809376955,
+          "n": 30,
+          "p95": 0.058304732991382474,
+          "stdev": 0.004872109506269737
+        },
+        "preprocess_seconds": {
+          "max": 0.19002102175727487,
+          "mean": 0.09436877823124329,
+          "median": 0.08700161660090089,
+          "min": 0.06928144674748182,
+          "n": 30,
+          "p95": 0.17034971837420015,
+          "stdev": 0.02905671695752053
+        },
+        "total_backend_seconds": {
+          "max": 0.2406617607921362,
+          "mean": 0.14686173354275525,
+          "median": 0.13995907525531948,
+          "min": 0.11093655088916421,
+          "n": 30,
+          "p95": 0.22303970078937707,
+          "stdev": 0.03016953715085859
+        },
+        "wall_seconds": {
+          "max": 0.24067280068993568,
+          "mean": 0.14687322919877868,
+          "median": 0.1399699051398784,
+          "min": 0.11094510136172175,
+          "n": 30,
+          "p95": 0.22305157410446552,
+          "stdev": 0.030169901221117436
+        }
+      },
+      "resolution": "256x128",
+      "runs": 30,
+      "top1_cosine": {
+        "max": 1.0,
+        "mean": 1.0,
+        "median": 1.0,
+        "min": 1.0,
+        "n": 30,
+        "p95": 1.0,
+        "stdev": 0.0
+      },
+      "top1_top2_margin": {
+        "max": 0.4248027801513672,
+        "mean": 0.4248027801513672,
+        "median": 0.4248027801513672,
+        "min": 0.4248027801513672,
+        "n": 30,
+        "p95": 0.4248027801513672,
+        "stdev": 0.0
+      },
+      "top_identity_counts": {
+        "nabid": 30
+      }
+    }
+  },
+  "order": "paired alternating: efficient/full then full/efficient",
+  "python": "3.12.3",
+  "source_git_commit": "1044c5d1ed4c2f396711c546f30064cbfcffd526",
+  "standard_market1501_test_used": false,
+  "timing_input": {
+    "accuracy_evaluation": false,
+    "basename": "64d1459602164ea397280fdc8328aa37.jpeg",
+    "identity_label": "nabid",
+    "source": "existing enrolled gallery original; timing-only input"
+  },
+  "torch": "2.15.0+cpu",
+  "torch_threads": 4,
+  "total_measured_searches": 60,
+  "trained_model_official_test_used": false,
+  "warmup_runs_per_mode": 5
+}
