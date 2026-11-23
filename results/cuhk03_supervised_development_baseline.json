@@ -1,0 +1,18 @@
+{
+  "calibration": {
+    "full_rank1": 0.42376237623762375,
+    "low_full_embedding_cosine": 0.7868160009384155,
+    "low_full_identity_agreement": 0.8706270627062707,
+    "low_rank1": 0.2871287128712871,
+    "rank1_gap": 0.13663366336633664
+  },
+  "gradient_updates": 0,
+  "held_out_validation": {
+    "full_rank1": 0.4485981308411215,
+    "low_full_embedding_cosine": 0.7792738676071167,
+    "low_full_identity_agreement": 0.8604806408544726,
+    "low_rank1": 0.29506008010680906,
+    "rank1_gap": 0.15353805073431243
+  },
+  "source": "osnet_x1_0_msmt17_combineall"
+}

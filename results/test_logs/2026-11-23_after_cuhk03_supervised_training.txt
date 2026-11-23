@@ -1,0 +1,47 @@
+test_detector_evidence_validation (test_adaptive_pipeline.AdaptivePipelineTests.test_detector_evidence_validation) ... ok
+test_gallery_retrieves_matching_identity (test_adaptive_pipeline.AdaptivePipelineTests.test_gallery_retrieves_matching_identity) ... ok
+test_identity_anchors_cover_three_regions (test_adaptive_pipeline.AdaptivePipelineTests.test_identity_anchors_cover_three_regions) ... ok
+test_pipeline_ranks_matching_identity (test_adaptive_pipeline.AdaptivePipelineTests.test_pipeline_ranks_matching_identity) ... ok
+test_token_budget_changes_count (test_adaptive_pipeline.AdaptivePipelineTests.test_token_budget_changes_count) ... ok
+test_progressive_restoration_processes_each_token_once (test_adaptive_pipeline.ProgressiveComputeTests.test_progressive_restoration_processes_each_token_once) ... ok
+test_center_subject_estimate (test_image_signals.ImageSignalExtractorTests.test_center_subject_estimate) ... ok
+test_checkerboard_has_edges (test_image_signals.ImageSignalExtractorTests.test_checkerboard_has_edges) ... ok
+test_missing_image_is_rejected (test_image_signals.ImageSignalExtractorTests.test_missing_image_is_rejected) ... ok
+test_solid_image (test_image_signals.ImageSignalExtractorTests.test_solid_image) ... ok
+test_values_are_normalized (test_image_signals.ImageSignalExtractorTests.test_values_are_normalized) ... ok
+test_identical_cosine (test_learned_reid.LearnedReIDTests.test_identical_cosine) ... ok
+test_normalization (test_learned_reid.LearnedReIDTests.test_normalization) ... ok
+test_ranking (test_learned_reid.LearnedReIDTests.test_ranking) ... ok
+test_zero_vector_rejected (test_learned_reid.LearnedReIDTests.test_zero_vector_rejected) ... ok
+test_async_formdata_preserved (test_multires_frontend.MultiResolutionFrontendTests.test_async_formdata_preserved) ... ok
+test_default_mode_is_efficient (test_multires_frontend.MultiResolutionFrontendTests.test_default_mode_is_efficient) ... ok
+test_live_form_has_modes (test_multires_frontend.MultiResolutionFrontendTests.test_live_form_has_modes) ... ok
+test_multires_renderer (test_multires_frontend.MultiResolutionFrontendTests.test_multires_renderer) ... ok
+test_post_reads_mode (test_multires_frontend.MultiResolutionFrontendTests.test_post_reads_mode) ... ok
+test_primary_worker_uses_multires (test_multires_frontend.MultiResolutionFrontendTests.test_primary_worker_uses_multires) ... ok
+test_constructor_is_lazy (test_multires_reid.MultiResolutionEncoderTests.test_constructor_is_lazy) ... ok
+test_invalid_mode_rejected (test_multires_reid.MultiResolutionEncoderTests.test_invalid_mode_rejected) ... ok
+test_modes_are_fixed (test_multires_reid.MultiResolutionEncoderTests.test_modes_are_fixed) ... ok
+test_detector_evidence_is_normalized (test_person_detector.PersonDetectorGeometryTests.test_detector_evidence_is_normalized) ... ok
+test_expanded_box_stays_inside_image (test_person_detector.PersonDetectorGeometryTests.test_expanded_box_stays_inside_image) ... ok
+test_person_count (test_person_detector.PersonDetectorGeometryTests.test_person_count) ... ok
+test_gallery_uses_prepare_reid (test_production_reid_path.ProductionReIDPathTests.test_gallery_uses_prepare_reid) ... ok
+test_live_search_uses_prepare_reid (test_production_reid_path.ProductionReIDPathTests.test_live_search_uses_prepare_reid) ... ok
+test_not_labelled_prototype (test_production_reid_path.ProductionReIDPathTests.test_not_labelled_prototype) ... ok
+test_prepare_reid_excludes_proxy_logic (test_production_reid_path.ProductionReIDPathTests.test_prepare_reid_excludes_proxy_logic) ... ok
+test_public_pipeline_is_current (test_production_reid_path.ProductionReIDPathTests.test_public_pipeline_is_current) ... ok
+test_finished_job_reaches_100 (test_progress_jobs.SearchJobStoreTests.test_finished_job_reaches_100) ... ok
+test_progress_is_monotonic (test_progress_jobs.SearchJobStoreTests.test_progress_is_monotonic) ... ok
+test_result_is_not_exposed_in_snapshot (test_progress_jobs.SearchJobStoreTests.test_result_is_not_exposed_in_snapshot) ... ok
+test_ambiguous_easy_result_refines (test_resource_controller.ResourceControllerTests.test_ambiguous_easy_result_refines) ... ok
+test_ambiguous_hard_result_invokes_vllm (test_resource_controller.ResourceControllerTests.test_ambiguous_hard_result_invokes_vllm) ... ok
+test_ambiguous_medium_result_refines (test_resource_controller.ResourceControllerTests.test_ambiguous_medium_result_refines) ... ok
+test_confident_result_exits_early (test_resource_controller.ResourceControllerTests.test_confident_result_exits_early) ... ok
+test_easy_query_gets_small_budget (test_resource_controller.ResourceControllerTests.test_easy_query_gets_small_budget) ... ok
+test_hard_query_gets_large_budget (test_resource_controller.ResourceControllerTests.test_hard_query_gets_large_budget) ... ok
+test_invalid_signal_is_rejected (test_resource_controller.ResourceControllerTests.test_invalid_signal_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 42 tests in 0.438s
+
+OK

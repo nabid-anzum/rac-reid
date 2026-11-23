@@ -184,3 +184,45 @@ Full test log:
 10. `scripts/evaluate_cuhk03_zero_shot.py`
 11. `results/cuhk03_zero_shot_epoch8_final.json`
 12. `results/project_test_summary_after_cuhk03_2026-11-23.json`
+
+
+## Experiment 3 — CUHK03 supervised training
+
+Preregistered configuration:
+
+`configs/cuhk03_supervised_multires_experiment.json`
+
+Training protocol and exact loss definitions:
+
+`docs/CUHK03_SUPERVISED_TRAINING_PROTOCOL.md`
+
+Exact trainer:
+
+`scripts/train_cuhk03_supervised_multires.py`
+
+Training result:
+
+`results/cuhk03_supervised_training_result.json`
+
+Epoch history:
+
+`results/cuhk03_supervised_training_history.json`
+
+Pre-training development baseline:
+
+`results/cuhk03_supervised_development_baseline.json`
+
+Human-readable result:
+
+`docs/CUHK03_SUPERVISED_TRAINING_RESULT.md`
+
+Checkpoint binary:
+
+Not committed.
+
+Checkpoint SHA-256:
+
+`f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399`
+
+The official CUHK03 query/gallery benchmark was not used during training or
+model selection.

@@ -253,3 +253,41 @@ evidence, see:
 This repository intentionally does not redistribute the raw third-party
 research image datasets. Instead, their archive SHA-256 values and split
 manifests are recorded so the exact dataset copies can be verified.
+
+
+## Experiment 3 — CUHK03 supervised training
+
+Experiment 3 uses CUHK03-NP Detected training identities to address the
+cross-dataset domain shift observed in Experiment 2.
+
+The protocol and exact trainer implementation were committed before training.
+
+Selected epoch:
+
+**3**
+
+Calibration:
+
+- Efficient 160x80 Rank-1: **49.901%**
+- Full 256x128 Rank-1: **54.323%**
+- Efficient improvement over pretrained calibration baseline:
+  **+21.188%**
+
+Identity-disjoint held-out:
+
+- Efficient Rank-1: **52.870%**
+- Full Rank-1: **56.075%**
+- low/full identity agreement: **96.929%**
+
+The checkpoint was selected at epoch 3. Later epochs continued lowering
+training loss but produced worse calibration retrieval accuracy.
+
+Checkpoint SHA-256:
+
+`f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399`
+
+The standardized CUHK03 post-training benchmark is still pending.
+
+Full training analysis:
+
+`docs/CUHK03_SUPERVISED_TRAINING_RESULT.md`

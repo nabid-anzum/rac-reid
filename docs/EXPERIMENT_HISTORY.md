@@ -195,3 +195,37 @@ Protocol:
 
 - `configs/cuhk03_supervised_multires_experiment.json`
 - `docs/CUHK03_SUPERVISED_TRAINING_PROTOCOL.md`
+
+
+## Step 31B — CUHK03 supervised training
+
+Experiment 3 completed all eight preregistered training epochs.
+
+Calibration selected **epoch 3**.
+
+Selected calibration result:
+
+- Efficient Rank-1: **49.901%**
+- Full Rank-1: **54.323%**
+- agreement: **97.030%**
+- cosine: **0.8495**
+
+Identity-disjoint held-out:
+
+- Efficient Rank-1: **52.870%**
+- Full Rank-1: **56.075%**
+- agreement: **96.929%**
+- cosine: **0.8489**
+
+Training loss continued falling after epoch 3, but calibration retrieval
+accuracy deteriorated. The preregistered model-selection rule therefore
+prevented final-epoch overfitting from determining the checkpoint.
+
+Checkpoint SHA-256:
+
+`f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399`
+
+Official CUHK03 query/gallery images were not used during training or model
+selection.
+
+The standardized post-training benchmark remains pending.

@@ -669,3 +669,29 @@ It includes links to:
 
 Raw third-party research datasets and temporary embedding caches are not
 committed to the repository; their hashes and provenance are recorded instead.
+
+
+## CUHK03 supervised adaptation
+
+Experiment 3 performs identity-disjoint supervised multi-resolution training
+on the CUHK03-NP Detected training population.
+
+The preregistered procedure selected epoch 3:
+
+- calibration Efficient Rank-1: 49.901%
+- calibration Full Rank-1: 54.323%
+- held-out Efficient Rank-1: 52.870%
+- held-out Full Rank-1: 56.075%
+- held-out low/full agreement: 96.929%
+
+Checkpoint SHA-256:
+
+`f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399`
+
+The standardized post-training CUHK03 benchmark is evaluated separately.
+
+See:
+
+- `docs/CUHK03_SUPERVISED_TRAINING_PROTOCOL.md`
+- `docs/CUHK03_SUPERVISED_TRAINING_RESULT.md`
+- `results/cuhk03_supervised_training_result.json`

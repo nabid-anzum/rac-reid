@@ -1,0 +1,191 @@
+{
+  "best_epoch": 3,
+  "completed_epoch": 8,
+  "epoch_history": [
+    {
+      "best_epoch_after_epoch": 1,
+      "calibration": {
+        "full_rank1": 0.49834983498349833,
+        "full_rank1_delta_vs_original": 0.07458745874587458,
+        "low_full_embedding_cosine": 0.834985613822937,
+        "low_full_identity_agreement": 0.9386138613861386,
+        "low_rank1": 0.4283828382838284,
+        "low_rank1_gain_vs_original": 0.1412541254125413,
+        "rank1_gap": 0.06996699669966994
+      },
+      "epoch": 1,
+      "selected_after_epoch": true,
+      "training_loss": {
+        "cross_resolution_consistency": 0.18454234323957386,
+        "full_teacher_cosine": 0.20619763565414093,
+        "identity_classification": 4.386685230714433,
+        "low_teacher_cosine": 0.3025906780625091,
+        "relational_similarity": 0.010757774648749652,
+        "total": 2.598997175693512
+      },
+      "wall_seconds": 412.9568023341708
+    },
+    {
+      "best_epoch_after_epoch": 2,
+      "calibration": {
+        "full_rank1": 0.5405940594059406,
+        "full_rank1_delta_vs_original": 0.11683168316831688,
+        "low_full_embedding_cosine": 0.846312403678894,
+        "low_full_identity_agreement": 0.9650165016501651,
+        "low_rank1": 0.4871287128712871,
+        "low_rank1_gain_vs_original": 0.2,
+        "rank1_gap": 0.05346534653465351
+      },
+      "epoch": 2,
+      "selected_after_epoch": true,
+      "training_loss": {
+        "cross_resolution_consistency": 0.12134155828286619,
+        "full_teacher_cosine": 0.21786004677414894,
+        "identity_classification": 0.9863154160625794,
+        "low_teacher_cosine": 0.2771795514751883,
+        "relational_similarity": 0.009330538029590732,
+        "total": 0.8598029311088955
+      },
+      "wall_seconds": 367.89125750400126
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "full_rank1": 0.5432343234323432,
+        "full_rank1_delta_vs_original": 0.11947194719471949,
+        "low_full_embedding_cosine": 0.8494964241981506,
+        "low_full_identity_agreement": 0.9702970297029703,
+        "low_rank1": 0.499009900990099,
+        "low_rank1_gain_vs_original": 0.2118811881188119,
+        "rank1_gap": 0.04422442244224423
+      },
+      "epoch": 3,
+      "selected_after_epoch": true,
+      "training_loss": {
+        "cross_resolution_consistency": 0.10717182453064357,
+        "full_teacher_cosine": 0.21212268248200417,
+        "identity_classification": 0.3150209201609387,
+        "low_teacher_cosine": 0.26181064458454356,
+        "relational_similarity": 0.00876817777273519,
+        "total": 0.5035288201316315
+      },
+      "wall_seconds": 361.82463331194595
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "full_rank1": 0.5062706270627063,
+        "full_rank1_delta_vs_original": 0.08250825082508256,
+        "low_full_embedding_cosine": 0.8527282476425171,
+        "low_full_identity_agreement": 0.972937293729373,
+        "low_rank1": 0.4871287128712871,
+        "low_rank1_gain_vs_original": 0.2,
+        "rank1_gap": 0.019141914191419196
+      },
+      "epoch": 4,
+      "selected_after_epoch": false,
+      "training_loss": {
+        "cross_resolution_consistency": 0.0991077898618053,
+        "full_teacher_cosine": 0.2029948330977384,
+        "identity_classification": 0.15277823509977145,
+        "low_teacher_cosine": 0.2474687789731166,
+        "relational_similarity": 0.00829808323075721,
+        "total": 0.40353259422323284
+      },
+      "wall_seconds": 344.78322913497686
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "full_rank1": 0.5207920792079208,
+        "full_rank1_delta_vs_original": 0.09702970297029706,
+        "low_full_embedding_cosine": 0.8572292923927307,
+        "low_full_identity_agreement": 0.976897689768977,
+        "low_rank1": 0.48250825082508253,
+        "low_rank1_gain_vs_original": 0.19537953795379542,
+        "rank1_gap": 0.03828382838283828
+      },
+      "epoch": 5,
+      "selected_after_epoch": false,
+      "training_loss": {
+        "cross_resolution_consistency": 0.09174408654079717,
+        "full_teacher_cosine": 0.19379734226009426,
+        "identity_classification": 0.09245267048861612,
+        "low_teacher_cosine": 0.23366337926948771,
+        "relational_similarity": 0.007842521227704471,
+        "total": 0.3551963288336992
+      },
+      "wall_seconds": 350.226990906056
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "full_rank1": 0.4904290429042904,
+        "full_rank1_delta_vs_original": 0.06666666666666665,
+        "low_full_embedding_cosine": 0.8579408526420593,
+        "low_full_identity_agreement": 0.9775577557755776,
+        "low_rank1": 0.4726072607260726,
+        "low_rank1_gain_vs_original": 0.1854785478547855,
+        "rank1_gap": 0.017821782178217782
+      },
+      "epoch": 6,
+      "selected_after_epoch": false,
+      "training_loss": {
+        "cross_resolution_consistency": 0.08578253778464653,
+        "full_teacher_cosine": 0.18621569696594686,
+        "identity_classification": 0.06673119177439195,
+        "low_teacher_cosine": 0.22257628248018377,
+        "relational_similarity": 0.0076289163621635556,
+        "total": 0.32775589484064016
+      },
+      "wall_seconds": 387.04082450596616
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "full_rank1": 0.47128712871287126,
+        "full_rank1_delta_vs_original": 0.04752475247524751,
+        "low_full_embedding_cosine": 0.8573530912399292,
+        "low_full_identity_agreement": 0.974917491749175,
+        "low_rank1": 0.45874587458745875,
+        "low_rank1_gain_vs_original": 0.17161716171617164,
+        "rank1_gap": 0.012541254125412515
+      },
+      "epoch": 7,
+      "selected_after_epoch": false,
+      "training_loss": {
+        "cross_resolution_consistency": 0.08033464607947013,
+        "full_teacher_cosine": 0.17899445049902973,
+        "identity_classification": 0.05229735299807919,
+        "low_teacher_cosine": 0.21185359073912396,
+        "relational_similarity": 0.007296298300121527,
+        "total": 0.3064826916464988
+      },
+      "wall_seconds": 371.7820498193614
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "full_rank1": 0.4561056105610561,
+        "full_rank1_delta_vs_original": 0.032343234323432335,
+        "low_full_embedding_cosine": 0.8620367050170898,
+        "low_full_identity_agreement": 0.976897689768977,
+        "low_rank1": 0.4409240924092409,
+        "low_rank1_gain_vs_original": 0.1537953795379538,
+        "rank1_gap": 0.015181518151815176
+      },
+      "epoch": 8,
+      "selected_after_epoch": false,
+      "training_loss": {
+        "cross_resolution_consistency": 0.07611948931041886,
+        "full_teacher_cosine": 0.17313053480842533,
+        "identity_classification": 0.04126100370879559,
+        "low_teacher_cosine": 0.2035938012687599,
+        "relational_similarity": 0.007044967628590872,
+        "total": 0.2900592935655047
+      },
+      "wall_seconds": 359.71240838523954
+    }
+  ],
+  "trainer_commit": "fd481e891293235df8b4482e4397d66a12711036"
+}
