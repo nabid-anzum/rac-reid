@@ -324,3 +324,23 @@ Protocol:
 Target manifest:
 
 `results/sensereid_target_manifest.json`
+
+
+## Step 32B - Experiment 4 multi-domain training
+
+Joint Market-1501 + CUHK03 training completed before SenseReID inference.
+
+Selected epoch:
+
+**3**
+
+Held-out macro:
+
+- Efficient Rank-1: **69.877%**
+- Full Rank-1: **70.708%**
+
+Checkpoint SHA-256:
+
+`1234aa0cb5e17b3d8e8f0567096aa132db56ddeb9c01ebc084050d6acd726b60`
+
+Training evidence was committed before target inference.

@@ -1,0 +1,458 @@
+{
+  "calibration": {
+    "cuhk03": {
+      "full_rank1": 0.499009900990099,
+      "low_full_embedding_cosine": 0.873237669467926,
+      "low_full_identity_agreement": 0.9762376237623762,
+      "low_rank1": 0.4858085808580858,
+      "rank1_gap": 0.013201320132013195
+    },
+    "macro": {
+      "full_rank1": 0.6880735389642344,
+      "low_full_embedding_cosine": 0.8785772323608398,
+      "low_full_identity_agreement": 0.9742023108871523,
+      "low_rank1": 0.6774967357570747,
+      "rank1_gap": 0.010576803207159702
+    },
+    "market1501": {
+      "full_rank1": 0.8771371769383698,
+      "low_full_embedding_cosine": 0.8839167952537537,
+      "low_full_identity_agreement": 0.9721669980119284,
+      "low_rank1": 0.8691848906560636,
+      "rank1_gap": 0.007952286282306154
+    }
+  },
+  "checkpoint": "/root/rac-reid/.runtime/models/multidomain-market-cuhk/osnet_x1_0_multidomain_market_cuhk.pt",
+  "checkpoint_sha256": "1234aa0cb5e17b3d8e8f0567096aa132db56ddeb9c01ebc084050d6acd726b60",
+  "classifier_classes": 901,
+  "epoch_history": [
+    {
+      "best_epoch_after_epoch": 1,
+      "calibration": {
+        "cuhk03": {
+          "full_rank1": 0.5696369636963696,
+          "low_full_embedding_cosine": 0.8643479943275452,
+          "low_full_identity_agreement": 0.9650165016501651,
+          "low_rank1": 0.4924092409240924,
+          "rank1_gap": 0.07722772277227724
+        },
+        "macro": {
+          "full_rank1": 0.7283572492438111,
+          "low_full_embedding_cosine": 0.8673132658004761,
+          "low_full_identity_agreement": 0.965013221004009,
+          "low_rank1": 0.6770197298059826,
+          "rank1_gap": 0.051337519437828494
+        },
+        "market1501": {
+          "full_rank1": 0.8870775347912525,
+          "low_full_embedding_cosine": 0.870278537273407,
+          "low_full_identity_agreement": 0.9650099403578529,
+          "low_rank1": 0.8616302186878728,
+          "rank1_gap": 0.02544731610337969
+        }
+      },
+      "epoch": 1,
+      "selected_after_epoch": true,
+      "selection_key": {
+        "macro_efficient_rank1": 0.6770197298059826,
+        "macro_full_rank1": 0.7283572492438111,
+        "macro_low_full_cosine": 0.8673132658004761
+      },
+      "training_loss": {
+        "cross_resolution_consistency": 0.1355265088353043,
+        "full_teacher_cosine": 0.22169290111418335,
+        "identity_classification": 3.229830763738504,
+        "low_teacher_cosine": 0.2877030483762714,
+        "relational_similarity": 0.009229397337966712,
+        "total": 1.9965379804527152
+      },
+      "wall_seconds": 923.2966131079011
+    },
+    {
+      "best_epoch_after_epoch": 1,
+      "calibration": {
+        "cuhk03": {
+          "full_rank1": 0.5214521452145214,
+          "low_full_embedding_cosine": 0.8706005811691284,
+          "low_full_identity_agreement": 0.976897689768977,
+          "low_rank1": 0.47128712871287126,
+          "rank1_gap": 0.05016501650165017
+        },
+        "macro": {
+          "full_rank1": 0.7062529115734635,
+          "low_full_embedding_cosine": 0.8736779391765594,
+          "low_full_identity_agreement": 0.9715502365345878,
+          "low_rank1": 0.6752061886109089,
+          "rank1_gap": 0.031046722962554618
+        },
+        "market1501": {
+          "full_rank1": 0.8910536779324055,
+          "low_full_embedding_cosine": 0.8767552971839905,
+          "low_full_identity_agreement": 0.9662027833001988,
+          "low_rank1": 0.8791252485089464,
+          "rank1_gap": 0.011928429423459175
+        }
+      },
+      "epoch": 2,
+      "selected_after_epoch": false,
+      "selection_key": {
+        "macro_efficient_rank1": 0.6752061886109089,
+        "macro_full_rank1": 0.7062529115734635,
+        "macro_low_full_cosine": 0.8736779391765594
+      },
+      "training_loss": {
+        "cross_resolution_consistency": 0.09470822255313274,
+        "full_teacher_cosine": 0.21906317908797404,
+        "identity_classification": 0.4200769286401509,
+        "low_teacher_cosine": 0.25813770183438406,
+        "relational_similarity": 0.008115753440796951,
+        "total": 0.5506768932979985
+      },
+      "wall_seconds": 935.145805050619
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "cuhk03": {
+          "full_rank1": 0.499009900990099,
+          "low_full_embedding_cosine": 0.873237669467926,
+          "low_full_identity_agreement": 0.9762376237623762,
+          "low_rank1": 0.4858085808580858,
+          "rank1_gap": 0.013201320132013195
+        },
+        "macro": {
+          "full_rank1": 0.6880735389642344,
+          "low_full_embedding_cosine": 0.8785772323608398,
+          "low_full_identity_agreement": 0.9742023108871523,
+          "low_rank1": 0.6774967357570747,
+          "rank1_gap": 0.010576803207159702
+        },
+        "market1501": {
+          "full_rank1": 0.8771371769383698,
+          "low_full_embedding_cosine": 0.8839167952537537,
+          "low_full_identity_agreement": 0.9721669980119284,
+          "low_rank1": 0.8691848906560636,
+          "rank1_gap": 0.007952286282306154
+        }
+      },
+      "epoch": 3,
+      "selected_after_epoch": true,
+      "selection_key": {
+        "macro_efficient_rank1": 0.6774967357570747,
+        "macro_full_rank1": 0.6880735389642344,
+        "macro_low_full_cosine": 0.8785772323608398
+      },
+      "training_loss": {
+        "cross_resolution_consistency": 0.08581812187391001,
+        "full_teacher_cosine": 0.20520283859693267,
+        "identity_classification": 0.15063236184950518,
+        "low_teacher_cosine": 0.23858674574886254,
+        "relational_similarity": 0.007747300581451134,
+        "total": 0.3905318171278403
+      },
+      "wall_seconds": 910.4660603352822
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "cuhk03": {
+          "full_rank1": 0.49372937293729374,
+          "low_full_embedding_cosine": 0.8768912553787231,
+          "low_full_identity_agreement": 0.9775577557755776,
+          "low_rank1": 0.46864686468646866,
+          "rank1_gap": 0.025082508250825086
+        },
+        "macro": {
+          "full_rank1": 0.6764869528702373,
+          "low_full_embedding_cosine": 0.8818386793136597,
+          "low_full_identity_agreement": 0.9726754981661188,
+          "low_rank1": 0.6687170705142085,
+          "rank1_gap": 0.007769882356028823
+        },
+        "market1501": {
+          "full_rank1": 0.8592445328031809,
+          "low_full_embedding_cosine": 0.8867861032485962,
+          "low_full_identity_agreement": 0.96779324055666,
+          "low_rank1": 0.8687872763419483,
+          "rank1_gap": -0.009542743538767384
+        }
+      },
+      "epoch": 4,
+      "selected_after_epoch": false,
+      "selection_key": {
+        "macro_efficient_rank1": 0.6687170705142085,
+        "macro_full_rank1": 0.6764869528702373,
+        "macro_low_full_cosine": 0.8818386793136597
+      },
+      "training_loss": {
+        "cross_resolution_consistency": 0.07866412325731814,
+        "full_teacher_cosine": 0.19167822583729446,
+        "identity_classification": 0.08249348143522534,
+        "low_teacher_cosine": 0.22133192270295868,
+        "relational_similarity": 0.007315066437545007,
+        "total": 0.33382178316341365
+      },
+      "wall_seconds": 894.680375311058
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "cuhk03": {
+          "full_rank1": 0.464026402640264,
+          "low_full_embedding_cosine": 0.8792217969894409,
+          "low_full_identity_agreement": 0.974917491749175,
+          "low_rank1": 0.46204620462046203,
+          "rank1_gap": 0.001980198019801982
+        },
+        "macro": {
+          "full_rank1": 0.6578581317376271,
+          "low_full_embedding_cosine": 0.8854861259460449,
+          "low_full_identity_agreement": 0.9735422448805517,
+          "low_rank1": 0.6636274760676862,
+          "rank1_gap": -0.005769344330059156
+        },
+        "market1501": {
+          "full_rank1": 0.8516898608349901,
+          "low_full_embedding_cosine": 0.8917504549026489,
+          "low_full_identity_agreement": 0.9721669980119284,
+          "low_rank1": 0.8652087475149105,
+          "rank1_gap": -0.013518886679920405
+        }
+      },
+      "epoch": 5,
+      "selected_after_epoch": false,
+      "selection_key": {
+        "macro_efficient_rank1": 0.6636274760676862,
+        "macro_full_rank1": 0.6578581317376271,
+        "macro_low_full_cosine": 0.8854861259460449
+      },
+      "training_loss": {
+        "cross_resolution_consistency": 0.07248382126139269,
+        "full_teacher_cosine": 0.18057849939291115,
+        "identity_classification": 0.055357378127787994,
+        "low_teacher_cosine": 0.20653278428473423,
+        "relational_similarity": 0.0069672065159678215,
+        "total": 0.30096065546252326
+      },
+      "wall_seconds": 966.9395081731491
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "cuhk03": {
+          "full_rank1": 0.43696369636963694,
+          "low_full_embedding_cosine": 0.8823123574256897,
+          "low_full_identity_agreement": 0.9788778877887789,
+          "low_rank1": 0.4145214521452145,
+          "rank1_gap": 0.022442244224422425
+        },
+        "macro": {
+          "full_rank1": 0.6325971563359118,
+          "low_full_embedding_cosine": 0.88530233502388,
+          "low_full_identity_agreement": 0.9735343713297772,
+          "low_rank1": 0.6329068493330446,
+          "rank1_gap": -0.0003096929971327933
+        },
+        "market1501": {
+          "full_rank1": 0.8282306163021869,
+          "low_full_embedding_cosine": 0.8882923126220703,
+          "low_full_identity_agreement": 0.9681908548707754,
+          "low_rank1": 0.8512922465208748,
+          "rank1_gap": -0.0230616302186879
+        }
+      },
+      "epoch": 6,
+      "selected_after_epoch": false,
+      "selection_key": {
+        "macro_efficient_rank1": 0.6329068493330446,
+        "macro_full_rank1": 0.6325971563359118,
+        "macro_low_full_cosine": 0.88530233502388
+      },
+      "training_loss": {
+        "cross_resolution_consistency": 0.06744924309437363,
+        "full_teacher_cosine": 0.17311076287581106,
+        "identity_classification": 0.042114637854897954,
+        "low_teacher_cosine": 0.19580877379035025,
+        "relational_similarity": 0.006808366635076939,
+        "total": 0.28041027740537167
+      },
+      "wall_seconds": 923.0897427736782
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "cuhk03": {
+          "full_rank1": 0.4033003300330033,
+          "low_full_embedding_cosine": 0.8877992630004883,
+          "low_full_identity_agreement": 0.976897689768977,
+          "low_rank1": 0.39735973597359736,
+          "rank1_gap": 0.005940594059405946
+        },
+        "macro": {
+          "full_rank1": 0.6113917157123268,
+          "low_full_embedding_cosine": 0.8879377543926239,
+          "low_full_identity_agreement": 0.9721466580057608,
+          "low_rank1": 0.6235307626190054,
+          "rank1_gap": -0.012139046906678663
+        },
+        "market1501": {
+          "full_rank1": 0.8194831013916501,
+          "low_full_embedding_cosine": 0.8880762457847595,
+          "low_full_identity_agreement": 0.9673956262425447,
+          "low_rank1": 0.8497017892644135,
+          "rank1_gap": -0.030218687872763383
+        }
+      },
+      "epoch": 7,
+      "selected_after_epoch": false,
+      "selection_key": {
+        "macro_efficient_rank1": 0.6235307626190054,
+        "macro_full_rank1": 0.6113917157123268,
+        "macro_low_full_cosine": 0.8879377543926239
+      },
+      "training_loss": {
+        "cross_resolution_consistency": 0.06295972784657546,
+        "full_teacher_cosine": 0.16231862065588812,
+        "identity_classification": 0.030921962744045108,
+        "low_teacher_cosine": 0.18299495719583334,
+        "relational_similarity": 0.0064943095058580085,
+        "total": 0.2580226803457111
+      },
+      "wall_seconds": 929.4939467296936
+    },
+    {
+      "best_epoch_after_epoch": 3,
+      "calibration": {
+        "cuhk03": {
+          "full_rank1": 0.42112211221122114,
+          "low_full_embedding_cosine": 0.8889778256416321,
+          "low_full_identity_agreement": 0.9775577557755776,
+          "low_rank1": 0.42046204620462047,
+          "rank1_gap": 0.0006600660066006792
+        },
+        "macro": {
+          "full_rank1": 0.614934813560879,
+          "low_full_embedding_cosine": 0.8903692960739136,
+          "low_full_identity_agreement": 0.9736695339514071,
+          "low_rank1": 0.6309069674363063,
+          "rank1_gap": -0.015972153875427275
+        },
+        "market1501": {
+          "full_rank1": 0.8087475149105368,
+          "low_full_embedding_cosine": 0.8917607665061951,
+          "low_full_identity_agreement": 0.9697813121272366,
+          "low_rank1": 0.841351888667992,
+          "rank1_gap": -0.032604373757455285
+        }
+      },
+      "epoch": 8,
+      "selected_after_epoch": false,
+      "selection_key": {
+        "macro_efficient_rank1": 0.6309069674363063,
+        "macro_full_rank1": 0.614934813560879,
+        "macro_low_full_cosine": 0.8903692960739136
+      },
+      "training_loss": {
+        "cross_resolution_consistency": 0.0595124579226707,
+        "full_teacher_cosine": 0.1554056863432739,
+        "identity_classification": 0.0269805922581159,
+        "low_teacher_cosine": 0.17417430168584824,
+        "relational_similarity": 0.006274072583166013,
+        "total": 0.24453117014751577
+      },
+      "wall_seconds": 906.7765095420182
+    }
+  ],
+  "experiment": 4,
+  "gradient_images": {
+    "combined": 12163,
+    "cuhk03": 4352,
+    "market1501": 7811
+  },
+  "held_out": {
+    "cuhk03": {
+      "full_rank1": 0.5260347129506008,
+      "low_full_embedding_cosine": 0.8737263083457947,
+      "low_full_identity_agreement": 0.9746328437917223,
+      "low_rank1": 0.514018691588785,
+      "rank1_gap": 0.012016021361815787
+    },
+    "macro": {
+      "full_rank1": 0.7070786591572927,
+      "low_full_embedding_cosine": 0.8783712685108185,
+      "low_full_identity_agreement": 0.9739064602100374,
+      "low_rank1": 0.6987717979016722,
+      "rank1_gap": 0.008306861255620523
+    },
+    "market1501": {
+      "full_rank1": 0.8881226053639847,
+      "low_full_embedding_cosine": 0.8830162286758423,
+      "low_full_identity_agreement": 0.9731800766283525,
+      "low_rank1": 0.8835249042145594,
+      "rank1_gap": 0.0045977011494252595
+    }
+  },
+  "implementation_commit": "f98baa4eda02d0ee39b99a39efb97558d0fa8375",
+  "post_target_tuning_allowed": false,
+  "preregistration_commit": "8be70b58a595bb3ce8fee1992b78e691257a255e",
+  "pretrained_baseline": {
+    "calibration": {
+      "cuhk03": {
+        "full_rank1": 0.42376237623762375,
+        "low_full_embedding_cosine": 0.7868160009384155,
+        "low_full_identity_agreement": 0.8706270627062707,
+        "low_rank1": 0.2871287128712871,
+        "rank1_gap": 0.13663366336633664
+      },
+      "macro": {
+        "full_rank1": 0.6108871523335236,
+        "low_full_embedding_cosine": 0.7944665551185608,
+        "low_full_identity_agreement": 0.8402837102795766,
+        "low_rank1": 0.45767966458673703,
+        "rank1_gap": 0.1532074877467866
+      },
+      "market1501": {
+        "full_rank1": 0.7980119284294235,
+        "low_full_embedding_cosine": 0.802117109298706,
+        "low_full_identity_agreement": 0.8099403578528827,
+        "low_rank1": 0.6282306163021869,
+        "rank1_gap": 0.16978131212723657
+      }
+    },
+    "gradient_updates": 0,
+    "held_out": {
+      "cuhk03": {
+        "full_rank1": 0.4485981308411215,
+        "low_full_embedding_cosine": 0.7792738676071167,
+        "low_full_identity_agreement": 0.8604806408544726,
+        "low_rank1": 0.29506008010680906,
+        "rank1_gap": 0.15353805073431243
+      },
+      "macro": {
+        "full_rank1": 0.6315787589071508,
+        "low_full_embedding_cosine": 0.7859711647033691,
+        "low_full_identity_agreement": 0.8417345733007995,
+        "low_rank1": 0.470518545800531,
+        "rank1_gap": 0.16106021310661978
+      },
+      "market1501": {
+        "full_rank1": 0.8145593869731801,
+        "low_full_embedding_cosine": 0.7926684617996216,
+        "low_full_identity_agreement": 0.8229885057471265,
+        "low_rank1": 0.6459770114942529,
+        "rank1_gap": 0.16858237547892718
+      }
+    },
+    "held_out_evaluated_before_selection": false,
+    "source": "osnet_x1_0_msmt17_combineall"
+  },
+  "selected_epoch": 3,
+  "sense_reid_model_inference": false,
+  "source_domains": [
+    "Market-1501",
+    "CUHK03-NP Detected"
+  ],
+  "status": "TRAINING_COMPLETE",
+  "target_used_for_selection": false,
+  "target_used_for_training": false
+}
