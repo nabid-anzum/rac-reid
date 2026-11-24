@@ -1,0 +1,35 @@
+{
+  "checkpoint": "/root/rac-reid/.runtime/models/multidomain-market-cuhk/osnet_x1_0_multidomain_market_cuhk.pt",
+  "checkpoint_epoch": 3,
+  "checkpoint_sha256": "1234aa0cb5e17b3d8e8f0567096aa132db56ddeb9c01ebc084050d6acd726b60",
+  "comparison": {
+    "map_delta_pp_efficient_minus_full": -3.331806469131216,
+    "rank1_delta_pp_efficient_minus_full": -3.9575289575289574,
+    "rank1_retention_percent": 90.26128266033254
+  },
+  "efficient_160x80": {
+    "gallery_images": 3388,
+    "map": 45.71645486547381,
+    "minp": 45.71645486547381,
+    "query_images": 1040,
+    "rank1": 36.67953667953668,
+    "rank10": 65.05791505791507,
+    "rank5": 56.27413127413128,
+    "reranking": false,
+    "same_pid_same_camera_removed": true,
+    "scored_queries": 1036
+  },
+  "full_256x128": {
+    "gallery_images": 3388,
+    "map": 49.04826133460502,
+    "minp": 49.04826133460502,
+    "query_images": 1040,
+    "rank1": 40.63706563706564,
+    "rank10": 65.15444015444015,
+    "rank5": 58.78378378378378,
+    "reranking": false,
+    "same_pid_same_camera_removed": true,
+    "scored_queries": 1036
+  },
+  "model": "Experiment 4 Market+CUHK"
+}

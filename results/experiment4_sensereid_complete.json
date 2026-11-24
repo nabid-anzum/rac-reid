@@ -1,0 +1,9 @@
+{
+  "completed_utc": "2026-11-24T11:05:50+00:00",
+  "evaluation_run": 1,
+  "joint_checkpoint_sha256": "1234aa0cb5e17b3d8e8f0567096aa132db56ddeb9c01ebc084050d6acd726b60",
+  "post_target_tuning_allowed": false,
+  "result_path": "/root/rac-reid/.runtime/experiments/multidomain-market-cuhk-sensereid/sensereid-final/sensereid_multidomain_final.json",
+  "result_sha256": "978c88f2319827e585ef1bfd52ddd57a3b3882debc0ba7b3610bbb3242d87065",
+  "status": "TARGET_EVALUATION_COMPLETE"
+}

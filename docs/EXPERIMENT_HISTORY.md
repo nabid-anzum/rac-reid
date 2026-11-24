@@ -344,3 +344,27 @@ Checkpoint SHA-256:
 `1234aa0cb5e17b3d8e8f0567096aa132db56ddeb9c01ebc084050d6acd726b60`
 
 Training evidence was committed before target inference.
+
+
+## Step 32B - Experiment 4 final SenseReID evaluation
+
+SenseReID was evaluated only after the Experiment-4 checkpoint and training
+evidence were frozen.
+
+Joint model:
+
+- Efficient mAP: **45.716%**
+- Efficient Rank-1: **36.680%**
+- Full mAP: **49.048%**
+- Full Rank-1: **40.637%**
+- R1 retention: **90.261%**
+
+Joint vs Market Efficient Rank-1:
+
+**+1.641 pp**
+
+Joint vs CUHK Efficient Rank-1:
+
+**+4.537 pp**
+
+SenseReID is consumed. No target-driven tuning is permitted.

@@ -1,0 +1,156 @@
+{
+  "archive_sha256": "10f02fda87794853c174f2de9bff7343edcd12421483273329780e7150cfaa57",
+  "comparison": {
+    "joint_vs_cuhk_single_source": {
+      "efficient_map_pp": 4.960283332254214,
+      "efficient_rank1_pp": 4.536679536679536,
+      "full_map_pp": 3.2946363120636306,
+      "full_rank1_pp": 3.1853281853281885
+    },
+    "joint_vs_market_single_source": {
+      "efficient_map_pp": 2.3173356290712945,
+      "efficient_rank1_pp": 1.6409266409266436,
+      "full_map_pp": 4.342053807742836,
+      "full_rank1_pp": 4.247104247104247
+    }
+  },
+  "completed_utc": "2026-11-24T11:05:50+00:00",
+  "dataset": "SenseReID",
+  "evaluation_run": 1,
+  "experiment": 4,
+  "gallery_identities": 1718,
+  "gallery_images": 3388,
+  "gallery_manifest_sha256": "4e8392d697ff8527d9a187d71320e45352c6063d557170f564c5c57c66efde93",
+  "models": {
+    "cuhk_single_source": {
+      "checkpoint": "/root/rac-reid/.runtime/models/cuhk03-supervised/osnet_x1_0_cuhk03_multires.pt",
+      "checkpoint_epoch": 3,
+      "checkpoint_sha256": "f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399",
+      "comparison": {
+        "map_delta_pp_efficient_minus_full": -4.997453489321799,
+        "rank1_delta_pp_efficient_minus_full": -5.308880308880305,
+        "rank1_retention_percent": 85.82474226804125
+      },
+      "efficient_160x80": {
+        "gallery_images": 3388,
+        "map": 40.75617153321959,
+        "minp": 40.75617153321959,
+        "query_images": 1040,
+        "rank1": 32.142857142857146,
+        "rank10": 55.98455598455598,
+        "rank5": 49.71042471042471,
+        "reranking": false,
+        "same_pid_same_camera_removed": true,
+        "scored_queries": 1036
+      },
+      "full_256x128": {
+        "gallery_images": 3388,
+        "map": 45.75362502254139,
+        "minp": 45.75362502254139,
+        "query_images": 1040,
+        "rank1": 37.45173745173745,
+        "rank10": 63.32046332046332,
+        "rank5": 54.633204633204635,
+        "reranking": false,
+        "same_pid_same_camera_removed": true,
+        "scored_queries": 1036
+      },
+      "model": "Experiment 3 CUHK-trained"
+    },
+    "market_single_source": {
+      "checkpoint": "/root/rac-reid/.runtime/models/multires/osnet_x1_0_multires_160x80.pt",
+      "checkpoint_epoch": 8,
+      "checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+      "comparison": {
+        "map_delta_pp_efficient_minus_full": -1.3070882904596743,
+        "rank1_delta_pp_efficient_minus_full": -1.3513513513513544,
+        "rank1_retention_percent": 96.28647214854111
+      },
+      "efficient_160x80": {
+        "gallery_images": 3388,
+        "map": 43.39911923640251,
+        "minp": 43.39911923640251,
+        "query_images": 1040,
+        "rank1": 35.03861003861004,
+        "rank10": 60.810810810810814,
+        "rank5": 54.054054054054056,
+        "reranking": false,
+        "same_pid_same_camera_removed": true,
+        "scored_queries": 1036
+      },
+      "full_256x128": {
+        "gallery_images": 3388,
+        "map": 44.70620752686219,
+        "minp": 44.70620752686219,
+        "query_images": 1040,
+        "rank1": 36.38996138996139,
+        "rank10": 60.52123552123552,
+        "rank5": 54.440154440154444,
+        "reranking": false,
+        "same_pid_same_camera_removed": true,
+        "scored_queries": 1036
+      },
+      "model": "Experiment 1 Market-trained"
+    },
+    "multidomain_exp4": {
+      "checkpoint": "/root/rac-reid/.runtime/models/multidomain-market-cuhk/osnet_x1_0_multidomain_market_cuhk.pt",
+      "checkpoint_epoch": 3,
+      "checkpoint_sha256": "1234aa0cb5e17b3d8e8f0567096aa132db56ddeb9c01ebc084050d6acd726b60",
+      "comparison": {
+        "map_delta_pp_efficient_minus_full": -3.331806469131216,
+        "rank1_delta_pp_efficient_minus_full": -3.9575289575289574,
+        "rank1_retention_percent": 90.26128266033254
+      },
+      "efficient_160x80": {
+        "gallery_images": 3388,
+        "map": 45.71645486547381,
+        "minp": 45.71645486547381,
+        "query_images": 1040,
+        "rank1": 36.67953667953668,
+        "rank10": 65.05791505791507,
+        "rank5": 56.27413127413128,
+        "reranking": false,
+        "same_pid_same_camera_removed": true,
+        "scored_queries": 1036
+      },
+      "full_256x128": {
+        "gallery_images": 3388,
+        "map": 49.04826133460502,
+        "minp": 49.04826133460502,
+        "query_images": 1040,
+        "rank1": 40.63706563706564,
+        "rank10": 65.15444015444015,
+        "rank5": 58.78378378378378,
+        "reranking": false,
+        "same_pid_same_camera_removed": true,
+        "scored_queries": 1036
+      },
+      "model": "Experiment 4 Market+CUHK"
+    }
+  },
+  "post_target_tuning_allowed": false,
+  "published_metadata_discrepancy_documented": true,
+  "query_identities": 521,
+  "query_images": 1040,
+  "query_manifest_sha256": "044427adcb3b5925a005db4668b968e0dd219f01f89655d9612fbfa033994f46",
+  "standard_protocol": {
+    "efficient_query_resolution": [
+      160,
+      80
+    ],
+    "full_query_resolution": [
+      256,
+      128
+    ],
+    "gallery_resolution": [
+      256,
+      128
+    ],
+    "reranking": false,
+    "same_pid_same_camera_removed": true,
+    "similarity": "cosine on L2-normalized embeddings"
+  },
+  "status": "SENSEREID_FINAL",
+  "target_used_for_selection": false,
+  "target_used_for_training": false
+}

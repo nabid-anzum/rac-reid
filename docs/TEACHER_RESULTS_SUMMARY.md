@@ -329,3 +329,29 @@ No post-benchmark tuning is allowed.
 Full result:
 
 `docs/CUHK03_SUPERVISED_BENCHMARK_RESULT.md`
+
+
+## Experiment 4 - multi-domain generalization
+
+The Market+CUHK03 model was frozen before a single unseen SenseReID
+evaluation.
+
+Joint model:
+
+- Efficient mAP: **45.716%**
+- Efficient Rank-1: **36.680%**
+- Full mAP: **49.048%**
+- Full Rank-1: **40.637%**
+- Efficient Rank-1 retention: **90.261%**
+
+Joint vs Market Efficient R1:
+
+**+1.641 pp**
+
+Joint vs CUHK Efficient R1:
+
+**+4.537 pp**
+
+See:
+
+`docs/EXPERIMENT4_MULTIDOMAIN_FINAL_RESULT.md`

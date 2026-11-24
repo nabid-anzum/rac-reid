@@ -1,0 +1,35 @@
+{
+  "checkpoint": "/root/rac-reid/.runtime/models/cuhk03-supervised/osnet_x1_0_cuhk03_multires.pt",
+  "checkpoint_epoch": 3,
+  "checkpoint_sha256": "f879574a3cf21f9b106f51fbd2bef692e6044761a3bb17280c5da3a37fd1a399",
+  "comparison": {
+    "map_delta_pp_efficient_minus_full": -4.997453489321799,
+    "rank1_delta_pp_efficient_minus_full": -5.308880308880305,
+    "rank1_retention_percent": 85.82474226804125
+  },
+  "efficient_160x80": {
+    "gallery_images": 3388,
+    "map": 40.75617153321959,
+    "minp": 40.75617153321959,
+    "query_images": 1040,
+    "rank1": 32.142857142857146,
+    "rank10": 55.98455598455598,
+    "rank5": 49.71042471042471,
+    "reranking": false,
+    "same_pid_same_camera_removed": true,
+    "scored_queries": 1036
+  },
+  "full_256x128": {
+    "gallery_images": 3388,
+    "map": 45.75362502254139,
+    "minp": 45.75362502254139,
+    "query_images": 1040,
+    "rank1": 37.45173745173745,
+    "rank10": 63.32046332046332,
+    "rank5": 54.633204633204635,
+    "reranking": false,
+    "same_pid_same_camera_removed": true,
+    "scored_queries": 1036
+  },
+  "model": "Experiment 3 CUHK-trained"
+}

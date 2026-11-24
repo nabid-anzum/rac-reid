@@ -1,0 +1,35 @@
+{
+  "checkpoint": "/root/rac-reid/.runtime/models/multires/osnet_x1_0_multires_160x80.pt",
+  "checkpoint_epoch": 8,
+  "checkpoint_sha256": "d0570ff0fec0905b75bef1b90ec5147b96ac7b51d8ba9f30de5fa3f0c0757dec",
+  "comparison": {
+    "map_delta_pp_efficient_minus_full": -1.3070882904596743,
+    "rank1_delta_pp_efficient_minus_full": -1.3513513513513544,
+    "rank1_retention_percent": 96.28647214854111
+  },
+  "efficient_160x80": {
+    "gallery_images": 3388,
+    "map": 43.39911923640251,
+    "minp": 43.39911923640251,
+    "query_images": 1040,
+    "rank1": 35.03861003861004,
+    "rank10": 60.810810810810814,
+    "rank5": 54.054054054054056,
+    "reranking": false,
+    "same_pid_same_camera_removed": true,
+    "scored_queries": 1036
+  },
+  "full_256x128": {
+    "gallery_images": 3388,
+    "map": 44.70620752686219,
+    "minp": 44.70620752686219,
+    "query_images": 1040,
+    "rank1": 36.38996138996139,
+    "rank10": 60.52123552123552,
+    "rank5": 54.440154440154444,
+    "reranking": false,
+    "same_pid_same_camera_removed": true,
+    "scored_queries": 1036
+  },
+  "model": "Experiment 1 Market-trained"
+}

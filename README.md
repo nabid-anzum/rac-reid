@@ -726,3 +726,26 @@ See:
 - `docs/CUHK03_SUPERVISED_BENCHMARK_RESULT.md`
 - `results/cuhk03_supervised_benchmark_final.json`
 - `results/experiment_comparison_summary_2026-11-23.json`
+
+
+## Experiment 4 - multi-domain generalization
+
+The joint Market-1501 + CUHK03 model was tested once on untouched SenseReID.
+
+Efficient Rank-1:
+
+- Market-only: 35.039%
+- CUHK-only: 32.143%
+- Market+CUHK: 36.680%
+
+Joint model:
+
+- Efficient mAP: 45.716%
+- Efficient R1: 36.680%
+- Full mAP: 49.048%
+- Full R1: 40.637%
+- Efficient R1 retention: 90.261%
+
+See:
+
+`docs/EXPERIMENT4_MULTIDOMAIN_FINAL_RESULT.md`

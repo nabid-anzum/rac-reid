@@ -279,3 +279,36 @@ Cross-experiment comparison:
 `results/experiment_comparison_summary_2026-11-23.json`
 
 No post-benchmark tuning is permitted.
+
+
+## Experiment 4 - SenseReID evidence
+
+Implementation:
+
+- `scripts/train_multidomain_market_cuhk_sensereid.py`
+- `scripts/evaluate_sensereid_multidomain.py`
+
+Training evidence:
+
+- `results/experiment4_multidomain_training_result.json`
+- `results/experiment4_multidomain_training_history.json`
+- `results/experiment4_multidomain_development_baseline.json`
+
+Target evidence:
+
+- `results/experiment4_sensereid_started.json`
+- `results/experiment4_sensereid_complete.json`
+- `results/experiment4_sensereid_market_single_source.json`
+- `results/experiment4_sensereid_cuhk_single_source.json`
+- `results/experiment4_sensereid_multidomain.json`
+- `results/experiment4_sensereid_final.json`
+
+Checkpoint SHA-256:
+
+`1234aa0cb5e17b3d8e8f0567096aa132db56ddeb9c01ebc084050d6acd726b60`
+
+Target result SHA-256:
+
+`978c88f2319827e585ef1bfd52ddd57a3b3882debc0ba7b3610bbb3242d87065`
+
+Post-target tuning is prohibited.
